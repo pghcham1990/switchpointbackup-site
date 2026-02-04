@@ -4,35 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SwitchPoint | Automatic LTE Internet Backup</title>
-  <meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages." />
+  <meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages. Not a primary connection. Hard data caps with customer-approved add-ons." />
   <style>
     :root{
-      --bg:#0b0f17;
-      --card:#111a2b;
-      --muted:#9fb0c8;
-      --text:#eaf0ff;
-      --accent:#7aa7ff;
-      --accent2:#66e2b4;
-      --border:rgba(255,255,255,.10);
-      --shadow:0 16px 60px rgba(0,0,0,.45);
+      --bg:#f7f9fc;
+      --surface:#ffffff;
+      --surface2:#f2f6ff;
+      --text:#0c1220;
+      --muted:#4f5f78;
+      --border:rgba(18, 28, 45, .12);
+      --shadow:0 18px 55px rgba(14, 24, 40, .10);
       --radius:18px;
+
+      --accent:#2e6bff;   /* blue */
+      --accent2:#1fbf8a;  /* green */
+      --accentSoft:rgba(46,107,255,.12);
+      --accent2Soft:rgba(31,191,138,.14);
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       color:var(--text);
-      background: radial-gradient(1200px 800px at 10% 10%, rgba(122,167,255,.22), transparent 60%),
-                  radial-gradient(900px 700px at 80% 30%, rgba(102,226,180,.16), transparent 60%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 800px at 10% 0%, rgba(46,107,255,.10), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(31,191,138,.10), transparent 60%),
+        var(--bg);
       line-height:1.45;
     }
+
     a{color:inherit}
     .container{max-width:1100px;margin:0 auto;padding:0 20px}
+
     .nav{
       position:sticky;top:0;z-index:20;
       backdrop-filter:saturate(160%) blur(10px);
-      background:rgba(11,15,23,.55);
+      background:rgba(247,249,252,.72);
       border-bottom:1px solid var(--border);
     }
     .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:14px}
@@ -40,33 +48,34 @@
     .logo{
       width:34px;height:34px;border-radius:10px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 10px 30px rgba(122,167,255,.25);
+      box-shadow: 0 10px 28px rgba(46,107,255,.14);
       position:relative;
     }
     .logo:after{
       content:"";
       position:absolute;inset:7px;
       border-radius:8px;
-      background:rgba(11,15,23,.65);
-      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.90);
+      border:1px solid rgba(18,28,45,.10);
     }
-    .brand-name{font-weight:760;letter-spacing:.2px}
+    .brand-name{font-weight:800;letter-spacing:.2px}
     .nav-links{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
     .nav-links a{opacity:.86;text-decoration:none;font-size:14px}
     .nav-links a:hover{opacity:1}
+
     .btn{
       display:inline-flex;align-items:center;justify-content:center;
       padding:10px 14px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
+      border:1px solid rgba(18,28,45,.14);
+      background:rgba(255,255,255,.85);
       text-decoration:none;
-      font-weight:650;
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      font-weight:750;
+      box-shadow: 0 10px 26px rgba(14, 24, 40, .08);
     }
-    .btn:hover{background:rgba(255,255,255,.10)}
+    .btn:hover{background:rgba(255,255,255,.98)}
     .btn.primary{
-      background: linear-gradient(135deg, rgba(122,167,255,.95), rgba(102,226,180,.85));
+      background: linear-gradient(135deg, rgba(46,107,255,.98), rgba(31,191,138,.92));
       color:#07101a;
       border:0;
     }
@@ -79,36 +88,36 @@
     .badge{
       display:inline-flex;gap:8px;align-items:center;
       padding:8px 12px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.05);
+      border:1px solid rgba(18,28,45,.12);
+      background:rgba(255,255,255,.85);
       color:var(--muted);
       font-size:13px;
     }
-    .dot{width:8px;height:8px;border-radius:99px;background:var(--accent2);box-shadow:0 0 0 6px rgba(102,226,180,.15)}
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--accent2);box-shadow:0 0 0 6px rgba(31,191,138,.12)}
 
     h1{font-size:44px;line-height:1.08;margin:14px 0 12px;letter-spacing:-.8px}
     @media (max-width: 900px){h1{font-size:38px}}
 
-    .sub{color:var(--muted);font-size:16.5px;max-width:62ch}
+    .sub{color:var(--muted);font-size:16.5px;max-width:66ch}
     .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
     .mini{color:var(--muted);font-size:13px;margin-top:10px}
 
     .card{
-      background:rgba(17,26,43,.86);
-      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(18,28,45,.12);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
     }
 
     .hero-card{padding:18px}
     .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .stat{padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
-    .stat .k{font-weight:800;font-size:20px}
+    .stat{padding:14px;border-radius:16px;border:1px solid rgba(18,28,45,.10);background:rgba(247,249,252,.75)}
+    .stat .k{font-weight:900;font-size:20px}
     .stat .l{color:var(--muted);font-size:13px;margin-top:4px}
     .list{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
     .li{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:14px}
-    .check{width:18px;height:18px;border-radius:6px;background:rgba(102,226,180,.16);border:1px solid rgba(102,226,180,.35);position:relative;flex:0 0 auto;margin-top:2px}
-    .check:after{content:"";position:absolute;left:5px;top:3px;width:5px;height:9px;border:2px solid rgba(102,226,180,.95);border-top:0;border-left:0;transform:rotate(40deg)}
+    .check{width:18px;height:18px;border-radius:6px;background:var(--accent2Soft);border:1px solid rgba(31,191,138,.35);position:relative;flex:0 0 auto;margin-top:2px}
+    .check:after{content:"";position:absolute;left:5px;top:3px;width:5px;height:9px;border:2px solid rgba(31,191,138,.95);border-top:0;border-left:0;transform:rotate(40deg)}
 
     section{padding:34px 0}
     h2{font-size:24px;margin:0 0 10px;letter-spacing:-.2px}
@@ -122,71 +131,78 @@
     .feature p{color:var(--muted);font-size:14px;margin:0}
     .icon{
       width:36px;height:36px;border-radius:12px;
-      background:rgba(122,167,255,.16);
-      border:1px solid rgba(122,167,255,.28);
+      background:var(--accentSoft);
+      border:1px solid rgba(46,107,255,.22);
       display:flex;align-items:center;justify-content:center;
-      font-weight:850;color:rgba(122,167,255,.95)
+      font-weight:900;color:rgba(46,107,255,.98)
+    }
+    .icon.green{
+      background:var(--accent2Soft);
+      border:1px solid rgba(31,191,138,.30);
+      color:rgba(18,140,98,.98);
     }
 
     .how{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
     @media (max-width: 900px){.how{grid-template-columns:1fr;}}
+
     .steps{padding:18px}
-    .step{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
-    .num{width:28px;height:28px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:800;color:#dbe6ff;flex:0 0 auto}
+    .step{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;border:1px solid rgba(18,28,45,.10);background:rgba(247,249,252,.70)}
+    .num{
+      width:28px;height:28px;border-radius:10px;
+      background:rgba(255,255,255,.95);
+      border:1px solid rgba(18,28,45,.14);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;color:#23314d;flex:0 0 auto
+    }
     .step b{display:block;margin-bottom:3px}
     .step span{color:var(--muted);font-size:14px}
 
-    .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    @media (max-width: 900px){.pricing{grid-template-columns:1fr;}}
-    .price{padding:18px;position:relative;overflow:hidden}
-    .price.popular{border-color:rgba(102,226,180,.45)}
-    .tag{
-      position:absolute;top:14px;right:14px;
-      padding:6px 10px;border-radius:999px;
-      background:rgba(102,226,180,.14);
-      border:1px solid rgba(102,226,180,.35);
-      color:rgba(194,255,234,.95);
-      font-size:12px;font-weight:750
+    .note{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(18,28,45,.10);
+      background:linear-gradient(135deg, rgba(46,107,255,.06), rgba(31,191,138,.06));
+      color:var(--muted);
+      font-size:13.5px;
     }
-    .price h3{margin:0 0 6px;font-size:16px}
-    .price .amt{font-size:28px;font-weight:850;margin:6px 0 2px}
-    .price .amt small{font-size:13px;color:var(--muted);font-weight:650}
-    .price .setup{color:var(--muted);font-size:13px;margin-bottom:12px}
-    .price ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
-    .price li{color:var(--muted);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+    .note b{color:#1a2740}
 
     .faq{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     @media (max-width: 900px){.faq{grid-template-columns:1fr;}}
-    details{padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
-    summary{cursor:pointer;font-weight:700}
+    details{padding:14px 16px;border-radius:16px;border:1px solid rgba(18,28,45,.10);background:rgba(247,249,252,.65)}
+    summary{cursor:pointer;font-weight:800}
     details p{color:var(--muted);font-size:14px;margin-top:10px}
 
     .contact{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
     @media (max-width: 900px){.contact{grid-template-columns:1fr;}}
+
     form{padding:18px}
     label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
     input, textarea{
       width:100%;
       padding:12px 12px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(11,15,23,.55);
+      border:1px solid rgba(18,28,45,.14);
+      background:rgba(255,255,255,.95);
       color:var(--text);
       outline:none;
     }
     textarea{min-height:110px;resize:vertical}
+
     .foot{
       padding:26px 0 40px;
-      color:rgba(159,176,200,.85);
+      color:rgba(79,95,120,.95);
       font-size:13px;
       border-top:1px solid var(--border);
       margin-top:26px;
     }
-    .fine{color:rgba(159,176,200,.75);font-size:12.5px;margin-top:10px}
+    .fine{color:rgba(79,95,120,.86);font-size:12.5px;margin-top:10px}
     .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .pill{font-size:12px;color:rgba(159,176,200,.9);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+    .pill{font-size:12px;color:rgba(79,95,120,.95);padding:8px 10px;border-radius:999px;border:1px solid rgba(18,28,45,.12);background:rgba(255,255,255,.85)}
   </style>
 </head>
+
 <body>
   <div class="nav">
     <div class="container nav-inner">
@@ -196,10 +212,10 @@
       </a>
       <div class="nav-links">
         <a href="#how">How it works</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#controls">Controls</a>
         <a href="#faq">FAQ</a>
         <a class="btn" href="#contact">Contact</a>
-        <a class="btn primary" href="#contact">Get a quote</a>
+        <a class="btn primary" href="#contact">Request a proposal</a>
       </div>
     </div>
   </div>
@@ -207,14 +223,19 @@
   <header id="top">
     <div class="container hero">
       <div>
-        <div class="badge"><span class="dot" aria-hidden="true"></span> Automatic LTE failover for ISP outages</div>
-        <h1>Keep your business online when your internet provider goes down.</h1>
-        <p class="sub">SwitchPoint installs and manages a small on site device that automatically switches your connection to a bundled LTE SIM during an outage. No new ISP required. No IT project.</p>
+        <div class="badge"><span class="dot" aria-hidden="true"></span> Automatic LTE failover for ISP outages (not primary internet)</div>
+        <h1>Business continuity when your internet provider goes down.</h1>
+        <p class="sub">
+          SwitchPoint installs and manages a small on site device that automatically switches your connection to a bundled LTE SIM during an outage.
+          Your normal internet stays the same. The LTE backup only activates when the primary connection fails.
+        </p>
         <div class="cta-row">
-          <a class="btn primary" href="#contact">Request a quote</a>
+          <a class="btn primary" href="#contact">Request a proposal</a>
           <a class="btn" href="#how">See how it works</a>
         </div>
-        <div class="mini">Designed for offices, clinics, dealerships, professional services, and any business that cannot afford downtime.</div>
+        <div class="mini">
+          Designed for offices, clinics, contractors, professional services, and any organization that loses money when the internet drops.
+        </div>
       </div>
 
       <div class="card hero-card">
@@ -228,24 +249,37 @@
             <div class="l">Typical install time</div>
           </div>
           <div class="stat">
-            <div class="k">One bill</div>
-            <div class="l">Device, SIM, management</div>
+            <div class="k">Hard caps</div>
+            <div class="l">No surprise overages</div>
           </div>
           <div class="stat">
             <div class="k">Cloud view</div>
             <div class="l">Monitoring and alerts</div>
           </div>
         </div>
+
         <ul class="list" aria-label="Highlights">
-          <li class="li"><span class="check" aria-hidden="true"></span><span><b>Automatic</b> switches to LTE when WAN fails, then switches back when restored.</span></li>
-          <li class="li"><span class="check" aria-hidden="true"></span><span><b>Bundled SIM</b> you do not need to manage a carrier plan yourself.</span></li>
-          <li class="li"><span class="check" aria-hidden="true"></span><span><b>Managed</b> with monitoring, alerts, and basic support.</span></li>
+          <li class="li"><span class="check" aria-hidden="true"></span>
+            <span><b>Automatic</b> switches to LTE when WAN fails, then returns to normal when restored.</span>
+          </li>
+          <li class="li"><span class="check" aria-hidden="true"></span>
+            <span><b>Controlled</b> traffic rules help prevent streaming and nonessential usage during failover.</span>
+          </li>
+          <li class="li"><span class="check" aria-hidden="true"></span>
+            <span><b>Managed</b> installation, monitoring, and basic support for the failover device.</span>
+          </li>
         </ul>
+
         <div class="pillrow" aria-label="Supported use cases">
-          <div class="pill">VoIP and UCaaS</div>
-          <div class="pill">POS and payments</div>
           <div class="pill">Email and cloud apps</div>
-          <div class="pill">Remote work</div>
+          <div class="pill">POS and payments</div>
+          <div class="pill">VoIP and UCaaS</div>
+          <div class="pill">Scheduling and dispatch</div>
+        </div>
+
+        <div class="note">
+          <b>Important:</b> SwitchPoint is not an ISP, carrier, or utility. We do not replace your internet provider.
+          We add a managed failover layer that activates only during outages.
         </div>
       </div>
     </div>
@@ -254,23 +288,34 @@
   <section>
     <div class="container">
       <h2>What SwitchPoint is</h2>
-      <p class="sub">We are not an internet carrier. We deploy and manage a failover device that protects your business from ISP outages by switching your connection to cellular automatically.</p>
+      <p class="sub">
+        SwitchPoint is a managed internet failover service. We deploy a device that sits above your existing carrier and keeps your business online
+        when your primary ISP fails by switching to cellular automatically.
+      </p>
+
       <div class="grid3" style="margin-top:14px">
         <div class="card feature">
           <div class="icon" aria-hidden="true">1</div>
           <h3>Keep your current internet</h3>
-          <p>No need to replace your provider. We add failover on top of what you already have.</p>
+          <p>No provider change. Your ISP stays exactly as it is. We add failover on top.</p>
         </div>
+
         <div class="card feature">
-          <div class="icon" aria-hidden="true">2</div>
-          <h3>Bundled LTE SIM</h3>
-          <p>We include the SIM and manage usage so you have one point of contact.</p>
+          <div class="icon green" aria-hidden="true">2</div>
+          <h3>Backup activates only during outages</h3>
+          <p>LTE is idle during normal operation. It turns on when the primary link fails and turns off when it returns.</p>
         </div>
+
         <div class="card feature">
           <div class="icon" aria-hidden="true">3</div>
-          <h3>Simple, fast install</h3>
-          <p>Most installs take under an hour and do not require an IT project.</p>
+          <h3>Managed device on site</h3>
+          <p>We install, configure, monitor, and support the failover equipment and SIM as one managed system.</p>
         </div>
+      </div>
+
+      <div class="note" style="margin-top:14px">
+        <b>Why this exists:</b> When a business loses internet, work stops. Payments can fail, phones can drop, and teams lose access to cloud tools.
+        A controlled LTE failover system reduces downtime without turning into a full IT project.
       </div>
     </div>
   </section>
@@ -284,94 +329,109 @@
             <div class="num">1</div>
             <div>
               <b>Install the SwitchPoint device</b>
-              <span>We place the device between your internet handoff and your network equipment.</span>
+              <span>We place the device between your internet handoff (modem or fiber) and your network equipment.</span>
             </div>
           </div>
+
           <div class="step" style="margin-top:12px">
             <div class="num">2</div>
             <div>
-              <b>Configure automatic failover</b>
-              <span>We set WAN health checks and thresholds so failover triggers automatically.</span>
+              <b>Set outage detection and failover rules</b>
+              <span>When the primary connection fails, the device automatically routes outbound traffic over LTE.</span>
             </div>
           </div>
+
           <div class="step" style="margin-top:12px">
             <div class="num">3</div>
             <div>
               <b>Test it in front of you</b>
-              <span>We simulate an outage so you can see it switch to LTE and recover back to WAN.</span>
+              <span>We simulate an outage so you see it switch to LTE and then recover back to the primary link.</span>
             </div>
           </div>
+
           <div class="step" style="margin-top:12px">
             <div class="num">4</div>
             <div>
-              <b>Monitor and support</b>
-              <span>We monitor connectivity and can provide basic support for the failover device.</span>
+              <b>Monitor, alert, and support</b>
+              <span>We monitor connectivity and usage through a cloud portal and support the failover device.</span>
             </div>
           </div>
-          <p class="fine">Power outage note: LTE failover protects against ISP outages when your building has power. If you want coverage for brief power outages, ask about a small UPS add on for the network gear.</p>
+
+          <div class="note">
+            <b>Power outage note:</b> LTE failover protects against ISP outages while your building has power.
+            If you want brief power outage coverage, ask about adding a small UPS for the modem and failover device.
+          </div>
         </div>
 
         <div class="card" style="padding:18px">
-          <h3 style="margin:0 0 8px">Typical fit</h3>
-          <p class="sub" style="margin:0">If your internet goes down and your phones, payments, or cloud apps stop, this is for you.</p>
+          <h3 style="margin:0 0 8px">What stays working during an outage</h3>
+          <p class="sub" style="margin:0">
+            LTE failover is designed to keep essential business functions online until the primary ISP is restored.
+            We apply traffic controls so data is used for operations, not entertainment.
+          </p>
+
           <div style="height:12px"></div>
+
           <div class="stat" style="margin-bottom:12px">
-            <div class="k">Quick win</div>
-            <div class="l">No ISP change, no major rewiring</div>
+            <div class="k">Email + web apps</div>
+            <div class="l">Stay connected to cloud tools and communication</div>
           </div>
+
           <div class="stat" style="margin-bottom:12px">
-            <div class="k">Low disruption</div>
-            <div class="l">Most installs are scheduled around your business hours</div>
+            <div class="k">Payments + POS</div>
+            <div class="l">Continue taking cards and processing transactions</div>
           </div>
+
           <div class="stat">
-            <div class="k">One owner</div>
-            <div class="l">One contact responsible for failover performance</div>
+            <div class="k">Managed boundaries</div>
+            <div class="l">Hard caps and approval-based add-ons</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="pricing">
+  <section id="controls">
     <div class="container">
-      <h2>Phase 1 pricing</h2>
-      <p class="sub">Simple pricing for LTE backup only. Your current ISP stays in place. Final pricing depends on location, signal, and environment.</p>
-      <div class="pricing" style="margin-top:14px">
-        <div class="card price">
-          <h3>Essential</h3>
-          <div class="amt">$149 <small>/ month</small></div>
-          <div class="setup">Setup from $249</div>
-          <ul>
-            <li><span class="check" aria-hidden="true"></span><span>Automatic LTE failover with bundled SIM</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Monitoring and basic alerts</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Remote support for the failover device</span></li>
-          </ul>
+      <h2>Controls that keep costs predictable</h2>
+      <p class="sub">
+        The backup connection is intentionally constrained. This is not a second full time internet circuit.
+        The goal is continuity during outages with predictable behavior and clear approval steps.
+      </p>
+
+      <div class="grid3" style="margin-top:14px">
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">A</div>
+          <h3>Monthly data cap example</h3>
+          <p>
+            Example cap: <b>1 GB per month</b> for failover usage. This is typically enough to keep a small team operational
+            during a short outage while the ISP restores service.
+          </p>
         </div>
 
-        <div class="card price popular">
-          <div class="tag">Most popular</div>
-          <h3>Business</h3>
-          <div class="amt">$179 <small>/ month</small></div>
-          <div class="setup">Setup from $299</div>
-          <ul>
-            <li><span class="check" aria-hidden="true"></span><span>Everything in Essential</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Priority alerts and response</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Quarterly connectivity check in</span></li>
-          </ul>
+        <div class="card feature">
+          <div class="icon green" aria-hidden="true">B</div>
+          <h3>Hard stop, no surprises</h3>
+          <p>
+            When the LTE cap is reached, the backup connection <b>stops</b>. There are no automatic overages.
+            You choose whether to add more continuity or wait for the primary link to return.
+          </p>
         </div>
 
-        <div class="card price">
-          <h3>Plus</h3>
-          <div class="amt">$219 <small>/ month</small></div>
-          <div class="setup">Setup from $349</div>
-          <ul>
-            <li><span class="check" aria-hidden="true"></span><span>Everything in Business</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Usage reporting and tuning</span></li>
-            <li><span class="check" aria-hidden="true"></span><span>Optional UPS add on consultation</span></li>
-          </ul>
+        <div class="card feature">
+          <div class="icon" aria-hidden="true">C</div>
+          <h3>Add more only with approval</h3>
+          <p>
+            If the outage continues and you want additional LTE capacity, we can add it on demand.
+            We do not add usage or charges without explicit authorization.
+          </p>
         </div>
       </div>
-      <p class="fine">All plans are intended for backup continuity during ISP outages. LTE usage is monitored and may include a reasonable data allowance. Heavy sustained usage may require an adjusted plan.</p>
+
+      <div class="note" style="margin-top:14px">
+        <b>What we manage:</b> the failover device, the SIM, monitoring, alerts, and the policies that control usage.
+        <b>What we do not do:</b> we do not replace your ISP and we do not provide primary internet service.
+      </div>
     </div>
   </section>
 
@@ -380,20 +440,49 @@
       <h2>FAQ</h2>
       <div class="faq" style="margin-top:14px">
         <details class="card">
-          <summary>Do I need a new internet provider</summary>
-          <p>No. SwitchPoint sits on top of your existing provider. We add automatic LTE failover so you stay online when your ISP has an outage.</p>
+          <summary>Are you an internet provider</summary>
+          <p>
+            No. SwitchPoint is not an ISP, carrier, or utility. Your primary internet service remains with your existing provider.
+            We install and manage a failover device that switches to LTE only when the primary link fails.
+          </p>
         </details>
+
+        <details class="card">
+          <summary>Do I need a new internet provider</summary>
+          <p>
+            No. We keep your current provider. SwitchPoint sits above your existing connection and provides continuity during outages.
+          </p>
+        </details>
+
         <details class="card">
           <summary>Do I need a static IP</summary>
-          <p>No for most businesses. This service is designed for outbound connectivity during outages. If you host on site services that require inbound access, we can review your setup.</p>
+          <p>
+            Usually no. This service is designed primarily for outbound business continuity during outages.
+            If your environment requires inbound access or special routing, we can review it as a higher tier deployment.
+          </p>
         </details>
+
+        <details class="card">
+          <summary>What happens when the LTE cap is used up</summary>
+          <p>
+            The LTE backup stops at the cap to prevent unexpected costs. At that point you can either wait for the primary ISP to return,
+            or authorize additional LTE capacity to stay online during the outage.
+          </p>
+        </details>
+
         <details class="card">
           <summary>Will it work during a power outage</summary>
-          <p>If the building has no power, network gear will go down. LTE failover protects against ISP outages while power is on. For brief power outages, a small UPS can keep the modem and device running.</p>
+          <p>
+            If the building has no power, your network equipment will shut down. LTE failover protects against ISP outages while the building has power.
+            For brief power outages, a small UPS can keep the modem and SwitchPoint device running.
+          </p>
         </details>
+
         <details class="card">
           <summary>How fast is failover</summary>
-          <p>Most environments fail over within about 10 to 30 seconds. We test failover during installation.</p>
+          <p>
+            Most environments fail over within about 10 to 30 seconds. We test failover during installation.
+          </p>
         </details>
       </div>
     </div>
@@ -404,15 +493,22 @@
       <h2>Contact</h2>
       <div class="contact" style="margin-top:14px">
         <div class="card" style="padding:18px">
-          <h3 style="margin:0 0 8px">Get a quote</h3>
-          <p class="sub" style="margin:0">Tell us your business name, address, and current ISP. We will confirm LTE signal, recommend a plan, and schedule a quick install.</p>
+          <h3 style="margin:0 0 8px">Request a proposal</h3>
+          <p class="sub" style="margin:0">
+            Send your business name, address, and current ISP. We will confirm LTE signal, review your environment,
+            and provide a simple proposal for managed failover service.
+          </p>
+
           <div style="height:12px"></div>
+
           <div class="pillrow">
             <div class="pill">Fast installs</div>
             <div class="pill">Bundled SIM</div>
-            <div class="pill">Monitoring</div>
+            <div class="pill">Hard caps</div>
+            <div class="pill">Cloud monitoring</div>
             <div class="pill">Month to month</div>
           </div>
+
           <div style="height:16px"></div>
           <p class="fine">Prefer email: <a href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a></p>
         </div>
@@ -427,12 +523,12 @@
           <label for="email">Email</label>
           <input id="email" name="email" type="email" placeholder="you@company.com" required />
 
-          <label for="message">What are you trying to protect</label>
-          <textarea id="message" name="message" placeholder="Example: Our phones and payments stop when the internet drops. We have Spectrum. One location." required></textarea>
+          <label for="message">What do outages impact for you</label>
+          <textarea id="message" name="message" placeholder="Example: When the internet drops, payments and phones stop. We have Verizon FiOS. One location." required></textarea>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
             <button class="btn primary" type="submit">Send</button>
-            <a class="btn" href="mailto:scott.rocca.pa@gmail.com?subject=SwitchPoint%20Quote%20Request">Email instead</a>
+            <a class="btn" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Proposal%20Request">Email instead</a>
           </div>
           <p class="fine">Submitting opens your email app. This site does not store your data.</p>
         </form>
@@ -445,7 +541,10 @@
       <div>© <span id="year"></span> SwitchPoint</div>
       <div>Automatic LTE failover for ISP outages</div>
     </div>
-    <div class="fine">SwitchPoint provides equipment, setup, and management for LTE backup connectivity. We are not an internet carrier or utility.</div>
+    <div class="fine">
+      SwitchPoint provides equipment, installation, and management for LTE backup connectivity. We are not an internet carrier, ISP, or utility.
+      Backup service is designed for continuity during outages and is subject to data caps and customer-approved add-ons.
+    </div>
   </div>
 
   <script>
@@ -459,10 +558,10 @@
       const email = encodeURIComponent(form.email.value);
       const msg = encodeURIComponent(form.message.value);
 
-      const subject = `SwitchPoint Quote Request - ${decodeURIComponent(company)}`;
+      const subject = `SwitchPoint Proposal Request - ${decodeURIComponent(company)}`;
       const body = `Name: ${decodeURIComponent(name)}\nBusiness: ${decodeURIComponent(company)}\nEmail: ${decodeURIComponent(email)}\n\nDetails:\n${decodeURIComponent(msg)}\n`;
 
-      const mailto = `mailto:scott.rocca.pa@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const mailto = `mailto:sales@switchpointbackup.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailto;
       return false;
     }
