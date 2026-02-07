@@ -3,8 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SwitchPoint | Automatic LTE Internet Backup</title>
-  <meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages. Not a primary connection. Hard data caps with customer-approved add-ons." />
+  <title>SwitchPoint Backup | Automatic LTE Internet Failover</title>
+
+  <meta name="description" content="SwitchPoint Backup installs and manages an automatic LTE failover device that keeps essential business operations online during ISP outages. A spare tire for your internet." />
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href='data:image/svg+xml;utf8,
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="%232e6bff"/>
+          <stop offset="1" stop-color="%231fbf8a"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(%23g)"/>
+      <rect x="12" y="12" width="40" height="40" rx="12" fill="white" opacity="0.92"/>
+      <path d="M22 36c6-10 14-10 20 0" fill="none" stroke="%2323314d" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="24" cy="26" r="3" fill="%2323314d"/>
+      <circle cx="40" cy="26" r="3" fill="%2323314d"/>
+    </svg>' />
+
+  <!-- Social sharing -->
+  <meta property="og:title" content="SwitchPoint Backup | Automatic LTE Internet Failover" />
+  <meta property="og:description" content="A spare tire for your internet. Seamless LTE failover during ISP outages with monitoring and logs." />
+  <meta property="og:type" content="website" />
+
   <style>
     :root{
       --bg:#f7f9fc;
@@ -16,8 +39,8 @@
       --shadow:0 18px 55px rgba(14, 24, 40, .10);
       --radius:18px;
 
-      --accent:#2e6bff;   /* blue */
-      --accent2:#1fbf8a;  /* green */
+      --accent:#2e6bff;
+      --accent2:#1fbf8a;
       --accentSoft:rgba(46,107,255,.12);
       --accent2Soft:rgba(31,191,138,.14);
     }
@@ -98,7 +121,7 @@
     h1{font-size:44px;line-height:1.08;margin:14px 0 12px;letter-spacing:-.8px}
     @media (max-width: 900px){h1{font-size:38px}}
 
-    .sub{color:var(--muted);font-size:16.5px;max-width:66ch}
+    .sub{color:var(--muted);font-size:16.5px;max-width:72ch}
     .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
     .mini{color:var(--muted);font-size:13px;margin-top:10px}
 
@@ -114,6 +137,7 @@
     .stat{padding:14px;border-radius:16px;border:1px solid rgba(18,28,45,.10);background:rgba(247,249,252,.75)}
     .stat .k{font-weight:900;font-size:20px}
     .stat .l{color:var(--muted);font-size:13px;margin-top:4px}
+
     .list{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
     .li{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:14px}
     .check{width:18px;height:18px;border-radius:6px;background:var(--accent2Soft);border:1px solid rgba(31,191,138,.35);position:relative;flex:0 0 auto;margin-top:2px}
@@ -177,19 +201,6 @@
     .contact{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
     @media (max-width: 900px){.contact{grid-template-columns:1fr;}}
 
-    form{padding:18px}
-    label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
-    input, textarea{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(18,28,45,.14);
-      background:rgba(255,255,255,.95);
-      color:var(--text);
-      outline:none;
-    }
-    textarea{min-height:110px;resize:vertical}
-
     .foot{
       padding:26px 0 40px;
       color:rgba(79,95,120,.95);
@@ -200,22 +211,40 @@
     .fine{color:rgba(79,95,120,.86);font-size:12.5px;margin-top:10px}
     .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .pill{font-size:12px;color:rgba(79,95,120,.95);padding:8px 10px;border-radius:999px;border:1px solid rgba(18,28,45,.12);background:rgba(255,255,255,.85)}
+    .email{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:14px 16px;border-radius:16px;
+      border:1px solid rgba(18,28,45,.12);
+      background:rgba(255,255,255,.90);
+      text-decoration:none;
+      font-weight:850;
+      box-shadow: 0 10px 26px rgba(14, 24, 40, .08);
+      word-break:break-word;
+    }
+    .email:hover{filter:brightness(1.01)}
+    .email .bubble{
+      width:34px;height:34px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, rgba(46,107,255,.18), rgba(31,191,138,.18));
+      border:1px solid rgba(18,28,45,.10);
+      font-weight:900;
+    }
   </style>
 </head>
 
 <body>
   <div class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="#top" aria-label="SwitchPoint home">
+      <a class="brand" href="#top" aria-label="SwitchPoint Backup home">
         <div class="logo" aria-hidden="true"></div>
-        <div class="brand-name">SwitchPoint</div>
+        <div class="brand-name">SwitchPoint Backup</div>
       </a>
       <div class="nav-links">
         <a href="#how">How it works</a>
-        <a href="#controls">Controls</a>
+        <a href="#why">Why it exists</a>
         <a href="#faq">FAQ</a>
         <a class="btn" href="#contact">Contact</a>
-        <a class="btn primary" href="#contact">Request a proposal</a>
+        <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20Inquiry">Email us</a>
       </div>
     </div>
   </div>
@@ -223,99 +252,99 @@
   <header id="top">
     <div class="container hero">
       <div>
-        <div class="badge"><span class="dot" aria-hidden="true"></span> Automatic LTE failover for ISP outages (not primary internet)</div>
-        <h1>Business continuity when your internet provider goes down.</h1>
+        <div class="badge"><span class="dot" aria-hidden="true"></span> A spare tire for your internet (automatic LTE failover)</div>
+        <h1>When your internet drops, work should not stop.</h1>
         <p class="sub">
-          SwitchPoint installs and manages a small on site device that automatically switches your connection to a bundled LTE SIM during an outage.
-          Your normal internet stays the same. The LTE backup only activates when the primary connection fails.
+          SwitchPoint Backup installs and manages enterprise failover equipment that monitors your primary internet connection.
+          If it fails, your network automatically shifts to LTE for essential operations, then returns to normal when service is restored.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="#contact">Request a proposal</a>
+          <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20Proposal%20Request">Request a proposal</a>
           <a class="btn" href="#how">See how it works</a>
         </div>
         <div class="mini">
-          Designed for offices, clinics, contractors, professional services, and any organization that loses money when the internet drops.
+          Designed for offices, clinics, restaurants, contractors, and any organization that loses revenue, productivity, or reputation during outages.
         </div>
       </div>
 
       <div class="card hero-card">
         <div class="stat-grid">
           <div class="stat">
-            <div class="k">10–30s</div>
-            <div class="l">Typical failover time</div>
+            <div class="k">Automatic</div>
+            <div class="l">No buttons, no scrambling</div>
           </div>
           <div class="stat">
-            <div class="k">30–60m</div>
-            <div class="l">Typical install time</div>
+            <div class="k">Logged</div>
+            <div class="l">Outages recorded and time stamped</div>
           </div>
           <div class="stat">
-            <div class="k">Hard caps</div>
-            <div class="l">No surprise overages</div>
+            <div class="k">Monitored</div>
+            <div class="l">Alerts when links change state</div>
           </div>
           <div class="stat">
-            <div class="k">Cloud view</div>
-            <div class="l">Monitoring and alerts</div>
+            <div class="k">Controlled</div>
+            <div class="l">Policies keep usage operational</div>
           </div>
         </div>
 
         <ul class="list" aria-label="Highlights">
           <li class="li"><span class="check" aria-hidden="true"></span>
-            <span><b>Automatic</b> switches to LTE when WAN fails, then returns to normal when restored.</span>
+            <span><b>Seamless failover</b> keeps critical traffic moving during ISP outages.</span>
           </li>
           <li class="li"><span class="check" aria-hidden="true"></span>
-            <span><b>Controlled</b> traffic rules help prevent streaming and nonessential usage during failover.</span>
+            <span><b>Set and forget</b> once installed, the device sits quietly until it is needed.</span>
           </li>
           <li class="li"><span class="check" aria-hidden="true"></span>
-            <span><b>Managed</b> installation, monitoring, and basic support for the failover device.</span>
+            <span><b>Enterprise gear</b> purpose built hardware that is designed for reliability.</span>
           </li>
         </ul>
 
         <div class="pillrow" aria-label="Supported use cases">
+          <div class="pill">Scheduling</div>
+          <div class="pill">Payments and POS</div>
           <div class="pill">Email and cloud apps</div>
-          <div class="pill">POS and payments</div>
           <div class="pill">VoIP and UCaaS</div>
-          <div class="pill">Scheduling and dispatch</div>
         </div>
 
         <div class="note">
-          <b>Important:</b> SwitchPoint is not an ISP, carrier, or utility. We do not replace your internet provider.
-          We add a managed failover layer that activates only during outages.
+          <b>Important:</b> SwitchPoint Backup is not a carrier, ISP, or utility. Your primary internet remains with your chosen provider.
+          We add a managed continuity layer that activates only when the primary link is unavailable.
         </div>
       </div>
     </div>
   </header>
 
-  <section>
+  <section id="why">
     <div class="container">
-      <h2>What SwitchPoint is</h2>
+      <h2>Why this business exists</h2>
       <p class="sub">
-        SwitchPoint is a managed internet failover service. We deploy a device that sits above your existing carrier and keeps your business online
-        when your primary ISP fails by switching to cellular automatically.
+        Most businesses do not realize how many systems quietly depend on internet access until it is gone.
+        Outages create a chain reaction: transactions fail, phones degrade, scheduling stalls, and staff time gets burned on troubleshooting.
+        SwitchPoint Backup is built to reduce that downtime without turning into a second full time internet service.
       </p>
 
       <div class="grid3" style="margin-top:14px">
         <div class="card feature">
           <div class="icon" aria-hidden="true">1</div>
-          <h3>Keep your current internet</h3>
-          <p>No provider change. Your ISP stays exactly as it is. We add failover on top.</p>
+          <h3>Outages are not rare</h3>
+          <p>Fiber, cable, DSL, and even modern wireless can go down. Weather, construction, hardware failure, upstream issues, it all happens.</p>
         </div>
 
         <div class="card feature">
           <div class="icon green" aria-hidden="true">2</div>
-          <h3>Backup activates only during outages</h3>
-          <p>LTE is idle during normal operation. It turns on when the primary link fails and turns off when it returns.</p>
+          <h3>Downtime is expensive</h3>
+          <p>The cost is not only internet. It is staff time, missed revenue, delayed care or service, and frustrated customers.</p>
         </div>
 
         <div class="card feature">
           <div class="icon" aria-hidden="true">3</div>
-          <h3>Managed device on site</h3>
-          <p>We install, configure, monitor, and support the failover equipment and SIM as one managed system.</p>
+          <h3>Continuity needs discipline</h3>
+          <p>Failover must be controlled. The goal is to keep operations online, not to encourage replacing the primary ISP with a backup link.</p>
         </div>
       </div>
 
       <div class="note" style="margin-top:14px">
-        <b>Why this exists:</b> When a business loses internet, work stops. Payments can fail, phones can drop, and teams lose access to cloud tools.
-        A controlled LTE failover system reduces downtime without turning into a full IT project.
+        <b>The idea in one sentence:</b> your internet should have a spare tire that is ready instantly, predictable in behavior, and managed by someone accountable.
       </div>
     </div>
   </section>
@@ -328,109 +357,68 @@
           <div class="step">
             <div class="num">1</div>
             <div>
-              <b>Install the SwitchPoint device</b>
-              <span>We place the device between your internet handoff (modem or fiber) and your network equipment.</span>
+              <b>Install a failover device on site</b>
+              <span>We place a dedicated device at your location that monitors your primary connection in real time.</span>
             </div>
           </div>
 
           <div class="step" style="margin-top:12px">
             <div class="num">2</div>
             <div>
-              <b>Set outage detection and failover rules</b>
-              <span>When the primary connection fails, the device automatically routes outbound traffic over LTE.</span>
+              <b>Define operational traffic rules</b>
+              <span>Policies prioritize business needs and deprioritize nonessential traffic during failover.</span>
             </div>
           </div>
 
           <div class="step" style="margin-top:12px">
             <div class="num">3</div>
             <div>
-              <b>Test it in front of you</b>
-              <span>We simulate an outage so you see it switch to LTE and then recover back to the primary link.</span>
+              <b>Failover happens automatically</b>
+              <span>If your ISP drops, the device shifts essential outbound connectivity to LTE, then returns when service is restored.</span>
             </div>
           </div>
 
           <div class="step" style="margin-top:12px">
             <div class="num">4</div>
             <div>
-              <b>Monitor, alert, and support</b>
-              <span>We monitor connectivity and usage through a cloud portal and support the failover device.</span>
+              <b>Everything is logged</b>
+              <span>Connection state changes and events are recorded so you can audit what happened, when, and for how long.</span>
             </div>
           </div>
 
           <div class="note">
-            <b>Power outage note:</b> LTE failover protects against ISP outages while your building has power.
-            If you want brief power outage coverage, ask about adding a small UPS for the modem and failover device.
+            <b>Carrier flexibility:</b> We are not tied to one cellular provider. We select what performs best in your area and can support multi carrier designs when needed.
           </div>
         </div>
 
         <div class="card" style="padding:18px">
           <h3 style="margin:0 0 8px">What stays working during an outage</h3>
           <p class="sub" style="margin:0">
-            LTE failover is designed to keep essential business functions online until the primary ISP is restored.
-            We apply traffic controls so data is used for operations, not entertainment.
+            The goal is continuity for essential systems until your primary provider is back online.
           </p>
 
           <div style="height:12px"></div>
 
           <div class="stat" style="margin-bottom:12px">
-            <div class="k">Email + web apps</div>
-            <div class="l">Stay connected to cloud tools and communication</div>
+            <div class="k">Payments and POS</div>
+            <div class="l">Keep transactions moving during short outages</div>
           </div>
 
           <div class="stat" style="margin-bottom:12px">
-            <div class="k">Payments + POS</div>
-            <div class="l">Continue taking cards and processing transactions</div>
+            <div class="k">Email and cloud tools</div>
+            <div class="l">Maintain access to the systems your team relies on</div>
           </div>
 
           <div class="stat">
-            <div class="k">Managed boundaries</div>
-            <div class="l">Hard caps and approval-based add-ons</div>
+            <div class="k">Voice and critical apps</div>
+            <div class="l">Prioritized traffic for business communication</div>
+          </div>
+
+          <div class="note" style="margin-top:12px">
+            <b>Power note:</b> Internet failover helps when the building has power but the ISP is down. If you also want coverage for short power interruptions,
+            add a small UPS for the modem and failover device.
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="controls">
-    <div class="container">
-      <h2>Controls that keep costs predictable</h2>
-      <p class="sub">
-        The backup connection is intentionally constrained. This is not a second full time internet circuit.
-        The goal is continuity during outages with predictable behavior and clear approval steps.
-      </p>
-
-      <div class="grid3" style="margin-top:14px">
-        <div class="card feature">
-          <div class="icon" aria-hidden="true">A</div>
-          <h3>Monthly data cap example</h3>
-          <p>
-            Example cap: <b>1 GB per month</b> for failover usage. This is typically enough to keep a small team operational
-            during a short outage while the ISP restores service.
-          </p>
-        </div>
-
-        <div class="card feature">
-          <div class="icon green" aria-hidden="true">B</div>
-          <h3>Hard stop, no surprises</h3>
-          <p>
-            When the LTE cap is reached, the backup connection <b>stops</b>. There are no automatic overages.
-            You choose whether to add more continuity or wait for the primary link to return.
-          </p>
-        </div>
-
-        <div class="card feature">
-          <div class="icon" aria-hidden="true">C</div>
-          <h3>Add more only with approval</h3>
-          <p>
-            If the outage continues and you want additional LTE capacity, we can add it on demand.
-            We do not add usage or charges without explicit authorization.
-          </p>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:14px">
-        <b>What we manage:</b> the failover device, the SIM, monitoring, alerts, and the policies that control usage.
-        <b>What we do not do:</b> we do not replace your ISP and we do not provide primary internet service.
       </div>
     </div>
   </section>
@@ -442,46 +430,45 @@
         <details class="card">
           <summary>Are you an internet provider</summary>
           <p>
-            No. SwitchPoint is not an ISP, carrier, or utility. Your primary internet service remains with your existing provider.
-            We install and manage a failover device that switches to LTE only when the primary link fails.
+            No. We do not replace your existing internet service. You keep your current provider.
+            We deploy and manage failover equipment that provides continuity when your primary link is unavailable.
           </p>
         </details>
 
         <details class="card">
-          <summary>Do I need a new internet provider</summary>
+          <summary>Will this work with my current provider</summary>
           <p>
-            No. We keep your current provider. SwitchPoint sits above your existing connection and provides continuity during outages.
+            Yes. The service is designed to sit on top of common primary connections such as fiber, cable, DSL, and other wired internet services.
+            We can also support more advanced designs depending on your environment.
           </p>
         </details>
 
         <details class="card">
-          <summary>Do I need a static IP</summary>
+          <summary>Is this secure</summary>
           <p>
-            Usually no. This service is designed primarily for outbound business continuity during outages.
-            If your environment requires inbound access or special routing, we can review it as a higher tier deployment.
+            The failover device uses enterprise networking principles and can apply standard firewalling, segmentation, and policy controls.
+            Your traffic remains your traffic. The service focuses on continuity and managed operation, not data collection.
           </p>
         </details>
 
         <details class="card">
-          <summary>What happens when the LTE cap is used up</summary>
+          <summary>Will my staff have to do anything during an outage</summary>
           <p>
-            The LTE backup stops at the cap to prevent unexpected costs. At that point you can either wait for the primary ISP to return,
-            or authorize additional LTE capacity to stay online during the outage.
+            No. That is the point. The system detects a failure and switches automatically. When the primary connection returns, it switches back.
           </p>
         </details>
 
         <details class="card">
-          <summary>Will it work during a power outage</summary>
+          <summary>How do you prevent the backup from becoming “internet #2”</summary>
           <p>
-            If the building has no power, your network equipment will shut down. LTE failover protects against ISP outages while the building has power.
-            For brief power outages, a small UPS can keep the modem and SwitchPoint device running.
+            The solution is designed around operational continuity with controls. It is engineered to be used during outages, not as a replacement for your primary ISP.
           </p>
         </details>
 
         <details class="card">
-          <summary>How fast is failover</summary>
+          <summary>Do you deploy outside Pennsylvania</summary>
           <p>
-            Most environments fail over within about 10 to 30 seconds. We test failover during installation.
+            Yes. The service is straightforward to deploy and can be implemented nationally. We can start local and expand as operational demand grows.
           </p>
         </details>
       </div>
@@ -493,78 +480,74 @@
       <h2>Contact</h2>
       <div class="contact" style="margin-top:14px">
         <div class="card" style="padding:18px">
-          <h3 style="margin:0 0 8px">Request a proposal</h3>
+          <h3 style="margin:0 0 8px">Email is the fastest way to reach us</h3>
           <p class="sub" style="margin:0">
-            Send your business name, address, and current ISP. We will confirm LTE signal, review your environment,
-            and provide a simple proposal for managed failover service.
+            Send your business name, location, and what happens when your internet drops.
+            We will confirm feasibility and reply with next steps.
+          </p>
+
+          <div style="height:16px"></div>
+
+          <a class="email" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20Inquiry">
+            <span class="bubble" aria-hidden="true">@</span>
+            <span>sales@switchpointbackup.com</span>
+          </a>
+
+          <div class="pillrow" style="margin-top:14px">
+            <div class="pill">Managed install</div>
+            <div class="pill">Monitoring</div>
+            <div class="pill">Alerting</div>
+            <div class="pill">Policy controls</div>
+          </div>
+
+          <div class="note" style="margin-top:14px">
+            <b>Positioning:</b> SwitchPoint Backup is the spare tire for your internet.
+            You hope you never need it, but when you do, it is already installed and works automatically.
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px">
+          <h3 style="margin:0 0 8px">What to include in your email</h3>
+          <p class="sub" style="margin:0">
+            A few details helps us reply with something useful.
           </p>
 
           <div style="height:12px"></div>
 
-          <div class="pillrow">
-            <div class="pill">Fast installs</div>
-            <div class="pill">Bundled SIM</div>
-            <div class="pill">Hard caps</div>
-            <div class="pill">Cloud monitoring</div>
-            <div class="pill">Month to month</div>
-          </div>
+          <ul class="list" aria-label="Email checklist">
+            <li class="li"><span class="check" aria-hidden="true"></span><span>Business name and address</span></li>
+            <li class="li"><span class="check" aria-hidden="true"></span><span>Current primary internet type (fiber, cable, DSL, etc.)</span></li>
+            <li class="li"><span class="check" aria-hidden="true"></span><span>What breaks when internet goes down (payments, phones, scheduling)</span></li>
+            <li class="li"><span class="check" aria-hidden="true"></span><span>Number of locations (if more than one)</span></li>
+          </ul>
 
-          <div style="height:16px"></div>
-          <p class="fine">Prefer email: <a href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a></p>
+          <div style="height:14px"></div>
+
+          <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20Proposal%20Request&body=Business%20name%3A%0ALocation%3A%0AInternet%20type%3A%0AWhat%20breaks%20during%20outages%3A%0ANumber%20of%20locations%3A">
+            Start an email
+          </a>
+
+          <p class="fine" style="margin-top:12px">
+            No web forms. No phone numbers on the site. Email only.
+          </p>
         </div>
-
-        <form class="card" onsubmit="return sendMail(event)">
-          <label for="name">Name</label>
-          <input id="name" name="name" placeholder="Your name" required />
-
-          <label for="company">Business name</label>
-          <input id="company" name="company" placeholder="Company" required />
-
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" placeholder="you@company.com" required />
-
-          <label for="message">What do outages impact for you</label>
-          <textarea id="message" name="message" placeholder="Example: When the internet drops, payments and phones stop. We have Verizon FiOS. One location." required></textarea>
-
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-            <button class="btn primary" type="submit">Send</button>
-            <a class="btn" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Proposal%20Request">Email instead</a>
-          </div>
-          <p class="fine">Submitting opens your email app. This site does not store your data.</p>
-        </form>
       </div>
     </div>
   </section>
 
   <div class="container foot">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div>© <span id="year"></span> SwitchPoint</div>
+      <div>© <span id="year"></span> SwitchPoint Backup</div>
       <div>Automatic LTE failover for ISP outages</div>
     </div>
     <div class="fine">
-      SwitchPoint provides equipment, installation, and management for LTE backup connectivity. We are not an internet carrier, ISP, or utility.
-      Backup service is designed for continuity during outages and is subject to data caps and customer-approved add-ons.
+      SwitchPoint Backup provides equipment, installation, monitoring, and management for internet continuity during outages.
+      We are not an internet carrier, ISP, or utility.
     </div>
   </div>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    function sendMail(e){
-      e.preventDefault();
-      const form = e.target;
-      const name = encodeURIComponent(form.name.value);
-      const company = encodeURIComponent(form.company.value);
-      const email = encodeURIComponent(form.email.value);
-      const msg = encodeURIComponent(form.message.value);
-
-      const subject = `SwitchPoint Proposal Request - ${decodeURIComponent(company)}`;
-      const body = `Name: ${decodeURIComponent(name)}\nBusiness: ${decodeURIComponent(company)}\nEmail: ${decodeURIComponent(email)}\n\nDetails:\n${decodeURIComponent(msg)}\n`;
-
-      const mailto = `mailto:sales@switchpointbackup.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailto;
-      return false;
-    }
   </script>
 </body>
 </html>
