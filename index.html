@@ -265,6 +265,19 @@
   .email-chip{ width:100%; justify-content:center; }
 }
 
+
+/* Contact attention pulse */
+#contact-email.contact-pop {
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+  animation: contactPulse 1.2s ease-out 0s 2;
+  border-color: rgba(59, 130, 246, 0.45);
+}
+@keyframes contactPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35); transform: translateY(0); }
+  60%  { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0.0); transform: translateY(-1px); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.0); transform: translateY(0); }
+}
+
 </style>
 </head>
 
@@ -581,7 +594,7 @@
         </div>
       </div>
 
-      <div class="card contact-cta">
+      <div class="card contact-cta" id="contact-email">
         <h3>General questions</h3>
         <p class="muted">
           Email is the best way to reach us. Your message goes straight to the team monitoring installs and support.
@@ -618,5 +631,55 @@
   <script>
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
+
+<script>
+(function () {
+  function focusContactEmail() {
+    var section = document.getElementById('contact');
+    var card = document.getElementById('contact-email');
+    if (!section) return;
+
+    // Smooth scroll to the contact section
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // After scroll starts, briefly highlight the email card
+    if (card) {
+      window.setTimeout(function () {
+        card.classList.remove('contact-pop');
+        // Force reflow so animation restarts reliably
+        void card.offsetWidth;
+        card.classList.add('contact-pop');
+        window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
+      }, 350);
+    }
+  }
+
+  // Intercept clicks on top CTAs so they "teach" the visitor where to email
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a.js-contact-focus');
+    if (!a) return;
+    e.preventDefault();
+    focusContactEmail();
+    // Update hash without jumping
+    if (history && history.replaceState) {
+      history.replaceState(null, '', '#contact');
+    } else {
+      location.hash = '#contact';
+    }
+  });
+
+  // If someone lands with #contact, give the email card a little emphasis
+  if (location.hash === '#contact') {
+    window.setTimeout(function () {
+      var card = document.getElementById('contact-email');
+      if (card) {
+        card.classList.add('contact-pop');
+        window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
+      }
+    }, 300);
+  }
+})();
+</script>
+
 </body>
 </html>
