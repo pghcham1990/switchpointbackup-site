@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SwitchPoint | Automatic LTE Internet Backup</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230ea5e9%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2310b981%22/%3E%0A%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22url%28%23g%29%22/%3E%0A%3Ctext%20x%3D%2232%22%20y%3D%2241%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22800%22%20fill%3D%22white%22%3ESP%3C/text%3E%0A%3C/svg%3E">
-<meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages. Not a primary connection. Hard data caps with customer-approved add-ons." />
+  <meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages. Not a primary connection. Hard data caps with customer-approved add-ons." />
   <style>
     :root{
       --bg:#f7f9fc;
@@ -17,8 +17,8 @@
       --shadow:0 18px 55px rgba(14, 24, 40, .10);
       --radius:18px;
 
-      --accent:#2e6bff;   /* blue */
-      --accent2:#1fbf8a;  /* green */
+      --accent:#2e6bff;
+      --accent2:#1fbf8a;
       --accentSoft:rgba(46,107,255,.12);
       --accent2Soft:rgba(31,191,138,.14);
     }
@@ -175,21 +175,46 @@
     summary{cursor:pointer;font-weight:800}
     details p{color:var(--muted);font-size:14px;margin-top:10px}
 
-    .contact{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
-    @media (max-width: 900px){.contact{grid-template-columns:1fr;}}
-
-    form{padding:18px}
-    label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
-    input, textarea{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(18,28,45,.14);
-      background:rgba(255,255,255,.95);
-      color:var(--text);
-      outline:none;
+    /* Contact */
+    .contact{display:grid;grid-template-columns:1fr;gap:14px}
+    .contact-card{padding:18px}
+    .contact-card h3{margin:0 0 8px 0}
+    .muted{color:rgba(15,23,42,.72)}
+    .email-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.45);
+      background:rgba(255,255,255,.70);
+      width:fit-content;
+      margin-top:12px;
     }
-    textarea{min-height:110px;resize:vertical}
+    .email-chip .dot{
+      width:10px;height:10px;border-radius:999px;
+      background:rgba(16,185,129,.85);
+      box-shadow:0 0 0 6px rgba(16,185,129,.15);
+    }
+    .email-link{font-weight:750;letter-spacing:.2px;text-decoration:none}
+    .contact-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .tiny{font-size:12px;line-height:1.45;margin:14px 0 0}
+    @media (max-width: 900px){
+      .email-chip{width:100%;justify-content:center}
+      .contact-actions{width:100%}
+    }
+
+    /* Contact attention pulse */
+    #contact-email.contact-pop {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
+      animation: contactPulse 1.2s ease-out 0s 2;
+      border-color: rgba(59, 130, 246, 0.45);
+    }
+    @keyframes contactPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35); transform: translateY(0); }
+      60%  { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0.0); transform: translateY(-1px); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.0); transform: translateY(0); }
+    }
 
     .foot{
       padding:26px 0 40px;
@@ -201,84 +226,7 @@
     .fine{color:rgba(79,95,120,.86);font-size:12.5px;margin-top:10px}
     .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .pill{font-size:12px;color:rgba(79,95,120,.95);padding:8px 10px;border-radius:999px;border:1px solid rgba(18,28,45,.12);background:rgba(255,255,255,.85)}
-  /* Contact polish */
-.contact{
-  align-items:stretch;
-  gap:18px;
-}
-.contact h3{
-  margin:0 0 8px 0;
-}
-.contact .muted{
-  color:rgba(15,23,42,.72);
-}
-.pill-row{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin:14px 0 16px;
-}
-.pill{
-  display:inline-flex;
-  align-items:center;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,.45);
-  background:rgba(255,255,255,.6);
-  font-size:12px;
-  color:rgba(15,23,42,.75);
-}
-.contact-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:14px;
-}
-.email-chip{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid rgba(148,163,184,.45);
-  background:rgba(255,255,255,.65);
-  width:fit-content;
-}
-.email-chip .dot{
-  width:10px;
-  height:10px;
-  border-radius:999px;
-  background:rgba(16,185,129,.85);
-  box-shadow:0 0 0 6px rgba(16,185,129,.15);
-}
-.email-link{
-  font-weight:650;
-  letter-spacing:.2px;
-}
-.tiny{
-  font-size:12px;
-  line-height:1.45;
-  margin:14px 0 0;
-}
-@media (max-width: 900px){
-  .contact-actions{ width:100%; }
-  .email-chip{ width:100%; justify-content:center; }
-}
-
-
-/* Contact attention pulse */
-#contact-email.contact-pop {
-  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
-  animation: contactPulse 1.2s ease-out 0s 2;
-  border-color: rgba(59, 130, 246, 0.45);
-}
-@keyframes contactPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35); transform: translateY(0); }
-  60%  { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0.0); transform: translateY(-1px); }
-  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.0); transform: translateY(0); }
-}
-
-</style>
+  </style>
 </head>
 
 <body>
@@ -292,8 +240,8 @@
         <a href="#how">How it works</a>
         <a href="#controls">Controls</a>
         <a href="#faq">FAQ</a>
-        <a class="btn" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20-%20Internet%20continuity&body=Hi%20Scott%2C%0A%0AI%27d%20like%20to%20learn%20more%20about%20SwitchPoint%20Backup%20for%20our%20office.%0A%0ABusiness%20name%3A%0ALocation%3A%0APrimary%20internet%20provider%3A%0ABest%20time%20to%20talk%3A%0A%0AThanks%2C%0A">Contact</a>
-        <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20-%20Internet%20continuity&body=Hi%20Scott%2C%0A%0AI%27d%20like%20to%20learn%20more%20about%20SwitchPoint%20Backup%20for%20our%20office.%0A%0ABusiness%20name%3A%0ALocation%3A%0APrimary%20internet%20provider%3A%0ABest%20time%20to%20talk%3A%0A%0AThanks%2C%0A">Request a proposal</a>
+        <a class="btn js-contact-focus" href="#contact">Contact</a>
+        <a class="btn primary js-contact-focus" href="#contact">Request a proposal</a>
       </div>
     </div>
   </div>
@@ -308,7 +256,7 @@
           Your normal internet stays the same. The LTE backup only activates when the primary connection fails.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20-%20Internet%20continuity&body=Hi%20Scott%2C%0A%0AI%27d%20like%20to%20learn%20more%20about%20SwitchPoint%20Backup%20for%20our%20office.%0A%0ABusiness%20name%3A%0ALocation%3A%0APrimary%20internet%20provider%3A%0ABest%20time%20to%20talk%3A%0A%0AThanks%2C%0A">Request a proposal</a>
+          <a class="btn primary js-contact-focus" href="#contact">Request a proposal</a>
           <a class="btn" href="#how">See how it works</a>
         </div>
         <div class="mini">
@@ -567,55 +515,35 @@
   </section>
 
   <section id="contact">
-  <div class="container">
-    <h2>Contact</h2>
+    <div class="container">
+      <h2>Contact</h2>
 
-    <div class="contact">
-      <div class="card contact-proposal">
-        <h3>Request a proposal</h3>
-        <p class="muted">
-          Email your business name, address, and current internet provider. We’ll confirm LTE signal, review your environment,
-          and reply with a simple proposal for managed failover service.
-        </p>
+      <div class="contact">
+        <div class="card contact-card" id="contact-email">
+          <h3>Email is the best way to reach us</h3>
+          <p class="muted">
+            Send a quick note with your business name, service address, and your current internet provider.
+            We’ll confirm LTE signal and reply with next steps.
+          </p>
 
-        <div class="pill-row">
-          <span class="pill">Fast installs</span>
-          <span class="pill">Bundled SIM</span>
-          <span class="pill">Predictable caps</span>
-          <span class="pill">Cloud monitoring</span>
-          <span class="pill">Month to month</span>
+          <div class="email-chip" aria-label="Email address">
+            <span class="dot" aria-hidden="true"></span>
+            <a class="email-link" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
+          </div>
+
+          <div class="contact-actions">
+            <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20-%20Internet%20continuity&body=Hi%20Scott%2C%0A%0ABusiness%20name%3A%20%0AService%20address%3A%20%0APrimary%20internet%20provider%3A%20%0AWhat%20do%20you%20need%20to%20keep%20running%20during%20an%20outage%3A%20%0A%0AThanks%2C">
+              Start an email
+            </a>
+          </div>
+
+          <p class="tiny muted">
+            Reply anytime. We’ll see it and respond as soon as we can.
+          </p>
         </div>
-
-        <div class="contact-actions">
-          <a class="btn" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20Proposal%20Request&body=Hi%20Scott%2C%0A%0ABusiness%20name%3A%20%0AService%20address%3A%20%0APrimary%20internet%20provider%3A%20%0A#%20of%20staff%2Fdevices%20on%20Wi-Fi%3A%20%0AAny%20special%20systems%20to%20keep%20running%20during%20an%20outage%3A%20%0A%0AThanks%2C">
-            Start an email
-          </a>
-          <a class="btn btn-ghost" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
-        </div>
-      </div>
-
-      <div class="card contact-cta" id="contact-email">
-        <h3>General questions</h3>
-        <p class="muted">
-          Email is the best way to reach us. Your message goes straight to the team monitoring installs and support.
-        </p>
-
-        <div class="email-chip">
-          <span class="dot" aria-hidden="true"></span>
-          <a class="email-link" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
-        </div>
-
-        <div class="contact-actions">
-          <a class="btn" href="mailto:sales@switchpointbackup.com?subject=Question%20about%20SwitchPoint%20Backup">Email us</a>
-        </div>
-
-        <p class="tiny muted">
-          Reply anytime. We’ll see it immediately and get back to you as soon as we can.
-        </p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
   <div class="container foot">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -629,57 +557,52 @@
   </div>
 
   <script>
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
-<script>
-(function () {
-  function focusContactEmail() {
-    var section = document.getElementById('contact');
-    var card = document.getElementById('contact-email');
-    if (!section) return;
-
-    // Smooth scroll to the contact section
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // After scroll starts, briefly highlight the email card
-    if (card) {
-      window.setTimeout(function () {
-        card.classList.remove('contact-pop');
-        // Force reflow so animation restarts reliably
-        void card.offsetWidth;
-        card.classList.add('contact-pop');
-        window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
-      }, 350);
-    }
-  }
-
-  // Intercept clicks on top CTAs so they "teach" the visitor where to email
-  document.addEventListener('click', function (e) {
-    var a = e.target.closest && e.target.closest('a.js-contact-focus');
-    if (!a) return;
-    e.preventDefault();
-    focusContactEmail();
-    // Update hash without jumping
-    if (history && history.replaceState) {
-      history.replaceState(null, '', '#contact');
-    } else {
-      location.hash = '#contact';
-    }
-  });
-
-  // If someone lands with #contact, give the email card a little emphasis
-  if (location.hash === '#contact') {
-    window.setTimeout(function () {
+  <script>
+  (function () {
+    function focusContactEmail() {
+      var section = document.getElementById('contact');
       var card = document.getElementById('contact-email');
+      if (!section) return;
+
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       if (card) {
-        card.classList.add('contact-pop');
-        window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
+        window.setTimeout(function () {
+          card.classList.remove('contact-pop');
+          void card.offsetWidth;
+          card.classList.add('contact-pop');
+          window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
+        }, 350);
       }
-    }, 300);
-  }
-})();
-</script>
+    }
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a.js-contact-focus');
+      if (!a) return;
+      e.preventDefault();
+      focusContactEmail();
+
+      if (history && history.replaceState) {
+        history.replaceState(null, '', '#contact');
+      } else {
+        location.hash = '#contact';
+      }
+    });
+
+    if (location.hash === '#contact') {
+      window.setTimeout(function () {
+        var card = document.getElementById('contact-email');
+        if (card) {
+          card.classList.add('contact-pop');
+          window.setTimeout(function () { card.classList.remove('contact-pop'); }, 2600);
+        }
+      }, 300);
+    }
+  })();
+  </script>
 
 </body>
 </html>
