@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SwitchPoint | Automatic LTE Internet Backup</title>
+
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230ea5e9%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2310b981%22/%3E%0A%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22url%28%23g%29%22/%3E%0A%3Ctext%20x%3D%2232%22%20y%3D%2241%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22800%22%20fill%3D%22white%22%3ESP%3C/text%3E%0A%3C/svg%3E">
+
   <meta name="description" content="SwitchPoint installs and manages an automatic LTE failover device that keeps your business online during ISP outages. Not a primary connection. Hard data caps with customer-approved add-ons." />
+
   <style>
     :root{
       --bg:#f7f9fc;
@@ -73,6 +76,7 @@
       text-decoration:none;
       font-weight:750;
       box-shadow: 0 10px 26px rgba(14, 24, 40, .08);
+      cursor:pointer;
     }
     .btn:hover{background:rgba(255,255,255,.98)}
     .btn.primary{
@@ -180,61 +184,57 @@
     .contact-card{padding:18px}
     .contact-card h3{margin:0 0 8px 0}
     .muted{color:rgba(15,23,42,.72)}
-    .email-chip{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:14px 14px;
-      border-radius:16px;
-      border:1px solid rgba(148,163,184,.45);
-      background:rgba(255,255,255,.70);
-      width:fit-content;
-      margin-top:12px;
-    }
-    .email-chip .dot{
-      width:10px;height:10px;border-radius:999px;
-      background:rgba(16,185,129,.85);
-      box-shadow:0 0 0 6px rgba(16,185,129,.15);
-    }
-    .email-link{font-weight:750;letter-spacing:.2px;text-decoration:none}
-    .contact-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .tiny{font-size:12px;line-height:1.45;margin:14px 0 0}
-    @media (max-width: 900px){
-      .email-chip{width:100%;justify-content:center}
-      .contact-actions{width:100%}
-    }
 
-    /* New: Email + Phone chips row */
-    .contact-chips{
+    .chip-row{
       display:flex;
       gap:12px;
       flex-wrap:wrap;
       margin-top:12px;
     }
-    .phone-chip{
+
+    .chip{
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:10px;
       padding:14px 14px;
       border-radius:16px;
       border:1px solid rgba(148,163,184,.45);
       background:rgba(255,255,255,.70);
       width:fit-content;
-      margin-top:12px;
-    }
-    .phone-chip .dot{
-      width:10px;height:10px;border-radius:999px;
-      background:rgba(46,107,255,.90);
-      box-shadow:0 0 0 6px rgba(46,107,255,.16);
-    }
-    .phone-link{
+      text-decoration:none;
       font-weight:750;
       letter-spacing:.2px;
-      text-decoration:none;
+      line-height:1;
     }
+
+    .chip .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:block;
+      flex:0 0 auto;
+      position:relative;
+      top:0.5px; /* visual centering */
+    }
+
+    .chip .dot.email{
+      background:rgba(16,185,129,.85);
+      box-shadow:0 0 0 6px rgba(16,185,129,.15);
+    }
+
+    .chip .dot.phone{
+      background:rgba(59,130,246,.85);
+      box-shadow:0 0 0 6px rgba(59,130,246,.15);
+    }
+
+    .contact-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .tiny{font-size:12px;line-height:1.45;margin:14px 0 0}
+
     @media (max-width: 900px){
-      .contact-chips{width:100%}
-      .phone-chip{width:100%;justify-content:center}
+      .chip-row{width:100%}
+      .chip{width:100%}
+      .contact-actions{width:100%}
     }
 
     /* Contact attention pulse */
@@ -559,16 +559,16 @@
             We’ll confirm LTE signal and reply with next steps.
           </p>
 
-          <div class="contact-chips" aria-label="Contact options">
-            <div class="email-chip" aria-label="Email address">
-              <span class="dot" aria-hidden="true"></span>
-              <a class="email-link" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
-            </div>
+          <div class="chip-row" aria-label="Contact options">
+            <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales@switchpointbackup.com">
+              <span class="dot email" aria-hidden="true"></span>
+              sales@switchpointbackup.com
+            </a>
 
-            <div class="phone-chip" aria-label="Phone number">
-              <span class="dot" aria-hidden="true"></span>
-              <a class="phone-link" href="tel:+14123298790">412-329-8790</a>
-            </div>
+            <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790">
+              <span class="dot phone" aria-hidden="true"></span>
+              412-329-8790
+            </a>
           </div>
 
           <div class="contact-actions">
@@ -589,7 +589,7 @@
   <div class="container foot">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <div>© <span id="year"></span> SwitchPoint</div>
-      <div>Automatic LTE failover for ISP outages | 412-329-8790</div>
+      <div>Automatic LTE failover for ISP outages <span aria-hidden="true">|</span> <a href="tel:+14123298790">412-329-8790</a></div>
     </div>
     <div class="fine">
       SwitchPoint provides equipment, installation, and management for LTE backup connectivity. We are not an internet carrier, ISP, or utility.
@@ -646,4 +646,4 @@
   </script>
 
 </body>
-</html>
+</html
