@@ -204,6 +204,39 @@
       .contact-actions{width:100%}
     }
 
+    /* New: Email + Phone chips row */
+    .contact-chips{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .phone-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.45);
+      background:rgba(255,255,255,.70);
+      width:fit-content;
+      margin-top:12px;
+    }
+    .phone-chip .dot{
+      width:10px;height:10px;border-radius:999px;
+      background:rgba(46,107,255,.90);
+      box-shadow:0 0 0 6px rgba(46,107,255,.16);
+    }
+    .phone-link{
+      font-weight:750;
+      letter-spacing:.2px;
+      text-decoration:none;
+    }
+    @media (max-width: 900px){
+      .contact-chips{width:100%}
+      .phone-chip{width:100%;justify-content:center}
+    }
+
     /* Contact attention pulse */
     #contact-email.contact-pop {
       box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.35);
@@ -520,25 +553,33 @@
 
       <div class="contact">
         <div class="card contact-card" id="contact-email">
-          <h3>Email is the best way to reach us</h3>
+          <h3>Email or call to get started</h3>
           <p class="muted">
             Send a quick note with your business name, service address, and your current internet provider.
             We’ll confirm LTE signal and reply with next steps.
           </p>
 
-          <div class="email-chip" aria-label="Email address">
-            <span class="dot" aria-hidden="true"></span>
-            <a class="email-link" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
+          <div class="contact-chips" aria-label="Contact options">
+            <div class="email-chip" aria-label="Email address">
+              <span class="dot" aria-hidden="true"></span>
+              <a class="email-link" href="mailto:sales@switchpointbackup.com">sales@switchpointbackup.com</a>
+            </div>
+
+            <div class="phone-chip" aria-label="Phone number">
+              <span class="dot" aria-hidden="true"></span>
+              <a class="phone-link" href="tel:+14123298790">412-329-8790</a>
+            </div>
           </div>
 
           <div class="contact-actions">
             <a class="btn primary" href="mailto:sales@switchpointbackup.com?subject=SwitchPoint%20Backup%20-%20Internet%20continuity&body=Hi%20Scott%2C%0A%0ABusiness%20name%3A%20%0AService%20address%3A%20%0APrimary%20internet%20provider%3A%20%0AWhat%20do%20you%20need%20to%20keep%20running%20during%20an%20outage%3A%20%0A%0AThanks%2C">
               Start an email
             </a>
+            <a class="btn" href="tel:+14123298790">Call 412-329-8790</a>
           </div>
 
           <p class="tiny muted">
-            Reply anytime. We’ll see it and respond as soon as we can.
+            Reply or call anytime. We’ll see it and respond as soon as we can.
           </p>
         </div>
       </div>
@@ -548,7 +589,7 @@
   <div class="container foot">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <div>© <span id="year"></span> SwitchPoint</div>
-      <div>Automatic LTE failover for ISP outages</div>
+      <div>Automatic LTE failover for ISP outages | 412-329-8790</div>
     </div>
     <div class="fine">
       SwitchPoint provides equipment, installation, and management for LTE backup connectivity. We are not an internet carrier, ISP, or utility.
