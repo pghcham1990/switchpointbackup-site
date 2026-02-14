@@ -438,7 +438,7 @@
 
     header{padding:52px 0 24px}
     .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
-    @media(max-width:900px){header{padding:36px 0 20px}.hero{grid-template-columns:1fr}.hero-diagram{max-width:380px;margin:14px auto 0}}
+    @media(max-width:900px){header{padding:36px 0 20px}.hero{grid-template-columns:1fr}}
 
     /* ═══ BADGE WITH PULSE DOT ═══ */
     .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid rgba(18,28,45,.10);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);color:var(--muted);font-size:13px}
@@ -681,7 +681,6 @@
     /* ═══ SVG ILLUSTRATIONS ═══ */
     .art-divider{display:block;margin:0 auto;width:100%;max-width:600px;height:auto;opacity:.55}
     .hero-illustration{width:100%;max-width:420px;height:auto;display:block;margin:0 auto}
-    .hero-diagram{width:100%;max-width:520px;height:auto;display:block;margin:18px 0 0;opacity:.85}
     .failover-diagram{width:100%;max-width:100%;height:auto;display:block;margin:12px auto 0}
     .section-accent{position:relative;overflow:visible}
     .section-accent::before{
@@ -741,44 +740,6 @@
           <p class="mini">
             Serving offices, clinics, contractors, and professional services across PA, OH, WV, NY, MD, VA, and KY.
           </p>
-          <!-- Failover diagram — standalone, bigger, left-aligned -->
-          <svg class="hero-diagram" viewBox="0 0 520 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <!-- Connection lines -->
-            <line x1="90" y1="55" x2="190" y2="55" stroke="rgba(46,107,255,.3)" stroke-width="2.5" stroke-dasharray="6 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
-            </line>
-            <line x1="310" y1="55" x2="420" y2="55" stroke="rgba(31,191,138,.3)" stroke-width="2.5" stroke-dasharray="6 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
-            </line>
-            <!-- Primary path (top) -->
-            <path d="M190,55 Q250,15 310,55" stroke="rgba(46,107,255,.35)" stroke-width="2.5" fill="none" stroke-dasharray="5 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.5s" repeatCount="indefinite"/>
-            </path>
-            <!-- Backup path (bottom) -->
-            <path d="M190,55 Q250,95 310,55" stroke="rgba(31,191,138,.35)" stroke-width="2.5" fill="none" stroke-dasharray="5 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.8s" repeatCount="indefinite"/>
-            </path>
-            <!-- Labels -->
-            <text x="250" y="22" text-anchor="middle" font-size="10" fill="rgba(46,107,255,.65)" font-family="system-ui" font-weight="700">PRIMARY ISP</text>
-            <text x="250" y="105" text-anchor="middle" font-size="10" fill="rgba(31,191,138,.65)" font-family="system-ui" font-weight="700">LTE BACKUP</text>
-            <!-- Business node -->
-            <circle cx="60" cy="55" r="26" fill="rgba(46,107,255,.07)" stroke="rgba(46,107,255,.22)" stroke-width="1.5"/>
-            <text x="60" y="51" text-anchor="middle" font-size="18" fill="rgba(46,107,255,.75)">&#127970;</text>
-            <text x="60" y="66" text-anchor="middle" font-size="8.5" fill="rgba(79,95,120,.65)" font-family="system-ui" font-weight="700">YOUR BIZ</text>
-            <!-- SwitchPoint node -->
-            <rect x="210" y="38" width="80" height="34" rx="12" fill="rgba(255,255,255,.85)" stroke="url(#spGrad2)" stroke-width="1.8"/>
-            <defs><linearGradient id="spGrad2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(46,107,255,.45)"/><stop offset="1" stop-color="rgba(31,191,138,.45)"/></linearGradient></defs>
-            <text x="250" y="60" text-anchor="middle" font-size="10" fill="rgba(12,18,32,.75)" font-family="system-ui" font-weight="800">SwitchPoint</text>
-            <!-- Internet node -->
-            <circle cx="448" cy="55" r="26" fill="rgba(31,191,138,.07)" stroke="rgba(31,191,138,.22)" stroke-width="1.5"/>
-            <text x="448" y="51" text-anchor="middle" font-size="18" fill="rgba(31,191,138,.75)">&#127760;</text>
-            <text x="448" y="66" text-anchor="middle" font-size="8.5" fill="rgba(79,95,120,.65)" font-family="system-ui" font-weight="700">INTERNET</text>
-            <!-- Animated pulse on SwitchPoint -->
-            <circle cx="250" cy="55" r="20" fill="none" stroke="rgba(46,107,255,.15)" stroke-width="1">
-              <animate attributeName="r" from="20" to="35" dur="2.5s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" from=".4" to="0" dur="2.5s" repeatCount="indefinite"/>
-            </circle>
-          </svg>
         </div>
         <div class="card hero-card">
           <div class="stat-grid">
@@ -848,18 +809,6 @@
       </div>
     </div>
 
-    <!-- Signal wave divider -->
-    <svg class="art-divider" viewBox="0 0 600 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M0,20 Q75,5 150,20 T300,20 T450,20 T600,20" stroke="rgba(46,107,255,.15)" stroke-width="1.5" fill="none">
-        <animate attributeName="d" dur="4s" repeatCount="indefinite" values="M0,20 Q75,5 150,20 T300,20 T450,20 T600,20;M0,20 Q75,35 150,20 T300,20 T450,20 T600,20;M0,20 Q75,5 150,20 T300,20 T450,20 T600,20"/>
-      </path>
-      <path d="M0,20 Q75,35 150,20 T300,20 T450,20 T600,20" stroke="rgba(31,191,138,.12)" stroke-width="1.5" fill="none">
-        <animate attributeName="d" dur="5s" repeatCount="indefinite" values="M0,20 Q75,35 150,20 T300,20 T450,20 T600,20;M0,20 Q75,5 150,20 T300,20 T450,20 T600,20;M0,20 Q75,35 150,20 T300,20 T450,20 T600,20"/>
-      </path>
-      <circle cx="150" cy="20" r="3" fill="rgba(46,107,255,.25)"><animate attributeName="cx" from="0" to="600" dur="6s" repeatCount="indefinite"/></circle>
-      <circle cx="450" cy="20" r="2.5" fill="rgba(31,191,138,.25)"><animate attributeName="cx" from="600" to="0" dur="7s" repeatCount="indefinite"/></circle>
-    </svg>
-
     <!-- What SwitchPoint is -->
     <section class="reveal section-accent" aria-labelledby="what-heading">
       <div class="container">
@@ -922,19 +871,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Network nodes divider -->
-    <svg class="art-divider" viewBox="0 0 600 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="max-width:500px">
-      <line x1="100" y1="25" x2="200" y2="25" stroke="rgba(46,107,255,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2s" repeatCount="indefinite"/></line>
-      <line x1="200" y1="25" x2="300" y2="25" stroke="rgba(31,191,138,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2.3s" repeatCount="indefinite"/></line>
-      <line x1="300" y1="25" x2="400" y2="25" stroke="rgba(139,92,246,.10)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="1.8s" repeatCount="indefinite"/></line>
-      <line x1="400" y1="25" x2="500" y2="25" stroke="rgba(46,107,255,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2.1s" repeatCount="indefinite"/></line>
-      <circle cx="100" cy="25" r="5" fill="rgba(46,107,255,.12)" stroke="rgba(46,107,255,.20)" stroke-width="1"><animate attributeName="r" from="4" to="6" dur="3s" repeatCount="indefinite" values="4;6;4"/></circle>
-      <circle cx="200" cy="25" r="4" fill="rgba(31,191,138,.12)" stroke="rgba(31,191,138,.20)" stroke-width="1"/>
-      <circle cx="300" cy="25" r="6" fill="rgba(46,107,255,.08)" stroke="rgba(46,107,255,.15)" stroke-width="1"><animate attributeName="r" from="5" to="7" dur="2.5s" repeatCount="indefinite" values="5;7;5"/></circle>
-      <circle cx="400" cy="25" r="4" fill="rgba(139,92,246,.10)" stroke="rgba(139,92,246,.15)" stroke-width="1"/>
-      <circle cx="500" cy="25" r="5" fill="rgba(31,191,138,.12)" stroke="rgba(31,191,138,.20)" stroke-width="1"><animate attributeName="r" from="4" to="6" dur="3.2s" repeatCount="indefinite" values="4;6;4"/></circle>
-    </svg>
 
     <!-- How it works -->
     <section id="how" class="reveal" aria-labelledby="how-heading">
@@ -1046,6 +982,19 @@
         <!-- Label -->
         <text x="82" y="24" font-size="9" fill="rgba(79,95,120,.4)" font-family="system-ui" font-weight="600">LTE SIGNAL</text>
       </g>
+    </svg>
+
+    <!-- Network nodes divider -->
+    <svg class="art-divider" viewBox="0 0 600 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="max-width:500px">
+      <line x1="100" y1="25" x2="200" y2="25" stroke="rgba(46,107,255,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2s" repeatCount="indefinite"/></line>
+      <line x1="200" y1="25" x2="300" y2="25" stroke="rgba(31,191,138,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2.3s" repeatCount="indefinite"/></line>
+      <line x1="300" y1="25" x2="400" y2="25" stroke="rgba(139,92,246,.10)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="1.8s" repeatCount="indefinite"/></line>
+      <line x1="400" y1="25" x2="500" y2="25" stroke="rgba(46,107,255,.12)" stroke-width="1" stroke-dasharray="4 3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2.1s" repeatCount="indefinite"/></line>
+      <circle cx="100" cy="25" r="5" fill="rgba(46,107,255,.12)" stroke="rgba(46,107,255,.20)" stroke-width="1"><animate attributeName="r" from="4" to="6" dur="3s" repeatCount="indefinite" values="4;6;4"/></circle>
+      <circle cx="200" cy="25" r="4" fill="rgba(31,191,138,.12)" stroke="rgba(31,191,138,.20)" stroke-width="1"/>
+      <circle cx="300" cy="25" r="6" fill="rgba(46,107,255,.08)" stroke="rgba(46,107,255,.15)" stroke-width="1"><animate attributeName="r" from="5" to="7" dur="2.5s" repeatCount="indefinite" values="5;7;5"/></circle>
+      <circle cx="400" cy="25" r="4" fill="rgba(139,92,246,.10)" stroke="rgba(139,92,246,.15)" stroke-width="1"/>
+      <circle cx="500" cy="25" r="5" fill="rgba(31,191,138,.12)" stroke="rgba(31,191,138,.20)" stroke-width="1"><animate attributeName="r" from="4" to="6" dur="3.2s" repeatCount="indefinite" values="4;6;4"/></circle>
     </svg>
 
     <!-- ══════════════════════════════════════════════════════════
