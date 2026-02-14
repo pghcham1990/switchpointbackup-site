@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1084,9 +1085,52 @@
         .finally(function(){submitBtn.disabled=false;submitBtn.textContent='Send request'});
       }else{
         var subject='SwitchPoint Proposal Request \u2014 '+business;
-        var body=['Hi Scott,','','Name: '+name,'Business: '+business,'Email: '+email,'Phone: '+(phone||'(not provided)'),'Service address: '+address,'Current internet provider: '+(provider||'(not provided)'),'','What needs to stay running during an outage:',message||'(not specified)','','Thanks!'].join('\n');
-        window.location.href='mailto:'+SALES_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-        statusEl.textContent='Opening your email client\u2026 If it didn\u2019t open, email us at '+SALES_EMAIL;statusEl.className='form-status success';
+        var bodyLines=['Hi Scott,','','Name: '+name,'Business: '+business,'Email: '+email,'Phone: '+(phone||'(not provided)'),'Service address: '+address,'Current internet provider: '+(provider||'(not provided)'),'','What needs to stay running during an outage:',message||'(not specified)','','Thanks!'];
+        var bodyText=bodyLines.join('\n');
+
+        // Try mailto first (works on mobile + desktops with email clients)
+        var mailtoUrl='mailto:'+SALES_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(bodyText);
+        window.location.href=mailtoUrl;
+
+        // After a short delay, show fallback options for desktop users without a mail client
+        setTimeout(function(){
+          var gmailUrl='https://mail.google.com/mail/?view=cm&fs=1'
+            +'&to='+encodeURIComponent(SALES_EMAIL)
+            +'&su='+encodeURIComponent(subject)
+            +'&body='+encodeURIComponent(bodyText);
+          var outlookUrl='https://outlook.live.com/mail/0/deeplink/compose?to='+encodeURIComponent(SALES_EMAIL)
+            +'&subject='+encodeURIComponent(subject)
+            +'&body='+encodeURIComponent(bodyText);
+          var yahooUrl='https://compose.mail.yahoo.com/?to='+encodeURIComponent(SALES_EMAIL)
+            +'&subject='+encodeURIComponent(subject)
+            +'&body='+encodeURIComponent(bodyText);
+
+          statusEl.innerHTML=
+            '<div style="margin-bottom:8px"><b>Email client didn\u2019t open?</b> Use one of these instead:</div>'
+            +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+            +'<a href="'+gmailUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Gmail</a>'
+            +'<a href="'+outlookUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Outlook</a>'
+            +'<a href="'+yahooUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Yahoo</a>'
+            +'<button type="button" id="copy-email-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:1px solid rgba(46,107,255,.3);background:rgba(46,107,255,.08);font-weight:700;font-size:13px;color:rgba(46,107,255,.95);cursor:pointer;font-family:inherit">Copy to clipboard</button>'
+            +'</div>'
+            +'<div style="font-size:12px;color:rgba(79,95,120,.8)">Your info is pre-filled \u2014 just hit send.</div>';
+          statusEl.className='form-status success';
+
+          var copyBtn=document.getElementById('copy-email-btn');
+          if(copyBtn){
+            copyBtn.addEventListener('click',function(){
+              var clipText='To: '+SALES_EMAIL+'\nSubject: '+subject+'\n\n'+bodyText;
+              if(navigator.clipboard&&navigator.clipboard.writeText){
+                navigator.clipboard.writeText(clipText).then(function(){copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy to clipboard'},2000)});
+              }else{
+                // Fallback for older browsers
+                var ta=document.createElement('textarea');ta.value=clipText;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();
+                try{document.execCommand('copy');copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy to clipboard'},2000)}catch(ex){}
+                document.body.removeChild(ta);
+              }
+            });
+          }
+        },800);
       }
     });
   })();
