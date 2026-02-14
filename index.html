@@ -438,7 +438,7 @@
 
     header{padding:52px 0 24px}
     .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
-    @media(max-width:900px){header{padding:36px 0 20px}.hero{grid-template-columns:1fr}}
+    @media(max-width:900px){header{padding:36px 0 20px}.hero{grid-template-columns:1fr}.hero-diagram{max-width:380px;margin:14px auto 0}}
 
     /* ═══ BADGE WITH PULSE DOT ═══ */
     .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid rgba(18,28,45,.10);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);color:var(--muted);font-size:13px}
@@ -654,6 +654,10 @@
     .chip .cdot.phone{background:rgba(59,130,246,.85);box-shadow:0 0 0 6px rgba(59,130,246,.15)}
     .chip:hover .cdot.phone{box-shadow:0 0 0 8px rgba(59,130,246,.20),0 0 12px rgba(59,130,246,.15)}
     .tiny{font-size:12px;line-height:1.45;margin:14px 0 0}
+    .contact-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;align-items:start}
+    .mission-art-wrap{display:flex;align-items:center;justify-content:center}
+    .mission-art{width:100%;max-width:300px;height:auto}
+    @media(max-width:900px){.contact-grid{grid-template-columns:1fr}.mission-art-wrap{order:-1}.mission-art{max-width:220px}}
     @media(max-width:900px){.chip-row{width:100%}.chip{width:100%}}
 
     /* ═══ PILLS ═══ */
@@ -677,6 +681,7 @@
     /* ═══ SVG ILLUSTRATIONS ═══ */
     .art-divider{display:block;margin:0 auto;width:100%;max-width:600px;height:auto;opacity:.55}
     .hero-illustration{width:100%;max-width:420px;height:auto;display:block;margin:0 auto}
+    .hero-diagram{width:100%;max-width:520px;height:auto;display:block;margin:18px 0 0;opacity:.85}
     .failover-diagram{width:100%;max-width:100%;height:auto;display:block;margin:12px auto 0}
     .section-accent{position:relative;overflow:visible}
     .section-accent::before{
@@ -736,6 +741,44 @@
           <p class="mini">
             Serving offices, clinics, contractors, and professional services across PA, OH, WV, NY, MD, VA, and KY.
           </p>
+          <!-- Failover diagram — standalone, bigger, left-aligned -->
+          <svg class="hero-diagram" viewBox="0 0 520 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Connection lines -->
+            <line x1="90" y1="55" x2="190" y2="55" stroke="rgba(46,107,255,.3)" stroke-width="2.5" stroke-dasharray="6 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <line x1="310" y1="55" x2="420" y2="55" stroke="rgba(31,191,138,.3)" stroke-width="2.5" stroke-dasharray="6 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <!-- Primary path (top) -->
+            <path d="M190,55 Q250,15 310,55" stroke="rgba(46,107,255,.35)" stroke-width="2.5" fill="none" stroke-dasharray="5 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.5s" repeatCount="indefinite"/>
+            </path>
+            <!-- Backup path (bottom) -->
+            <path d="M190,55 Q250,95 310,55" stroke="rgba(31,191,138,.35)" stroke-width="2.5" fill="none" stroke-dasharray="5 4">
+              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.8s" repeatCount="indefinite"/>
+            </path>
+            <!-- Labels -->
+            <text x="250" y="22" text-anchor="middle" font-size="10" fill="rgba(46,107,255,.65)" font-family="system-ui" font-weight="700">PRIMARY ISP</text>
+            <text x="250" y="105" text-anchor="middle" font-size="10" fill="rgba(31,191,138,.65)" font-family="system-ui" font-weight="700">LTE BACKUP</text>
+            <!-- Business node -->
+            <circle cx="60" cy="55" r="26" fill="rgba(46,107,255,.07)" stroke="rgba(46,107,255,.22)" stroke-width="1.5"/>
+            <text x="60" y="51" text-anchor="middle" font-size="18" fill="rgba(46,107,255,.75)">&#127970;</text>
+            <text x="60" y="66" text-anchor="middle" font-size="8.5" fill="rgba(79,95,120,.65)" font-family="system-ui" font-weight="700">YOUR BIZ</text>
+            <!-- SwitchPoint node -->
+            <rect x="210" y="38" width="80" height="34" rx="12" fill="rgba(255,255,255,.85)" stroke="url(#spGrad2)" stroke-width="1.8"/>
+            <defs><linearGradient id="spGrad2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(46,107,255,.45)"/><stop offset="1" stop-color="rgba(31,191,138,.45)"/></linearGradient></defs>
+            <text x="250" y="60" text-anchor="middle" font-size="10" fill="rgba(12,18,32,.75)" font-family="system-ui" font-weight="800">SwitchPoint</text>
+            <!-- Internet node -->
+            <circle cx="448" cy="55" r="26" fill="rgba(31,191,138,.07)" stroke="rgba(31,191,138,.22)" stroke-width="1.5"/>
+            <text x="448" y="51" text-anchor="middle" font-size="18" fill="rgba(31,191,138,.75)">&#127760;</text>
+            <text x="448" y="66" text-anchor="middle" font-size="8.5" fill="rgba(79,95,120,.65)" font-family="system-ui" font-weight="700">INTERNET</text>
+            <!-- Animated pulse on SwitchPoint -->
+            <circle cx="250" cy="55" r="20" fill="none" stroke="rgba(46,107,255,.15)" stroke-width="1">
+              <animate attributeName="r" from="20" to="35" dur="2.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" from=".4" to="0" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
         </div>
         <div class="card hero-card">
           <div class="stat-grid">
@@ -773,44 +816,6 @@
             <div class="pill">VoIP &amp; UCaaS</div>
             <div class="pill">Scheduling &amp; dispatch</div>
           </div>
-          <!-- Network topology illustration -->
-          <svg class="failover-diagram" viewBox="0 0 460 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="margin-top:14px">
-            <!-- Connection lines -->
-            <line x1="80" y1="50" x2="180" y2="50" stroke="rgba(46,107,255,.25)" stroke-width="2" stroke-dasharray="6 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
-            </line>
-            <line x1="280" y1="50" x2="380" y2="50" stroke="rgba(31,191,138,.25)" stroke-width="2" stroke-dasharray="6 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
-            </line>
-            <!-- Primary path (top) -->
-            <path d="M180,50 Q230,15 280,50" stroke="rgba(46,107,255,.3)" stroke-width="2" fill="none" stroke-dasharray="5 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.5s" repeatCount="indefinite"/>
-            </path>
-            <!-- Backup path (bottom) -->
-            <path d="M180,50 Q230,85 280,50" stroke="rgba(31,191,138,.3)" stroke-width="2" fill="none" stroke-dasharray="5 4">
-              <animate attributeName="stroke-dashoffset" from="0" to="-18" dur="1.8s" repeatCount="indefinite"/>
-            </path>
-            <!-- Labels -->
-            <text x="230" y="22" text-anchor="middle" font-size="9" fill="rgba(46,107,255,.6)" font-family="system-ui" font-weight="600">PRIMARY ISP</text>
-            <text x="230" y="95" text-anchor="middle" font-size="9" fill="rgba(31,191,138,.6)" font-family="system-ui" font-weight="600">LTE BACKUP</text>
-            <!-- Business node -->
-            <circle cx="55" cy="50" r="22" fill="rgba(46,107,255,.06)" stroke="rgba(46,107,255,.2)" stroke-width="1.5"/>
-            <text x="55" y="47" text-anchor="middle" font-size="14" fill="rgba(46,107,255,.7)">&#127970;</text>
-            <text x="55" y="60" text-anchor="middle" font-size="7" fill="rgba(79,95,120,.6)" font-family="system-ui" font-weight="600">YOUR BIZ</text>
-            <!-- SwitchPoint node -->
-            <rect x="195" y="35" width="70" height="30" rx="10" fill="rgba(255,255,255,.8)" stroke="url(#spGrad)" stroke-width="1.5"/>
-            <defs><linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(46,107,255,.4)"/><stop offset="1" stop-color="rgba(31,191,138,.4)"/></linearGradient></defs>
-            <text x="230" y="55" text-anchor="middle" font-size="8" fill="rgba(12,18,32,.7)" font-family="system-ui" font-weight="800">SwitchPoint</text>
-            <!-- Internet node -->
-            <circle cx="405" cy="50" r="22" fill="rgba(31,191,138,.06)" stroke="rgba(31,191,138,.2)" stroke-width="1.5"/>
-            <text x="405" y="47" text-anchor="middle" font-size="14" fill="rgba(31,191,138,.7)">&#127760;</text>
-            <text x="405" y="60" text-anchor="middle" font-size="7" fill="rgba(79,95,120,.6)" font-family="system-ui" font-weight="600">INTERNET</text>
-            <!-- Animated pulse on SwitchPoint -->
-            <circle cx="230" cy="50" r="18" fill="none" stroke="rgba(46,107,255,.15)" stroke-width="1">
-              <animate attributeName="r" from="18" to="30" dur="2.5s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" from=".4" to="0" dur="2.5s" repeatCount="indefinite"/>
-            </circle>
-          </svg>
           <div class="note">
             <b>Important:</b> SwitchPoint is not an ISP, carrier, or utility. We do not replace your internet provider.
             We add a managed LTE failover layer that activates only during outages.
@@ -1245,25 +1250,88 @@
     <section id="contact" class="reveal" aria-labelledby="contact-heading">
       <div class="container">
         <h2 id="contact-heading">Get a proposal for your business</h2>
-        <div style="max-width:640px">
-          <div class="card contact-card">
-            <h3>Ready to get started?</h3>
-            <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
-            <div class="chip-row">
-              <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com" style="width:100%">
-                <span class="cdot email" aria-hidden="true"></span>
-                sales@switchpointbackup.com
-              </a>
-              <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
-                <span class="cdot phone" aria-hidden="true"></span>
-                412-329-8790
-              </a>
+        <div class="contact-grid">
+          <div>
+            <div class="card contact-card">
+              <h3>Ready to get started?</h3>
+              <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
+              <div class="chip-row">
+                <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com" style="width:100%">
+                  <span class="cdot email" aria-hidden="true"></span>
+                  sales@switchpointbackup.com
+                </a>
+                <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
+                  <span class="cdot phone" aria-hidden="true"></span>
+                  412-329-8790
+                </a>
+              </div>
+              <p class="tiny muted">We'll respond within one business day. No spam, no mailing lists.</p>
             </div>
-            <p class="tiny muted">We'll respond within one business day. No spam, no mailing lists.</p>
+            <div class="note" style="margin-top:14px">
+              <b>What to include:</b> Your business name, service address (with state), and current internet provider.
+              If you know what systems need to stay online during an outage, include that too.
+            </div>
           </div>
-          <div class="note" style="margin-top:14px">
-            <b>What to include:</b> Your business name, service address (with state), and current internet provider.
-            If you know what systems need to stay online during an outage, include that too.
+          <!-- Mission illustration -->
+          <div class="mission-art-wrap">
+            <svg class="mission-art" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Outer glow ring -->
+              <circle cx="160" cy="155" r="120" fill="none" stroke="rgba(46,107,255,.06)" stroke-width="1">
+                <animate attributeName="r" from="115" to="125" dur="4s" repeatCount="indefinite" values="115;125;115"/>
+                <animate attributeName="opacity" from=".5" to=".2" dur="4s" repeatCount="indefinite" values=".5;.2;.5"/>
+              </circle>
+              <circle cx="160" cy="155" r="100" fill="none" stroke="rgba(31,191,138,.05)" stroke-width="1">
+                <animate attributeName="r" from="95" to="105" dur="5s" repeatCount="indefinite" values="95;105;95"/>
+                <animate attributeName="opacity" from=".4" to=".15" dur="5s" repeatCount="indefinite" values=".4;.15;.4"/>
+              </circle>
+              <!-- Shield shape -->
+              <path d="M160,40 L230,75 L230,155 C230,210 160,250 160,250 C160,250 90,210 90,155 L90,75 Z" fill="rgba(46,107,255,.04)" stroke="url(#shieldGrad)" stroke-width="2"/>
+              <defs>
+                <linearGradient id="shieldGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="rgba(46,107,255,.35)"/>
+                  <stop offset=".5" stop-color="rgba(31,191,138,.30)"/>
+                  <stop offset="1" stop-color="rgba(139,92,246,.25)"/>
+                </linearGradient>
+                <linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="rgba(31,191,138,.7)"/>
+                  <stop offset="1" stop-color="rgba(46,107,255,.7)"/>
+                </linearGradient>
+              </defs>
+              <!-- Inner shield glow -->
+              <path d="M160,55 L220,85 L220,155 C220,200 160,235 160,235 C160,235 100,200 100,155 L100,85 Z" fill="rgba(255,255,255,.35)" stroke="none"/>
+              <!-- Uptime arrow (up arrow inside shield) -->
+              <path d="M160,185 L160,110" stroke="url(#arrowGrad)" stroke-width="4" stroke-linecap="round">
+                <animate attributeName="opacity" from="1" to=".5" dur="2s" repeatCount="indefinite" values="1;.5;1"/>
+              </path>
+              <path d="M140,130 L160,108 L180,130" stroke="url(#arrowGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                <animate attributeName="opacity" from="1" to=".5" dur="2s" repeatCount="indefinite" values="1;.5;1"/>
+              </path>
+              <!-- Signal waves emanating from shield top -->
+              <path d="M130,80 Q160,60 190,80" fill="none" stroke="rgba(46,107,255,.2)" stroke-width="1.5">
+                <animate attributeName="opacity" from=".4" to="0" dur="2.5s" repeatCount="indefinite"/>
+                <animate attributeName="d" from="M130,80 Q160,60 190,80" to="M120,70 Q160,45 200,70" dur="2.5s" repeatCount="indefinite"/>
+              </path>
+              <path d="M135,75 Q160,58 185,75" fill="none" stroke="rgba(31,191,138,.2)" stroke-width="1.5">
+                <animate attributeName="opacity" from=".4" to="0" dur="3s" begin=".5s" repeatCount="indefinite"/>
+                <animate attributeName="d" from="M135,75 Q160,58 185,75" to="M115,60 Q160,35 205,60" dur="3s" begin=".5s" repeatCount="indefinite"/>
+              </path>
+              <!-- Orbiting dots -->
+              <circle r="4" fill="rgba(46,107,255,.25)">
+                <animateMotion dur="8s" repeatCount="indefinite" path="M160,155 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" rotate="auto"/>
+              </circle>
+              <circle r="3" fill="rgba(31,191,138,.25)">
+                <animateMotion dur="10s" repeatCount="indefinite" path="M160,155 m-75,0 a75,75 0 1,0 150,0 a75,75 0 1,0 -150,0" rotate="auto"/>
+              </circle>
+              <!-- Bottom tagline -->
+              <text x="160" y="285" text-anchor="middle" font-size="11" fill="rgba(79,95,120,.5)" font-family="system-ui" font-weight="700" letter-spacing="2">KEEPING YOU ONLINE</text>
+              <text x="160" y="302" text-anchor="middle" font-size="9" fill="rgba(79,95,120,.35)" font-family="system-ui" font-weight="600">WHEN IT MATTERS MOST</text>
+              <!-- Small connection dots at bottom -->
+              <circle cx="130" cy="320" r="3" fill="rgba(46,107,255,.15)"><animate attributeName="opacity" from=".3" to=".7" dur="2s" repeatCount="indefinite" values=".3;.7;.3"/></circle>
+              <line x1="133" y1="320" x2="157" y2="320" stroke="rgba(46,107,255,.1)" stroke-width="1" stroke-dasharray="3 2"><animate attributeName="stroke-dashoffset" from="0" to="-10" dur="2s" repeatCount="indefinite"/></line>
+              <circle cx="160" cy="320" r="4" fill="rgba(31,191,138,.2)"><animate attributeName="opacity" from=".3" to=".7" dur="2.5s" repeatCount="indefinite" values=".3;.7;.3"/></circle>
+              <line x1="164" y1="320" x2="187" y2="320" stroke="rgba(31,191,138,.1)" stroke-width="1" stroke-dasharray="3 2"><animate attributeName="stroke-dashoffset" from="0" to="-10" dur="2s" repeatCount="indefinite"/></line>
+              <circle cx="190" cy="320" r="3" fill="rgba(139,92,246,.15)"><animate attributeName="opacity" from=".3" to=".7" dur="3s" repeatCount="indefinite" values=".3;.7;.3"/></circle>
+            </svg>
           </div>
         </div>
       </div>
