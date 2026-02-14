@@ -449,8 +449,6 @@
     details{padding:16px 18px;border-radius:16px;border:1px solid rgba(18,28,45,.10);background:rgba(247,249,252,.65)}
     summary{cursor:pointer;font-weight:800}
     details p{color:var(--muted);font-size:14px;margin-top:10px}
-    .contact-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-    @media(max-width:900px){.contact-grid{grid-template-columns:1fr}}
     .contact-card{padding:20px}
     .contact-card h3{margin:0 0 8px 0}
     .muted{color:rgba(15,23,42,.72)}
@@ -461,21 +459,6 @@
     .chip .cdot.phone{background:rgba(59,130,246,.85);box-shadow:0 0 0 6px rgba(59,130,246,.15)}
     .tiny{font-size:12px;line-height:1.45;margin:14px 0 0}
     @media(max-width:900px){.chip-row{width:100%}.chip{width:100%}}
-    .form-card{padding:22px}
-    .form-card h3{margin:0 0 4px}
-    .form-card .muted{font-size:14px;margin-bottom:14px}
-    .field{margin-bottom:12px}
-    .field label{display:block;font-weight:700;font-size:13px;margin-bottom:5px;color:var(--text)}
-    .field input,.field textarea,.field select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(18,28,45,.14);background:rgba(247,249,252,.80);font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
-    .field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(46,107,255,.45);box-shadow:0 0 0 4px rgba(46,107,255,.08)}
-    .field textarea{resize:vertical;min-height:70px}
-    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:600px){.field-row{grid-template-columns:1fr}}
-    .form-status{padding:12px 14px;border-radius:14px;font-size:14px;font-weight:600;margin-top:12px;display:none}
-    .form-status.success{display:block;background:rgba(31,191,138,.10);border:1px solid rgba(31,191,138,.30);color:#0f6b4a}
-    .form-status.error{display:block;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#b91c1c}
-    #contact-form-card.contact-pop{box-shadow:0 0 0 0 rgba(59,130,246,.35);animation:contactPulse 1.2s ease-out 0s 2;border-color:rgba(59,130,246,.45)}
-    @keyframes contactPulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.35);transform:translateY(0)}60%{box-shadow:0 0 0 14px rgba(59,130,246,0);transform:translateY(-1px)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0);transform:translateY(0)}}
     .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     .pill{font-size:12px;color:rgba(79,95,120,.95);padding:8px 10px;border-radius:999px;border:1px solid rgba(18,28,45,.12);background:rgba(255,255,255,.85)}
     .foot{padding:28px 0 44px;color:rgba(79,95,120,.95);font-size:13px;border-top:1px solid var(--border);margin-top:30px}
@@ -956,80 +939,25 @@
     <section id="contact" aria-labelledby="contact-heading">
       <div class="container">
         <h2 id="contact-heading">Get a proposal for your business</h2>
-        <div class="contact-grid">
-          <div class="card form-card" id="contact-form-card">
-            <h3>Request a proposal</h3>
-            <p class="muted">Tell us about your location and we'll confirm LTE signal availability and reply with next steps.</p>
-            <form id="contact-form" novalidate>
-              <div class="field-row">
-                <div class="field">
-                  <label for="f-name">Your name *</label>
-                  <input type="text" id="f-name" name="name" required autocomplete="name" placeholder="Jane Smith">
-                </div>
-                <div class="field">
-                  <label for="f-business">Business name *</label>
-                  <input type="text" id="f-business" name="business" required placeholder="Acme Dental">
-                </div>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="f-email">Email *</label>
-                  <input type="email" id="f-email" name="email" required autocomplete="email" placeholder="jane@acmedental.com">
-                </div>
-                <div class="field">
-                  <label for="f-phone">Phone <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-                  <input type="tel" id="f-phone" name="phone" autocomplete="tel" placeholder="412-555-0100">
-                </div>
-              </div>
-              <div class="field">
-                <label for="f-address">Service address *</label>
-                <input type="text" id="f-address" name="address" required autocomplete="street-address" placeholder="123 Main St, Anytown, PA 15001">
-              </div>
-              <div class="field">
-                <label for="f-provider">Current internet provider</label>
-                <input type="text" id="f-provider" name="provider" placeholder="Comcast, Spectrum, Verizon, etc.">
-              </div>
-              <div class="field">
-                <label for="f-message">What needs to stay running during an outage? <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-                <textarea id="f-message" name="message" rows="3" placeholder="Email, payment terminals, phones, scheduling software..."></textarea>
-              </div>
-              <div style="position:absolute;left:-9999px" aria-hidden="true">
-                <label for="f-website">Website</label>
-                <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off">
-              </div>
-              <button type="submit" class="btn primary" id="form-submit" style="width:100%;margin-top:4px">
-                Send request
-              </button>
-            </form>
-            <div id="form-status" class="form-status"></div>
+        <div style="max-width:640px">
+          <div class="card contact-card">
+            <h3>Ready to get started?</h3>
+            <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
+            <div class="chip-row">
+              <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com" style="width:100%">
+                <span class="cdot email" aria-hidden="true"></span>
+                sales@switchpointbackup.com
+              </a>
+              <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
+                <span class="cdot phone" aria-hidden="true"></span>
+                412-329-8790
+              </a>
+            </div>
             <p class="tiny muted">We'll respond within one business day. No spam, no mailing lists.</p>
           </div>
-          <div>
-            <div class="card contact-card">
-              <h3>Prefer email or phone?</h3>
-              <p class="muted" style="font-size:14px">Reach out directly &mdash; we'll respond as soon as we can.</p>
-              <div class="chip-row">
-                <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com">
-                  <span class="cdot email" aria-hidden="true"></span>
-                  sales@switchpointbackup.com
-                </a>
-                <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790">
-                  <span class="cdot phone" aria-hidden="true"></span>
-                  412-329-8790
-                </a>
-              </div>
-            </div>
-            <div class="note" style="margin-top:14px">
-              <b>What to include:</b> Your business name, service address (with state), and current internet provider.
-              If you know what systems need to stay online during an outage, include that too.
-            </div>
-            <div class="card contact-card" style="margin-top:14px">
-              <h3>Service area</h3>
-              <p class="muted" style="font-size:14px">
-                We serve businesses across Pennsylvania, Ohio, West Virginia, New York, Maryland, Virginia, and Kentucky.
-                Have a location outside these states? Reach out &mdash; if we can drive to you, we can likely help.
-              </p>
-            </div>
+          <div class="note" style="margin-top:14px">
+            <b>What to include:</b> Your business name, service address (with state), and current internet provider.
+            If you know what systems need to stay online during an outage, include that too.
           </div>
         </div>
       </div>
@@ -1055,90 +983,13 @@
   <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
   <script>
   (function(){
-    function focusContactForm(){
-      var s=document.getElementById('contact'),c=document.getElementById('contact-form-card');
-      if(!s)return;
-      s.scrollIntoView({behavior:'smooth',block:'start'});
-      if(c){setTimeout(function(){c.classList.remove('contact-pop');void c.offsetWidth;c.classList.add('contact-pop');setTimeout(function(){c.classList.remove('contact-pop')},2600)},350);setTimeout(function(){var f=document.getElementById('f-name');if(f)f.focus()},600)}
-    }
-    document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a.js-contact-focus');if(!a)return;e.preventDefault();focusContactForm();if(history&&history.replaceState)history.replaceState(null,'','#contact');else location.hash='#contact'});
-    if(location.hash==='#contact')setTimeout(function(){var c=document.getElementById('contact-form-card');if(c){c.classList.add('contact-pop');setTimeout(function(){c.classList.remove('contact-pop')},2600)}},300);
-  })();
-  </script>
-  <script>
-  (function(){
-    var USE_API=false,SALES_EMAIL='sales@switchpointbackup.com';
-    var form=document.getElementById('contact-form'),statusEl=document.getElementById('form-status'),submitBtn=document.getElementById('form-submit');
-    form.addEventListener('submit',function(e){
-      e.preventDefault();statusEl.className='form-status';statusEl.style.display='none';statusEl.textContent='';
-      var name=form.elements.name.value.trim(),business=form.elements.business.value.trim(),email=form.elements.email.value.trim(),phone=form.elements.phone.value.trim(),address=form.elements.address.value.trim(),provider=form.elements.provider.value.trim(),message=form.elements.message.value.trim();
-      if(!name||!business||!email||!address){statusEl.textContent='Please fill in the required fields: name, business, email, and address.';statusEl.className='form-status error';return}
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){statusEl.textContent='Please enter a valid email address.';statusEl.className='form-status error';return}
-      if(form.elements.website&&form.elements.website.value){statusEl.textContent='Thanks! We\u2019ll be in touch within one business day.';statusEl.className='form-status success';form.reset();return}
-      if(USE_API){
-        submitBtn.disabled=true;submitBtn.textContent='Sending\u2026';
-        fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,business:business,email:email,phone:phone,address:address,provider:provider,message:message,_t:Date.now()})})
-        .then(function(r){return r.json().then(function(b){return{ok:r.ok,body:b}})})
-        .then(function(r){if(r.ok){statusEl.textContent='Thanks! We\u2019ll be in touch within one business day.';statusEl.className='form-status success';form.reset()}else{statusEl.textContent=r.body.error||'Something went wrong. Please try emailing us directly.';statusEl.className='form-status error'}})
-        .catch(function(){statusEl.textContent='Could not reach our server. Please email '+SALES_EMAIL+' directly.';statusEl.className='form-status error'})
-        .finally(function(){submitBtn.disabled=false;submitBtn.textContent='Send request'});
-      }else{
-        var subject='SwitchPoint Proposal Request \u2014 '+business;
-        var bodyLines=['Hi Scott,','','Name: '+name,'Business: '+business,'Email: '+email,'Phone: '+(phone||'(not provided)'),'Service address: '+address,'Current internet provider: '+(provider||'(not provided)'),'','What needs to stay running during an outage:',message||'(not specified)','','Thanks!'];
-        var bodyText=bodyLines.join('\n');
-
-        // Detect mobile (mailto works reliably on mobile)
-        var isMobile=/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        var gmailUrl='https://mail.google.com/mail/?view=cm&fs=1'
-          +'&to='+encodeURIComponent(SALES_EMAIL)
-          +'&su='+encodeURIComponent(subject)
-          +'&body='+encodeURIComponent(bodyText);
-        var outlookUrl='https://outlook.live.com/mail/0/deeplink/compose?to='+encodeURIComponent(SALES_EMAIL)
-          +'&subject='+encodeURIComponent(subject)
-          +'&body='+encodeURIComponent(bodyText);
-        var yahooUrl='https://compose.mail.yahoo.com/?to='+encodeURIComponent(SALES_EMAIL)
-          +'&subject='+encodeURIComponent(subject)
-          +'&body='+encodeURIComponent(bodyText);
-
-        function showEmailOptions(headerMsg){
-          statusEl.innerHTML=
-            '<div style="margin-bottom:8px"><b>'+headerMsg+'</b></div>'
-            +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-            +'<a href="'+gmailUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Gmail</a>'
-            +'<a href="'+outlookUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Outlook</a>'
-            +'<a href="'+yahooUrl+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid rgba(18,28,45,.14);background:rgba(255,255,255,.9);text-decoration:none;font-weight:700;font-size:13px;color:#0c1220">Open in Yahoo</a>'
-            +'<button type="button" id="copy-email-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid rgba(46,107,255,.3);background:rgba(46,107,255,.08);font-weight:700;font-size:13px;color:rgba(46,107,255,.95);cursor:pointer;font-family:inherit">Copy to clipboard</button>'
-            +'</div>'
-            +'<div style="font-size:12px;color:rgba(79,95,120,.8)">Your info is pre-filled \u2014 just hit send.</div>';
-          statusEl.className='form-status success';
-
-          var copyBtn=document.getElementById('copy-email-btn');
-          if(copyBtn){
-            copyBtn.addEventListener('click',function(){
-              var clipText='To: '+SALES_EMAIL+'\nSubject: '+subject+'\n\n'+bodyText;
-              if(navigator.clipboard&&navigator.clipboard.writeText){
-                navigator.clipboard.writeText(clipText).then(function(){copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy to clipboard'},2000)});
-              }else{
-                var ta=document.createElement('textarea');ta.value=clipText;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();
-                try{document.execCommand('copy');copyBtn.textContent='Copied!';setTimeout(function(){copyBtn.textContent='Copy to clipboard'},2000)}catch(ex){}
-                document.body.removeChild(ta);
-              }
-            });
-          }
-        }
-
-        if(isMobile){
-          // On mobile, mailto works — use it directly
-          var mailtoUrl='mailto:'+SALES_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(bodyText);
-          window.location.href=mailtoUrl;
-          statusEl.textContent='Opening your email app\u2026';
-          statusEl.className='form-status success';
-        }else{
-          // On desktop, skip mailto entirely — show send options immediately
-          showEmailOptions('Choose how to send your request:');
-        }
-      }
+    document.addEventListener('click',function(e){
+      var a=e.target.closest&&e.target.closest('a.js-contact-focus');
+      if(!a)return;
+      e.preventDefault();
+      var s=document.getElementById('contact');
+      if(s)s.scrollIntoView({behavior:'smooth',block:'start'});
+      if(history&&history.replaceState)history.replaceState(null,'','#contact');else location.hash='#contact';
     });
   })();
   </script>
