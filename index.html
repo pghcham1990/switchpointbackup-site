@@ -447,12 +447,14 @@
 
     /* ═══ ANIMATED GRADIENT HEADLINE ═══ */
     h1{
-      font-size:46px;line-height:1.06;margin:16px 0 14px;letter-spacing:-.9px;
+      font-size:46px;line-height:1.15;margin:16px 0 14px;letter-spacing:-.9px;
+      padding-bottom:4px;
       background:linear-gradient(135deg,#0c1220 0%,#2e6bff 30%,#1fbf8a 50%,#6366f1 70%,#0c1220 100%);
       background-size:250% auto;
       -webkit-background-clip:text;background-clip:text;
       -webkit-text-fill-color:transparent;
       animation:headlineShimmer 8s linear infinite;
+      -webkit-box-decoration-break:clone;box-decoration-break:clone;
     }
     @keyframes headlineShimmer{0%{background-position:0% center}100%{background-position:250% center}}
     @media(max-width:900px){h1{font-size:36px;letter-spacing:-.5px}}
