@@ -698,6 +698,88 @@
       border-radius:50%;pointer-events:none;z-index:-1;
     }
 
+    /* ═══ FOUNDER SECTION ═══ */
+    .founder-section{padding:28px 0}
+    .founder-wrap{
+      position:relative;
+      border-radius:22px;
+      overflow:hidden;
+      background:rgba(255,255,255,.72);
+      backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+      border:1px solid rgba(255,255,255,.5);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.7),0 0 80px rgba(46,107,255,.04);
+      transition:all .4s cubic-bezier(.4,0,.2,1);
+    }
+    .founder-wrap:hover{
+      box-shadow:0 28px 80px rgba(14,24,40,.12),inset 0 1px 0 rgba(255,255,255,.7),0 0 100px rgba(46,107,255,.06);
+      transform:translateY(-3px);
+    }
+    .founder-wrap::before{
+      content:"";position:absolute;inset:0;z-index:0;
+      background-image:linear-gradient(rgba(46,107,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(46,107,255,.03) 1px,transparent 1px);
+      background-size:50px 50px;
+      mask-image:radial-gradient(ellipse 60% 80% at 70% 50%,black 10%,transparent 60%);
+      -webkit-mask-image:radial-gradient(ellipse 60% 80% at 70% 50%,black 10%,transparent 60%);
+      animation:fGridDrift 25s linear infinite;
+    }
+    @keyframes fGridDrift{0%{background-position:0 0}100%{background-position:50px 50px}}
+    .f-particles{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+    .f-particle{position:absolute;border-radius:50%;animation:fFloat linear infinite;opacity:.6}
+    .f-particle:nth-child(1){width:4px;height:4px;background:rgba(46,107,255,.25);left:12%;animation-duration:16s}
+    .f-particle:nth-child(2){width:3px;height:3px;background:rgba(31,191,138,.2);left:25%;animation-duration:19s;animation-delay:-5s}
+    .f-particle:nth-child(3){width:5px;height:5px;background:rgba(139,92,246,.15);left:55%;animation-duration:22s;animation-delay:-9s}
+    .f-particle:nth-child(4){width:3px;height:3px;background:rgba(46,107,255,.2);left:72%;animation-duration:17s;animation-delay:-3s}
+    .f-particle:nth-child(5){width:4px;height:4px;background:rgba(31,191,138,.15);left:42%;animation-duration:21s;animation-delay:-11s}
+    .f-particle:nth-child(6){width:3px;height:3px;background:rgba(251,146,60,.15);left:88%;animation-duration:18s;animation-delay:-7s}
+    @keyframes fFloat{0%{transform:translateY(500px) scale(0);opacity:0}10%{opacity:.6}90%{opacity:.6}100%{transform:translateY(-40px) scale(1);opacity:0}}
+    .founder-grid{display:grid;grid-template-columns:1fr 1fr;position:relative;z-index:1;min-height:460px}
+    .f-photo{position:relative;overflow:hidden}
+    .f-photo img{width:100%;height:100%;object-fit:cover;object-position:center 10%;display:block}
+    .f-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,rgba(255,255,255,.95) 100%),linear-gradient(to top,rgba(247,249,252,.6) 0%,transparent 25%),linear-gradient(to bottom,rgba(247,249,252,.3) 0%,transparent 15%)}
+    .f-photo-glow{position:absolute;right:0;top:8%;bottom:8%;width:3px;z-index:3;border-radius:3px;background:linear-gradient(to bottom,transparent,rgba(46,107,255,.5),rgba(31,191,138,.5),transparent);box-shadow:0 0 15px rgba(46,107,255,.2),0 0 40px rgba(46,107,255,.06);animation:fGlowPulse 3s ease-in-out infinite}
+    @keyframes fGlowPulse{0%,100%{opacity:.5}50%{opacity:1}}
+    .f-text{padding:44px 36px;display:flex;flex-direction:column;justify-content:center;position:relative}
+    .f-text::before{content:"";position:absolute;top:50%;left:-60px;width:250px;height:250px;background:radial-gradient(circle,rgba(46,107,255,.06),transparent 70%);transform:translateY(-50%);pointer-events:none}
+    .f-tag{display:inline-flex;align-items:center;gap:9px;width:fit-content;padding:7px 15px;border-radius:999px;background:rgba(46,107,255,.08);border:1px solid rgba(46,107,255,.14);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(46,107,255,.85);margin-bottom:22px;position:relative;overflow:hidden}
+    .f-tag::after{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(46,107,255,.06),transparent);animation:fTagSweep 5s ease-in-out infinite}
+    @keyframes fTagSweep{0%{left:-100%}40%{left:100%}100%{left:100%}}
+    .f-tag .f-dot{width:7px;height:7px;border-radius:50%;background:#1fbf8a;box-shadow:0 0 6px rgba(31,191,138,.4);animation:fDotPulse 2.5s ease-in-out infinite}
+    @keyframes fDotPulse{0%,100%{box-shadow:0 0 4px rgba(31,191,138,.3);transform:scale(1)}50%{box-shadow:0 0 14px rgba(31,191,138,.5);transform:scale(1.15)}}
+    .f-text h3{font-size:27px;line-height:1.25;letter-spacing:-.4px;font-weight:800;color:var(--text);margin:0 0 18px}
+    .f-text h3 em{font-style:normal;background:linear-gradient(135deg,#2e6bff,#1fbf8a,#6366f1,#2e6bff);background-size:250% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:fTextShimmer 6s linear infinite}
+    @keyframes fTextShimmer{0%{background-position:0% center}100%{background-position:250% center}}
+    .f-text p{color:var(--muted);font-size:14.5px;line-height:1.75;margin:0 0 12px;max-width:440px}
+    .f-text p strong{color:#1a2740;font-weight:700}
+    .f-stats{display:flex;gap:28px;margin:18px 0 22px;padding:18px 0;border-top:1px solid rgba(18,28,45,.06);border-bottom:1px solid rgba(18,28,45,.06)}
+    .f-stat-val{font-size:22px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#2e6bff,#1fbf8a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .f-stat-label{font-size:10.5px;color:#6b7c94;letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-top:2px}
+    .f-sig{display:flex;align-items:center;gap:14px}
+    .f-sig-photo{width:46px;height:46px;border-radius:13px;object-fit:cover;object-position:center top;border:2px solid rgba(46,107,255,.12);box-shadow:0 4px 16px rgba(14,24,40,.08),0 0 12px rgba(46,107,255,.06);transition:all .4s}
+    .f-sig-photo:hover{border-color:rgba(31,191,138,.3);box-shadow:0 4px 20px rgba(14,24,40,.1),0 0 20px rgba(31,191,138,.1);transform:scale(1.06)}
+    .f-sig-info b{display:block;font-size:14.5px;font-weight:700}
+    .f-sig-info span{font-size:12px;color:#6b7c94;font-weight:500}
+    .f-cta{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:14px;font-weight:750;font-size:13px;font-family:inherit;text-decoration:none;cursor:pointer;position:relative;overflow:hidden;color:#fff;border:0;background:linear-gradient(135deg,#2e6bff,#1fbf8a,#6366f1,#2e6bff);background-size:300% 300%;animation:gradientShift 6s ease infinite;box-shadow:0 8px 28px rgba(46,107,255,.22);text-shadow:0 1px 2px rgba(0,0,0,.1);transition:all .3s;letter-spacing:.3px}
+    .f-cta:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(46,107,255,.3),0 0 20px rgba(31,191,138,.1);filter:brightness(1.04)}
+    .f-cta::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:fBtnSweep 3.5s ease-in-out infinite}
+    @keyframes fBtnSweep{0%{left:-100%}55%{left:100%}100%{left:100%}}
+    .f-cta svg{width:14px;height:14px;transition:transform .3s}
+    .f-cta:hover svg{transform:translateX(3px)}
+    .f-corner{position:absolute;z-index:2;pointer-events:none}
+    .f-corner-tl{top:14px;left:14px;width:28px;height:28px;border-top:2px solid rgba(46,107,255,.12);border-left:2px solid rgba(46,107,255,.12);border-radius:3px 0 0 0}
+    .f-corner-br{bottom:14px;right:14px;width:28px;height:28px;border-bottom:2px solid rgba(31,191,138,.12);border-right:2px solid rgba(31,191,138,.12);border-radius:0 0 3px 0}
+    @media(max-width:900px){
+      .founder-grid{grid-template-columns:1fr}
+      .f-photo{height:300px}
+      .f-photo::after{background:linear-gradient(to top,rgba(255,255,255,1) 3%,transparent 35%),linear-gradient(to bottom,rgba(247,249,252,.3) 0%,transparent 15%)}
+      .f-photo-glow{display:none}
+      .f-text{padding:24px 24px 32px}
+      .f-text h3{font-size:22px}
+      .f-stats{gap:18px}
+      .f-stat-val{font-size:20px}
+      .f-sig{flex-wrap:wrap}
+      .f-cta{margin-left:0;margin-top:12px;width:100%;justify-content:center}
+    }
+
     /* ═══ SCROLL REVEAL ANIMATIONS ═══ */
     .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
     .reveal.visible{opacity:1;transform:translateY(0)}
@@ -1204,6 +1286,64 @@
       </div>
     </section>
 
+    <!-- Founder -->
+    <section class="founder-section reveal" aria-labelledby="founder-heading">
+      <div class="container">
+        <div class="founder-wrap">
+          <div class="f-particles">
+            <div class="f-particle"></div><div class="f-particle"></div><div class="f-particle"></div>
+            <div class="f-particle"></div><div class="f-particle"></div><div class="f-particle"></div>
+          </div>
+          <div class="f-corner f-corner-tl"></div>
+          <div class="f-corner f-corner-br"></div>
+          <div class="founder-grid">
+            <div class="f-photo">
+              <img src="scott-founder.png" alt="Scott Rocca, founder of SwitchPoint Backup, holding the Peplink B One Plus failover device" loading="lazy">
+              <div class="f-photo-glow"></div>
+            </div>
+            <div class="f-text">
+              <div class="f-tag"><span class="f-dot"></span> The operator</div>
+              <h3 id="founder-heading">Your failover is managed by <em>one person who built this from scratch.</em></h3>
+              <p>
+                I don't run a call center. I don't outsource installs. I don't hide behind a ticket system.
+                <strong>Every device deployed, every connection monitored, every call answered &mdash; that's me.</strong>
+              </p>
+              <p>
+                SwitchPoint exists because I watched too many businesses lose money to outages they could've
+                survived. This isn't a side project. It's a managed failover operation built for businesses
+                that can't afford to wait.
+              </p>
+              <div class="f-stats">
+                <div>
+                  <div class="f-stat-val">7</div>
+                  <div class="f-stat-label">States served</div>
+                </div>
+                <div>
+                  <div class="f-stat-val">10-30s</div>
+                  <div class="f-stat-label">Failover time</div>
+                </div>
+                <div>
+                  <div class="f-stat-val">$0</div>
+                  <div class="f-stat-label">Surprise fees</div>
+                </div>
+              </div>
+              <div class="f-sig">
+                <img src="scott-founder.png" class="f-sig-photo" alt="Scott Rocca" loading="lazy">
+                <div class="f-sig-info">
+                  <b>Scott Rocca</b>
+                  <span>Founder &amp; Operator</span>
+                </div>
+                <a href="#contact" class="f-cta js-contact-focus">
+                  Request a proposal
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Contact -->
     <section id="contact" class="reveal" aria-labelledby="contact-heading">
       <div class="container">
@@ -1214,9 +1354,9 @@
               <h3>Ready to get started?</h3>
               <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
               <div class="chip-row">
-                <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com" style="width:100%">
+                <a class="chip" href="/cdn-cgi/l/email-protection#4e3d2f222b3d0e3d39273a2d263e2127203a2c2f2d253b3e602d2123" aria-label="Email sales at switchpointbackup.com" style="width:100%">
                   <span class="cdot email" aria-hidden="true"></span>
-                  sales@switchpointbackup.com
+                  <span class="__cf_email__" data-cfemail="5526343930261526223c21363d253a3c3b213734363e20257b363a38">[email&#160;protected]</span>
                 </a>
                 <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
                   <span class="cdot phone" aria-hidden="true"></span>
@@ -1312,7 +1452,7 @@
     </div>
   </footer>
 
-  <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>document.getElementById('year').textContent=new Date().getFullYear();</script>
   <script>
   (function(){
     /* Smooth scroll for contact links */
@@ -1330,14 +1470,4 @@
     if('IntersectionObserver' in window){
       var io=new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          if(entry.isIntersecting){entry.target.classList.add('visible');io.unobserve(entry.target)}
-        });
-      },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
-      reveals.forEach(function(el){io.observe(el)});
-    }else{
-      reveals.forEach(function(el){el.classList.add('visible')});
-    }
-  })();
-  </script>
-</body>
-</html>
+          if(entry.isIntersecting){entry.target.classList.add('visible');io.unobserv
