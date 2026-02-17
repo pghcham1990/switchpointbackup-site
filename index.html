@@ -805,6 +805,153 @@
       *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
       .reveal{opacity:1;transform:none}
     }
+
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — TABLET (max-width: 900px)
+       ══════════════════════════════════════════════════════════ */
+    @media(max-width:900px){
+      .container{padding:0 18px}
+      header{padding:28px 0 18px}
+      h1{font-size:32px;letter-spacing:-.4px}
+      h2{font-size:22px}
+      .sub{font-size:15px}
+      section{padding:22px 0}
+
+      /* Nav — hamburger toggle */
+      .nav-inner{flex-wrap:wrap}
+      .nav-links{
+        display:none;
+        width:100%;
+        flex-direction:column;
+        gap:6px;
+        padding-top:10px;
+        border-top:1px solid rgba(18,28,45,.08);
+        margin-top:8px;
+      }
+      .nav-links.open{display:flex}
+      .nav-links a{font-size:15px;padding:8px 0;opacity:1}
+      .nav-links .btn{width:100%;text-align:center}
+      .nav-links .btn.primary{width:100%}
+      .nav-toggle{
+        display:flex;align-items:center;justify-content:center;
+        width:40px;height:40px;border-radius:10px;
+        border:1px solid rgba(18,28,45,.12);
+        background:rgba(255,255,255,.80);
+        cursor:pointer;font-size:20px;
+        -webkit-tap-highlight-color:transparent;
+      }
+
+      /* Hero grid stacks */
+      .hero{grid-template-columns:1fr;gap:18px}
+      .hero-card{order:2}
+      .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+
+      /* Feature cards stack */
+      .grid3{grid-template-columns:1fr}
+      .how{grid-template-columns:1fr}
+
+      /* Audience grid */
+      .audience-grid{grid-template-columns:1fr 1fr;gap:10px}
+
+      /* State grid */
+      .state-grid{grid-template-columns:1fr 1fr;gap:10px}
+
+      /* FAQ single column */
+      .faq{grid-template-columns:1fr}
+
+      /* Trust items wrap better */
+      .trust-grid{gap:10px}
+      .trust-item{padding:10px 14px;font-size:13px}
+
+      /* Proof cards smaller */
+      .proof-card{flex:0 0 300px;padding:16px 18px}
+      .proof-section::before{width:15%}
+      .proof-section::after{width:15%}
+
+      /* Chips full width */
+      .chip-row{width:100%}
+      .chip{width:100%}
+
+      /* CTA buttons stack */
+      .cta-row{flex-direction:column;gap:10px}
+      .cta-row .btn{width:100%;text-align:center}
+
+      /* Footer */
+      .foot{padding:24px 0 36px}
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — PHONE (max-width: 600px)
+       ══════════════════════════════════════════════════════════ */
+    @media(max-width:600px){
+      .container{padding:0 14px}
+      header{padding:22px 0 14px}
+      h1{font-size:27px;letter-spacing:-.3px;line-height:1.2}
+      h2{font-size:20px}
+      .sub{font-size:14px}
+      section{padding:18px 0}
+
+      /* Badge smaller */
+      .badge{font-size:11.5px;padding:6px 10px}
+      .mini{font-size:12px}
+
+      /* Stats 2-col stays but smaller */
+      .stat{padding:12px}
+      .stat .k{font-size:18px}
+      .stat .l{font-size:11.5px}
+
+      /* Audience single column */
+      .audience-grid{grid-template-columns:1fr}
+
+      /* States single column */
+      .state-grid{grid-template-columns:1fr}
+
+      /* Steps */
+      .step{padding:10px}
+      .step span{font-size:13px}
+
+      /* Cards padding tighter */
+      .hero-card{padding:14px}
+      .feature{padding:14px}
+      .steps{padding:14px}
+      .contact-card{padding:14px}
+
+      /* Note boxes */
+      .note{padding:10px 12px;font-size:12.5px}
+
+      /* Pills wrap */
+      .pillrow{gap:6px}
+      .pill{font-size:11px;padding:6px 8px}
+
+      /* Proof cards phone-width */
+      .proof-card{flex:0 0 280px;padding:14px 16px}
+      .proof-card .proof-quote{font-size:13.5px}
+      .proof-card .proof-meta{font-size:12px}
+      .proof-card .proof-stat{font-size:11px;padding:5px 8px}
+      .proof-section::before{width:8%}
+      .proof-section::after{width:8%}
+      .proof-heading h2{font-size:19px}
+      .proof-heading p{font-size:13px}
+
+      /* Trust compact */
+      .trust-grid{flex-direction:column;align-items:stretch}
+      .trust-item{justify-content:center}
+
+      /* Footer legal */
+      .foot{font-size:12px;padding:20px 0 32px}
+      .fine{font-size:11.5px}
+      .legal-heading{font-size:10.5px}
+
+      /* SEO content */
+      .seo-content{font-size:13px}
+      .seo-content h3{font-size:15px}
+
+      /* SVG dividers hide on small */
+      .art-divider{max-width:90%;opacity:.35}
+    }
+
+    /* Nav toggle — hidden on desktop */
+    .nav-toggle{display:none}
   </style>
 </head>
 <body>
@@ -815,13 +962,14 @@
         <img src="sp_orb_light_1024_1_emailava.png" alt="SwitchPoint Backup Logo" class="logo-img" width="38" height="38">
         <div class="brand-name">SwitchPoint</div>
       </a>
-      <div class="nav-links">
+      <div class="nav-links" id="navLinks">
         <a href="#how">How it works</a>
         <a href="#service-area">Service area</a>
         <a href="#faq">FAQ</a>
         <a class="btn js-contact-focus" href="#contact">Contact</a>
         <a class="btn primary js-contact-focus" href="#contact">Request a proposal</a>
       </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
     </div>
   </nav>
 
@@ -1517,9 +1665,9 @@
               <h3>Ready to get started?</h3>
               <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
               <div class="chip-row">
-                <a class="chip" href="mailto:sales@switchpointbackup.com" aria-label="Email sales at switchpointbackup.com" style="width:100%">
+                <a class="chip" href="/cdn-cgi/l/email-protection#6d1e0c01081e2d1e1a04190e051d020403190f0c0e06181d430e0200" aria-label="Email sales at switchpointbackup.com" style="width:100%">
                   <span class="cdot email" aria-hidden="true"></span>
-                  sales@switchpointbackup.com
+                  <span class="__cf_email__" data-cfemail="addeccc1c8deeddedac4d9cec5ddc2c4c3d9cfcccec6d8dd83cec2c0">[email&#160;protected]</span>
                 </a>
                 <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
                   <span class="cdot phone" aria-hidden="true"></span>
@@ -1581,6 +1729,25 @@
   <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
   <script>
   (function(){
+    /* Hamburger toggle */
+    var toggle=document.getElementById('navToggle');
+    var links=document.getElementById('navLinks');
+    if(toggle&&links){
+      toggle.addEventListener('click',function(){
+        var open=links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded',open);
+        toggle.innerHTML=open?'&#10005;':'&#9776;';
+      });
+      /* Close nav when a link is clicked */
+      links.addEventListener('click',function(e){
+        if(e.target.tagName==='A'){
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded','false');
+          toggle.innerHTML='&#9776;';
+        }
+      });
+    }
+
     /* Smooth scroll for contact links */
     document.addEventListener('click',function(e){
       var a=e.target.closest&&e.target.closest('a.js-contact-focus');
