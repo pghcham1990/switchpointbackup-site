@@ -814,6 +814,8 @@
       header{padding:28px 0 18px}
       h1{font-size:32px;letter-spacing:-.4px;text-align:center}
       h2{font-size:22px;text-align:center}
+      h3{text-align:center}
+      h4{text-align:center}
       .sub{font-size:15px;text-align:center;margin-left:auto;margin-right:auto}
       section{padding:22px 0}
 
@@ -844,51 +846,76 @@
       /* Hero grid stacks & centers */
       .hero{grid-template-columns:1fr;gap:18px;text-align:center}
       .hero > div:first-child{display:flex;flex-direction:column;align-items:center}
-      .hero-card{order:2}
+      .hero-card{order:2;text-align:center}
       .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .stat{text-align:center}
       .badge{align-self:center}
       .mini{text-align:center}
 
-      /* Feature cards stack */
+      /* Checklist items center */
+      .list{justify-items:center}
+      .li{justify-content:center;text-align:center}
+
+      /* Pills center */
+      .pillrow{justify-content:center}
+
+      /* Note center */
+      .note{text-align:center}
+
+      /* Feature cards stack & center */
       .grid3{grid-template-columns:1fr}
+      .feature{text-align:center}
+      .feature .icon{margin:0 auto}
+      .feature p{text-align:center}
       .how{grid-template-columns:1fr}
+
+      /* Steps center */
+      .step{text-align:center;flex-direction:column;align-items:center}
+      .step b{text-align:center}
+      .step span{text-align:center}
 
       /* Audience grid */
       .audience-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .audience-item{text-align:center}
 
       /* State grid */
       .state-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .state-card{text-align:center}
 
       /* FAQ single column */
       .faq{grid-template-columns:1fr}
+      details{text-align:center}
+      details p{text-align:center}
+      summary{text-align:center}
 
-      /* Trust items wrap better */
-      .trust-grid{gap:10px}
-      .trust-item{padding:10px 14px;font-size:13px}
+      /* Trust items wrap & center */
+      .trust-grid{gap:10px;justify-content:center}
+      .trust-item{padding:10px 14px;font-size:13px;justify-content:center;text-align:center}
 
       /* Proof cards smaller */
       .proof-card{flex:0 0 300px;padding:16px 18px}
       .proof-section::before{width:15%}
       .proof-section::after{width:15%}
 
-      /* Chips full width */
+      /* Chips full width & centered */
       .chip-row{width:100%;justify-content:center}
-      .chip{width:100%}
+      .chip{width:100%;justify-content:center}
 
       /* CTA buttons stack & center */
       .cta-row{flex-direction:column;gap:10px;align-items:center}
       .cta-row .btn{width:100%;text-align:center}
 
-      /* Pillrow center */
-      .pillrow{justify-content:center}
+      /* Contact card center */
+      .contact-card{text-align:center}
+      .contact-card h3{text-align:center}
+      .contact-card p{text-align:center}
+      .tiny{text-align:center}
 
-      /* Notes center */
-      .note{text-align:center}
-
-      /* Section headings */
+      /* SEO long-form stays left */
       .seo-content{text-align:left}
+      .seo-content h3{text-align:left}
 
-      /* Footer stacks */
+      /* Footer stacks & centers */
       .foot .container > div:first-child{flex-direction:column;align-items:center;text-align:center}
       .foot{padding:24px 0 36px}
     }
@@ -908,38 +935,34 @@
       .badge{font-size:11.5px;padding:6px 10px;text-align:center}
       .mini{font-size:12px;text-align:center}
 
-      /* Stats 2-col stays but smaller */
+      /* Stats centered */
       .stat{padding:12px;text-align:center}
       .stat .k{font-size:18px}
       .stat .l{font-size:11.5px}
 
-      /* Audience single column */
+      /* Audience single column centered */
       .audience-grid{grid-template-columns:1fr}
       .audience-item{text-align:center}
 
-      /* States single column */
+      /* States single column centered */
       .state-grid{grid-template-columns:1fr}
       .state-card{text-align:center}
 
-      /* Steps */
-      .step{padding:10px}
-      .step span{font-size:13px}
+      /* Steps stack vertically & center */
+      .step{padding:10px;flex-direction:column;align-items:center;text-align:center}
+      .step span{font-size:13px;text-align:center}
 
-      /* Cards padding tighter */
-      .hero-card{padding:14px}
+      /* Cards padding tighter & centered */
+      .hero-card{padding:14px;text-align:center}
       .feature{padding:14px;text-align:center}
       .feature .icon{margin:0 auto}
       .steps{padding:14px}
       .contact-card{padding:14px;text-align:center}
 
-      /* Note boxes */
+      /* Note boxes centered */
       .note{padding:10px 12px;font-size:12.5px;text-align:center}
 
-      /* List items left-align for readability */
-      .list{text-align:left}
-      .li{text-align:left}
-
-      /* Pills wrap */
+      /* Pills wrap centered */
       .pillrow{gap:6px;justify-content:center}
       .pill{font-size:11px;padding:6px 8px}
 
@@ -964,7 +987,7 @@
       .legal-heading{font-size:10.5px}
       .legal-section{text-align:left}
 
-      /* SEO content */
+      /* SEO content left for readability */
       .seo-content{font-size:13px;text-align:left}
       .seo-content h3{font-size:15px}
 
