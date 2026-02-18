@@ -812,9 +812,9 @@
     @media(max-width:900px){
       .container{padding:0 18px}
       header{padding:28px 0 18px}
-      h1{font-size:32px;letter-spacing:-.4px}
-      h2{font-size:22px}
-      .sub{font-size:15px}
+      h1{font-size:32px;letter-spacing:-.4px;text-align:center}
+      h2{font-size:22px;text-align:center}
+      .sub{font-size:15px;text-align:center;margin-left:auto;margin-right:auto}
       section{padding:22px 0}
 
       /* Nav — hamburger toggle */
@@ -829,7 +829,7 @@
         margin-top:8px;
       }
       .nav-links.open{display:flex}
-      .nav-links a{font-size:15px;padding:8px 0;opacity:1}
+      .nav-links a{font-size:15px;padding:8px 0;opacity:1;text-align:center}
       .nav-links .btn{width:100%;text-align:center}
       .nav-links .btn.primary{width:100%}
       .nav-toggle{
@@ -841,10 +841,13 @@
         -webkit-tap-highlight-color:transparent;
       }
 
-      /* Hero grid stacks */
-      .hero{grid-template-columns:1fr;gap:18px}
+      /* Hero grid stacks & centers */
+      .hero{grid-template-columns:1fr;gap:18px;text-align:center}
+      .hero > div:first-child{display:flex;flex-direction:column;align-items:center}
       .hero-card{order:2}
       .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .badge{align-self:center}
+      .mini{text-align:center}
 
       /* Feature cards stack */
       .grid3{grid-template-columns:1fr}
@@ -869,14 +872,24 @@
       .proof-section::after{width:15%}
 
       /* Chips full width */
-      .chip-row{width:100%}
+      .chip-row{width:100%;justify-content:center}
       .chip{width:100%}
 
-      /* CTA buttons stack */
-      .cta-row{flex-direction:column;gap:10px}
+      /* CTA buttons stack & center */
+      .cta-row{flex-direction:column;gap:10px;align-items:center}
       .cta-row .btn{width:100%;text-align:center}
 
-      /* Footer */
+      /* Pillrow center */
+      .pillrow{justify-content:center}
+
+      /* Notes center */
+      .note{text-align:center}
+
+      /* Section headings */
+      .seo-content{text-align:left}
+
+      /* Footer stacks */
+      .foot .container > div:first-child{flex-direction:column;align-items:center;text-align:center}
       .foot{padding:24px 0 36px}
     }
 
@@ -886,25 +899,27 @@
     @media(max-width:600px){
       .container{padding:0 14px}
       header{padding:22px 0 14px}
-      h1{font-size:27px;letter-spacing:-.3px;line-height:1.2}
-      h2{font-size:20px}
-      .sub{font-size:14px}
+      h1{font-size:27px;letter-spacing:-.3px;line-height:1.2;text-align:center}
+      h2{font-size:20px;text-align:center}
+      .sub{font-size:14px;text-align:center}
       section{padding:18px 0}
 
-      /* Badge smaller */
-      .badge{font-size:11.5px;padding:6px 10px}
-      .mini{font-size:12px}
+      /* Badge smaller & centered */
+      .badge{font-size:11.5px;padding:6px 10px;text-align:center}
+      .mini{font-size:12px;text-align:center}
 
       /* Stats 2-col stays but smaller */
-      .stat{padding:12px}
+      .stat{padding:12px;text-align:center}
       .stat .k{font-size:18px}
       .stat .l{font-size:11.5px}
 
       /* Audience single column */
       .audience-grid{grid-template-columns:1fr}
+      .audience-item{text-align:center}
 
       /* States single column */
       .state-grid{grid-template-columns:1fr}
+      .state-card{text-align:center}
 
       /* Steps */
       .step{padding:10px}
@@ -912,15 +927,20 @@
 
       /* Cards padding tighter */
       .hero-card{padding:14px}
-      .feature{padding:14px}
+      .feature{padding:14px;text-align:center}
+      .feature .icon{margin:0 auto}
       .steps{padding:14px}
-      .contact-card{padding:14px}
+      .contact-card{padding:14px;text-align:center}
 
       /* Note boxes */
-      .note{padding:10px 12px;font-size:12.5px}
+      .note{padding:10px 12px;font-size:12.5px;text-align:center}
+
+      /* List items left-align for readability */
+      .list{text-align:left}
+      .li{text-align:left}
 
       /* Pills wrap */
-      .pillrow{gap:6px}
+      .pillrow{gap:6px;justify-content:center}
       .pill{font-size:11px;padding:6px 8px}
 
       /* Proof cards phone-width */
@@ -933,20 +953,22 @@
       .proof-heading h2{font-size:19px}
       .proof-heading p{font-size:13px}
 
-      /* Trust compact */
+      /* Trust compact & centered */
       .trust-grid{flex-direction:column;align-items:stretch}
-      .trust-item{justify-content:center}
+      .trust-item{justify-content:center;text-align:center}
 
       /* Footer legal */
       .foot{font-size:12px;padding:20px 0 32px}
-      .fine{font-size:11.5px}
+      .foot .container > div:first-child{flex-direction:column;align-items:center;text-align:center;gap:8px}
+      .fine{font-size:11.5px;text-align:left}
       .legal-heading{font-size:10.5px}
+      .legal-section{text-align:left}
 
       /* SEO content */
-      .seo-content{font-size:13px}
+      .seo-content{font-size:13px;text-align:left}
       .seo-content h3{font-size:15px}
 
-      /* SVG dividers hide on small */
+      /* SVG dividers smaller on small */
       .art-divider{max-width:90%;opacity:.35}
     }
 
