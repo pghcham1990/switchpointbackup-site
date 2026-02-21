@@ -1127,22 +1127,22 @@ textarea{resize:vertical;min-height:64px;}
     <p>Every plan includes hardware, professional installation, 24/7 automated monitoring, unlimited failover events, and direct support from SwitchPoint.</p>
     <div class="demo-cta-plans">
       <div class="demo-plan">
-        <div class="demo-plan-name">Core</div>
+        <div class="demo-plan-name">Core Continuity</div>
         <div class="demo-plan-price">$99<span>/mo</span></div>
-        <div class="demo-plan-feat">1 GB LTE data cap<br>Standard monitoring<br>Email alerts</div>
+        <div class="demo-plan-feat">1 GB LTE data cap<br>24/7 automated monitoring<br>Email alerts &amp; reports</div>
       </div>
       <div class="demo-plan featured">
-        <div class="demo-plan-name">Extended</div>
+        <div class="demo-plan-name">Extended Continuity</div>
         <div class="demo-plan-price">$149<span>/mo</span></div>
-        <div class="demo-plan-feat">3 GB LTE data cap<br>Priority monitoring<br>Email + phone alerts</div>
+        <div class="demo-plan-feat">3 GB LTE data cap<br>Priority monitoring<br>Email alerts &amp; reports</div>
       </div>
       <div class="demo-plan">
-        <div class="demo-plan-name">Operational</div>
+        <div class="demo-plan-name">Operational Continuity</div>
         <div class="demo-plan-price">$199<span>/mo</span></div>
         <div class="demo-plan-feat">5 GB LTE data cap<br>Priority monitoring<br>Full reporting suite</div>
       </div>
     </div>
-    <div style="margin-top:16px;font-size:11px;color:var(--text-dim);">Higher tiers available for mission-critical operations — ask about Resilience ($249) and Critical ($299+)</div>
+    <div style="margin-top:16px;font-size:11px;color:var(--text-dim);">Higher tiers available for mission-critical operations — Resilience Continuity ($249/mo · 10 GB) and Critical Continuity ($299+/mo · Custom)</div>
   </div>
 
   </div>
@@ -1332,6 +1332,122 @@ function handleLogin(e) {
 function showApp() { document.getElementById('loginScreen').style.display='none'; document.getElementById('appMain').style.display='block'; initDatabase(); }
 function checkAuth() { if(sessionStorage.getItem('sp_auth')==='true') showApp(); }
 function logout() { sessionStorage.clear(); document.getElementById('loginScreen').style.display='flex'; document.getElementById('appMain').style.display='none'; document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; }
+
+// =======================================================================
+// AUTO-FORMAT ENGINE (v9) — Clean inputs on blur
+// =======================================================================
+const AUTOFORMAT = {
+  // Phone: strip to digits, format as (XXX) XXX-XXXX
+  phone(val) {
+    const digits = val.replace(/\D/g, '');
+    if(digits.length === 10) return '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
+    if(digits.length === 11 && digits[0] === '1') return '(' + digits.slice(1,4) + ') ' + digits.slice(4,7) + '-' + digits.slice(7);
+    return val; // Don't mangle if not a standard US number
+  },
+
+  // Title Case: "ACME CORP" or "acme corp" → "Acme Corp"
+  // Keeps small words lowercase mid-sentence (of, the, and, etc.)
+  titleCase(val) {
+    if(!val || val.length < 2) return val;
+    const small = new Set(['of','the','and','in','at','to','for','on','by','a','an','or','is','llc','inc']);
+    const upper = new Set(['llc','inc','usa','hvac','it','pc','tv','atm','pos','isp','lte','ip','vpn','ceo','cfo','cto','dds','dmd','md','pa','esq','ii','iii','iv']);
+    return val.split(/\s+/).map((w, i) => {
+      const lower = w.toLowerCase();
+      const clean = lower.replace(/[^a-z]/g, '');
+      if(upper.has(clean)) return w.replace(/[a-zA-Z]+/, clean.toUpperCase());
+      if(i > 0 && small.has(clean) && w.length < 5) return lower;
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join(' ');
+  },
+
+  // Sentence case: capitalize first letter, fix ALL CAPS
+  sentenceCase(val) {
+    if(!val || val.length < 2) return val;
+    // If mostly uppercase (>60% caps), lowercase it first
+    const alphaChars = val.replace(/[^a-zA-Z]/g, '');
+    const upperCount = (alphaChars.match(/[A-Z]/g) || []).length;
+    let text = (upperCount / Math.max(alphaChars.length, 1)) > 0.6 ? val.toLowerCase() : val;
+    // Capitalize first letter of each sentence
+    return text.replace(/(^|\.\s+|!\s+|\?\s+)([a-z])/g, (m, pre, letter) => pre + letter.toUpperCase())
+               .replace(/^[a-z]/, c => c.toUpperCase());
+  },
+
+  // Email: lowercase everything
+  email(val) {
+    return val.trim().toLowerCase();
+  },
+
+  // URL: ensure has protocol, lowercase domain
+  url(val) {
+    let v = val.trim();
+    if(!v) return v;
+    if(!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    return v;
+  },
+
+  // Address: title case with common abbreviations
+  address(val) {
+    if(!val) return val;
+    let result = AUTOFORMAT.titleCase(val);
+    // Fix common address abbreviations
+    const abbrevs = {'St':'St','Ave':'Ave','Blvd':'Blvd','Dr':'Dr','Rd':'Rd','Ln':'Ln','Ct':'Ct','Pl':'Pl','Ste':'Ste','Apt':'Apt','Fl':'Fl','Hwy':'Hwy','Pkwy':'Pkwy'};
+    Object.entries(abbrevs).forEach(([k,v]) => {
+      result = result.replace(new RegExp('\\b'+k+'\\.?\\b','gi'), v);
+    });
+    // Fix state abbreviations (2 letter codes)
+    result = result.replace(/\b([a-zA-Z]{2})\s+(\d{5}(-\d{4})?)$/, (m, st, zip) => st.toUpperCase() + ' ' + zip);
+    return result;
+  },
+
+  // Zip: just digits and optional dash
+  zip(val) {
+    const clean = val.replace(/[^\d-]/g, '');
+    return clean;
+  }
+};
+
+// Determine which formatter to apply based on field context
+function getFieldFormatter(input) {
+  const name = (input.name || input.id || '').toLowerCase();
+  const label = input.closest('.form-group')?.querySelector('label')?.textContent?.toLowerCase() || '';
+  const detailLabel = input.closest('.detail-field-value')?.previousElementSibling?.textContent?.toLowerCase() || '';
+  const dataField = (input.closest('[data-field]')?.getAttribute('data-field') || '').toLowerCase();
+  const placeholder = (input.placeholder || '').toLowerCase();
+  const combined = name + ' ' + label + ' ' + detailLabel + ' ' + dataField + ' ' + placeholder;
+
+  if(combined.includes('phone') || combined.includes('tel') || combined.includes('fax')) return 'phone';
+  if(combined.includes('email') || combined.includes('e-mail') || input.type === 'email') return 'email';
+  if(combined.includes('url') || combined.includes('website') || input.type === 'url') return 'url';
+  if(combined.includes('address') || combined.includes('addr') || combined.includes('street') || combined.includes('location')) return 'address';
+  if(combined.includes('zip') || combined.includes('postal')) return 'zip';
+  if(combined.includes('note') || combined.includes('description') || combined.includes('comment') || input.tagName === 'TEXTAREA') return 'sentenceCase';
+  if(combined.includes('name') || combined.includes('customer') || combined.includes('contact') || combined.includes('business') || combined.includes('company') || combined.includes('city') || combined.includes('isp') || combined.includes('carrier') || combined.includes('vendor') || combined.includes('manufacturer') || combined.includes('plan') || combined.includes('source') || combined.includes('role') || combined.includes('brand')) return 'titleCase';
+  return null;
+}
+
+// Apply formatter to a single input
+function autoFormatField(input) {
+  if(input.readOnly || input.disabled || input.type === 'date' || input.type === 'hidden' || input.type === 'password' || input.tagName === 'SELECT') return;
+  const val = input.value.trim();
+  if(!val) return;
+  const formatter = getFieldFormatter(input);
+  if(!formatter || !AUTOFORMAT[formatter]) return;
+  const formatted = AUTOFORMAT[formatter](val);
+  if(formatted !== input.value) {
+    input.value = formatted;
+    // Trigger change event so any listeners pick it up
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+// Attach to all current and future inputs via event delegation
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    // Small delay to avoid interfering with other blur handlers
+    setTimeout(() => autoFormatField(el), 50);
+  }
+}, true);
 
 // =======================================================================
 // DATA STORE
@@ -2874,7 +2990,8 @@ function cmdSearch() {
   if(!q || 'report'.includes(q) || 'weekly'.includes(q)) cmdItems.push({ type:'action', action:'report', name:'Generate Weekly Report', sub:'Activity summary for this week', icon:'📋', iconBg:'var(--purple-bg)' });
   if(!q || 'kanban'.includes(q)) cmdItems.push({ type:'action', action:'kanban', name:'Kanban Board', sub:'Visual pipeline view', icon:'▦', iconBg:'var(--cyan-bg)' });
   cmdItems = cmdItems.slice(0, 15);
-  cmdSelectedIdx = Math.min(cmdSelectedIdx, cmdItems.length - 1);
+  if(cmdItems.length === 0) cmdSelectedIdx = -1;
+  else cmdSelectedIdx = Math.max(0, Math.min(cmdSelectedIdx, cmdItems.length - 1));
   renderCmdResults(q);
 }
 
@@ -2892,21 +3009,31 @@ function renderCmdResults(q) {
 }
 
 function cmdKeyNav(e) {
+  if(!cmdItems.length) return;
   if(e.key === 'ArrowDown') { e.preventDefault(); cmdSelectedIdx = Math.min(cmdSelectedIdx+1, cmdItems.length-1); renderCmdResults(document.getElementById('cmdInput').value.toLowerCase().trim()); }
   else if(e.key === 'ArrowUp') { e.preventDefault(); cmdSelectedIdx = Math.max(cmdSelectedIdx-1, 0); renderCmdResults(document.getElementById('cmdInput').value.toLowerCase().trim()); }
-  else if(e.key === 'Enter') { e.preventDefault(); cmdSelect(cmdSelectedIdx); }
+  else if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if(cmdItems.length > 0 && cmdSelectedIdx >= 0) cmdSelect(cmdSelectedIdx); }
 }
 
 function cmdSelect(idx) {
+  if(idx < 0 || idx >= cmdItems.length) return;
   const item = cmdItems[idx];
   if(!item) return;
   closeCmdPalette();
-  if(item.type === 'prospect') { switchTab('pipeline', document.querySelectorAll('.tab-btn')[2]); setTimeout(() => selectProspect(item.idx), 100); }
-  else if(item.type === 'customer') { switchTab('database', document.querySelectorAll('.tab-btn')[1]); setTimeout(() => selectCustomer(item.idx), 100); }
+  if(item.type === 'prospect') {
+    const tabBtn = document.querySelector('.tab-btn[onclick*="pipeline"]');
+    if(tabBtn) switchTab('pipeline', tabBtn);
+    setTimeout(() => selectProspect(item.idx), 150);
+  }
+  else if(item.type === 'customer') {
+    const tabBtn = document.querySelector('.tab-btn[onclick*="database"]');
+    if(tabBtn) switchTab('database', tabBtn);
+    setTimeout(() => selectCustomer(item.idx), 150);
+  }
   else if(item.type === 'action') {
-    if(item.action === 'dashboard') switchTab('dashboard', document.querySelectorAll('.tab-btn')[0]);
+    if(item.action === 'dashboard') { const b = document.querySelector('.tab-btn[onclick*="dashboard"]'); if(b) switchTab('dashboard', b); }
     else if(item.action === 'report') generateWeeklyReport();
-    else if(item.action === 'kanban') { switchTab('pipeline', document.querySelectorAll('.tab-btn')[2]); setTimeout(() => setPipeView('kanban', document.querySelectorAll('.kanban-toggle-btn')[1]), 100); }
+    else if(item.action === 'kanban') { const b = document.querySelector('.tab-btn[onclick*="pipeline"]'); if(b) switchTab('pipeline', b); setTimeout(() => setPipeView('kanban', document.querySelectorAll('.kanban-toggle-btn')[1]), 150); }
   }
 }
 
