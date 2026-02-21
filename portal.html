@@ -317,11 +317,14 @@ textarea{resize:vertical;min-height:64px;}
 .quick-preset.active{background:var(--accent);color:var(--white);border-color:var(--accent);}
 
 /* ===== KANBAN BOARD (v8) ===== */
+body.wide-mode .tab-nav{max-width:none;}
+body.wide-mode .main{max-width:none;}
+body.wide-mode .panel{max-width:none;}
 .kanban-toggle{display:flex;gap:2px;background:var(--surface-3);border-radius:8px;padding:2px;}
 .kanban-toggle-btn{font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text-dim);transition:all 0.15s;font-family:var(--sans);}
 .kanban-toggle-btn.active{background:var(--white);color:var(--text);box-shadow:var(--shadow-sm);}
-.kanban-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch;min-height:300px;}
-.kanban-col{min-width:220px;max-width:250px;flex:1;background:var(--surface-2);border-radius:var(--radius);border:1px solid var(--border);display:flex;flex-direction:column;max-height:500px;}
+.kanban-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch;min-height:400px;}
+.kanban-col{min-width:200px;flex:1;background:var(--surface-2);border-radius:var(--radius);border:1px solid var(--border);display:flex;flex-direction:column;max-height:600px;}
 .kanban-col-header{padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-dim);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface-2);z-index:1;}
 .kanban-col-count{font-family:var(--mono);font-size:10px;opacity:0.7;}
 .kanban-col-value{font-family:var(--mono);font-size:9px;color:var(--accent);margin-top:2px;}
@@ -2390,6 +2393,9 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+  // Remove wide mode if leaving pipeline or if switching to table view
+  if(id !== 'pipeline' || currentPipeView !== 'kanban') document.body.classList.remove('wide-mode');
+  else if(id === 'pipeline' && currentPipeView === 'kanban') document.body.classList.add('wide-mode');
 }
 
 function switchOutputTab(id, btn) {
@@ -2869,7 +2875,9 @@ function setPipeView(view, btn) {
   if(btn) btn.classList.add('active');
   document.getElementById('pipeViewTable').style.display = view === 'table' ? 'block' : 'none';
   document.getElementById('pipeViewKanban').style.display = view === 'kanban' ? 'block' : 'none';
-  if(view === 'kanban') renderKanban();
+  // Wide mode for kanban — use full screen width
+  if(view === 'kanban') { document.body.classList.add('wide-mode'); renderKanban(); }
+  else { document.body.classList.remove('wide-mode'); }
 }
 
 const KANBAN_STAGES = ['New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won'];
