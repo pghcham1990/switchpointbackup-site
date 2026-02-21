@@ -1055,14 +1055,14 @@ function getFilteredProspects() {
 const PROS_DETAIL_FIELDS = [
   { title:'Contact Info', fields:['Customer','Contact','Phone','Email','Address','URL'] },
   { title:'Pipeline', fields:['Stage','Source','Est. Plan','Date Added','Follow-Up'] },
-  { title:'Notes', fields:['Notes'] }
+  { title:'Notes', fields:['NOTES'] }
 ];
 
 function renderProsDetailSections(p) {
   document.getElementById('prosDetailSections').innerHTML = PROS_DETAIL_FIELDS.map(sec => {
     const fh = sec.fields.map(f => {
       const val=fmtVal(f,p[f]); const empty=!val;
-      const wide=f==='Notes'||f==='Address'; const ec=prosEditMode?' editable':'';
+      const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
       // Clickable phone
       if(f==='Phone' && val) display=`<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
@@ -1127,7 +1127,7 @@ const FIELD_DROPDOWNS = {
 function startProsEdit(el,field) {
   if(el.querySelector('.detail-field-edit')) return;
   const p=allProspects[selectedProspectIdx]; const cv=prosPendingEdits[field]!==undefined?prosPendingEdits[field]:fmtVal(field,p[field]);
-  const wide=field==='Notes'||field==='Address';
+  const wide=field==='Notes'||field==='NOTES'||field==='Address';
   const opts=FIELD_DROPDOWNS[field];
   const esc=field.replace(/'/g,"\\'");
   if(opts) {
