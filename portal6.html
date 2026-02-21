@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwitchPoint Backup — Operations Portal v6</title>
+<title>SwitchPoint Backup — Operations Portal v7</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -260,7 +260,78 @@ textarea{resize:vertical;min-height:64px;}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;background:var(--white);border:1px solid var(--border);color:var(--text);box-shadow:var(--shadow);transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);z-index:999;max-width:400px;}
 .toast.show{transform:translateY(0);opacity:1;}.toast.success{border-color:var(--success);}.toast.error{border-color:var(--danger);}
 
+/* ===== DASHBOARD ===== */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.dash-card{background:rgba(255,255,255,0.92);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:all 0.2s;}
+.dash-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.dash-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.dash-card.card-mrr::before{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.dash-card.card-pipe::before{background:linear-gradient(90deg,var(--warning),#f97316);}
+.dash-card.card-custs::before{background:linear-gradient(90deg,var(--success),#34d399);}
+.dash-card.card-streak::before{background:linear-gradient(90deg,var(--purple),#a78bfa);}
+.dash-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:4px;}
+.dash-value{font-size:28px;font-weight:700;letter-spacing:-1px;line-height:1.1;}
+.dash-value.mrr{color:var(--accent);}
+.dash-value.pipe{color:var(--warning);}
+.dash-value.custs{color:var(--success);}
+.dash-value.streak{color:var(--purple);}
+.dash-sub{font-size:11px;color:var(--text-dim);margin-top:4px;font-family:var(--mono);}
+.dash-progress{margin-top:24px;margin-bottom:16px;}
+.dash-progress-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.dash-progress-title{font-size:13px;font-weight:700;color:var(--text);}
+.dash-progress-pct{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);}
+.dash-progress-bar{height:12px;background:var(--surface-3);border-radius:8px;overflow:hidden;position:relative;}
+.dash-progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s cubic-bezier(.4,0,.2,1);position:relative;}
+.dash-progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,0.3) 50%,transparent 60%);animation:shimmer 2s ease-in-out infinite;}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.dash-progress-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-dim);font-family:var(--mono);}
+.dash-row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+.dash-mini-table{width:100%;border-collapse:collapse;}
+.dash-mini-table th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+.dash-mini-table td{font-size:12px;padding:8px 10px;border-bottom:1px solid rgba(18,28,45,0.04);}
+.dash-section{background:rgba(255,255,255,0.92);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm);}
+.dash-section h3{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* ===== URGENCY SCORE ===== */
+.urgency-bar{display:inline-flex;align-items:center;gap:3px;}
+.urgency-dot{width:6px;height:6px;border-radius:50%;}
+.urgency-label{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.3px;}
+.urgency-hot{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
+.urgency-warm{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(245,158,11,0.2);}
+.urgency-cool{background:var(--accent-glow);color:var(--accent);border:1px solid rgba(46,107,255,0.2);}
+.urgency-cold{background:rgba(100,116,139,0.08);color:var(--text-dim);border:1px solid rgba(100,116,139,0.15);}
+
+/* ===== QUICK LOG FAB ===== */
+.quick-log-fab{position:fixed;bottom:28px;left:28px;z-index:200;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--white);font-size:22px;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(46,107,255,0.35);display:flex;align-items:center;justify-content:center;transition:all 0.2s cubic-bezier(.4,0,.2,1);}
+.quick-log-fab:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(46,107,255,0.45);}
+.quick-log-fab:active{transform:scale(0.95);}
+.quick-modal{position:fixed;bottom:90px;left:28px;z-index:200;width:360px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);display:none;animation:slideUp 0.25s cubic-bezier(.16,1,.3,1);}
+.quick-modal.visible{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.quick-modal h4{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.quick-modal h4 button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:2px 6px;}
+.quick-prospect-display{font-size:12px;color:var(--accent);font-weight:600;padding:6px 10px;background:var(--accent-glow);border-radius:8px;margin-bottom:12px;}
+.quick-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.quick-preset{font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,0.88);color:var(--text-muted);cursor:pointer;transition:all 0.15s;}
+.quick-preset:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+.quick-preset.active{background:var(--accent);color:var(--white);border-color:var(--accent);}
+
+/* ===== MOMENTUM / STREAKS ===== */
+.streak-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(46,107,255,0.06));border:1px solid rgba(99,102,241,0.15);border-radius:var(--radius);margin-bottom:16px;}
+.streak-fire{font-size:24px;line-height:1;}
+.streak-info{flex:1;}
+.streak-count{font-size:15px;font-weight:700;color:var(--purple);}
+.streak-sub{font-size:10px;color:var(--text-dim);}
+.streak-score{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);text-align:right;}
+.streak-score-label{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;}
+.milestone-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.milestone{font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.88);border:1px solid var(--border);color:var(--text-dim);}
+.milestone.earned{background:linear-gradient(135deg,rgba(31,191,138,0.12),rgba(46,107,255,0.08));border-color:rgba(31,191,138,0.25);color:var(--success);}
+
 @media(max-width:768px){
+  .dash-grid{grid-template-columns:1fr 1fr;}.dash-row2{grid-template-columns:1fr;}
+  .quick-modal{left:16px;right:16px;width:auto;bottom:86px;}
+  .quick-log-fab{bottom:20px;left:20px;width:48px;height:48px;font-size:20px;}
   .header{padding:10px 14px;}.tab-nav{padding:10px 14px 0;}.main{padding:0 14px 32px;}.panel{padding:16px;}
   .form-grid,.form-grid.three-col,.form-grid.four-col{grid-template-columns:1fr;}
   .detail-section-body{grid-template-columns:1fr 1fr;}.db-search-bar{flex-wrap:wrap;}.login-card{margin:20px;padding:32px 24px;}
@@ -316,14 +387,101 @@ textarea{resize:vertical;min-height:64px;}
 </header>
 
 <div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('dashboard',this)">Dashboard<span class="tab-indicator ind-green">LIVE</span></button>
   <button class="tab-btn" onclick="switchTab('database',this)">Customers<span class="tab-indicator ind-blue">VIEW</span></button>
-  <button class="tab-btn active" onclick="switchTab('pipeline',this)">Pipeline<span class="tab-indicator ind-yellow">PROSPECTS</span></button>
+  <button class="tab-btn" onclick="switchTab('pipeline',this)">Pipeline<span class="tab-indicator ind-yellow">PROSPECTS</span></button>
   <button class="tab-btn" onclick="switchTab('activity',this)">Activity<span class="tab-indicator ind-purple">LOG</span></button>
   <button class="tab-btn" onclick="switchTab('onboard',this)">New Customer<span class="tab-indicator ind-green">ONBOARD</span></button>
   <button class="tab-btn" onclick="switchTab('prospect',this)">+ Prospect<span class="tab-indicator ind-cyan">ADD</span></button>
 </div>
 
 <main class="main">
+
+<!-- ======== DASHBOARD TAB ======== -->
+<div id="tab-dashboard" class="tab-content active">
+<div class="panel">
+  <div class="form-header">
+    <h2>Dashboard</h2>
+    <p>Your business at a glance. Revenue, pipeline, streaks — everything that matters.</p>
+  </div>
+
+  <!-- MOMENTUM STREAK BANNER -->
+  <div class="streak-banner" id="streakBanner">
+    <div class="streak-fire" id="streakEmoji">🔥</div>
+    <div class="streak-info">
+      <div class="streak-count" id="streakText">Loading streak...</div>
+      <div class="streak-sub" id="streakSub">Log activities to build your streak</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="streak-score" id="todayScore">0</div>
+      <div class="streak-score-label">Today's Score</div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="dash-grid">
+    <div class="dash-card card-mrr">
+      <div class="dash-label">Active MRR</div>
+      <div class="dash-value mrr" id="dashMRR">$0</div>
+      <div class="dash-sub" id="dashMRRsub">0 active customers</div>
+    </div>
+    <div class="dash-card card-pipe">
+      <div class="dash-label">Weighted Pipeline</div>
+      <div class="dash-value pipe" id="dashPipeline">$0</div>
+      <div class="dash-sub" id="dashPipeSub">0 open prospects</div>
+    </div>
+    <div class="dash-card card-custs">
+      <div class="dash-label">Projected MRR</div>
+      <div class="dash-value custs" id="dashProjected">$0</div>
+      <div class="dash-sub">at 30% close rate</div>
+    </div>
+    <div class="dash-card card-streak">
+      <div class="dash-label">Follow-Ups Due</div>
+      <div class="dash-value streak" id="dashFollowups">0</div>
+      <div class="dash-sub" id="dashFollowupSub">0 overdue</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="dash-progress">
+    <div class="dash-progress-header">
+      <div class="dash-progress-title">🎯 Progress to $5K MRR Goal</div>
+      <div class="dash-progress-pct" id="dashGoalPct">0%</div>
+    </div>
+    <div class="dash-progress-bar">
+      <div class="dash-progress-fill" id="dashGoalFill" style="width:0%"></div>
+    </div>
+    <div class="dash-progress-labels">
+      <span>$0</span>
+      <span id="dashGoalCurrent">$0 MRR</span>
+      <span>$5,000</span>
+    </div>
+  </div>
+
+  <!-- ROW 2: HOT PROSPECTS + MILESTONES -->
+  <div class="dash-row2">
+    <div class="dash-section">
+      <h3>🔥 Hottest Prospects</h3>
+      <div style="overflow-x:auto;">
+        <table class="dash-mini-table">
+          <thead><tr><th>Business</th><th>Stage</th><th>Urgency</th><th>Follow-Up</th></tr></thead>
+          <tbody id="dashHotProspects"><tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dash-section">
+      <h3>🏆 Milestones & Achievements</h3>
+      <div class="milestone-list" id="dashMilestones">
+        <span class="milestone">Loading...</span>
+      </div>
+      <div style="margin-top:16px;">
+        <h3 style="font-size:12px;margin-bottom:8px;">📊 Activity This Week</h3>
+        <div id="dashWeeklyActivity" style="font-size:12px;color:var(--text-muted);">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 
 <!-- ======== CUSTOMER DATABASE TAB ======== -->
 <div id="tab-database" class="tab-content">
@@ -358,7 +516,7 @@ textarea{resize:vertical;min-height:64px;}
 </div>
 
 <!-- ======== PROSPECT PIPELINE TAB ======== -->
-<div id="tab-pipeline" class="tab-content active">
+<div id="tab-pipeline" class="tab-content">
 <div class="panel">
   <div class="form-header"><h2>Prospect Pipeline</h2><p>Your active sales pipeline. Click any prospect to see full details, log activity, and take action.</p></div>
   <div class="stage-filters" id="stageFilters"></div>
@@ -368,8 +526,8 @@ textarea{resize:vertical;min-height:64px;}
     <button class="btn btn-secondary" onclick="refreshProspects()">↻ Refresh</button>
   </div>
   <div class="db-table-wrap" style="max-height:360px;">
-    <table class="db-table"><thead><tr><th>Business</th><th>Contact</th><th>Phone</th><th>Stage</th><th>Source</th><th>Follow-Up</th><th>Est. Plan</th><th>Acts</th><th>Last Touch</th></tr></thead>
-      <tbody id="pipeTableBody"><tr><td colspan="9" class="loading-msg"><div class="spinner"></div><br>Loading prospects...</td></tr></tbody>
+    <table class="db-table"><thead><tr><th>Business</th><th>Contact</th><th>Phone</th><th>Stage</th><th>🔥</th><th>Source</th><th>Follow-Up</th><th>Est. Plan</th><th>Acts</th><th>Last Touch</th></tr></thead>
+      <tbody id="pipeTableBody"><tr><td colspan="10" class="loading-msg"><div class="spinner"></div><br>Loading prospects...</td></tr></tbody>
     </table>
   </div>
 
@@ -700,6 +858,52 @@ textarea{resize:vertical;min-height:64px;}
 
 <div id="toast" class="toast"></div>
 
+<!-- QUICK LOG FAB -->
+<button class="quick-log-fab" id="quickLogFab" onclick="toggleQuickLog()" title="Quick Log Activity">+</button>
+
+<!-- QUICK LOG MODAL -->
+<div class="quick-modal" id="quickLogModal">
+  <h4>⚡ Quick Log <button onclick="toggleQuickLog()">✕</button></h4>
+  <div class="quick-prospect-display" id="quickProspectDisplay">Select a prospect first</div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>Prospect</label>
+    <select id="quickProspect" onchange="updateQuickProspect()" style="font-size:12px;">
+      <option value="">— Pick prospect —</option>
+    </select>
+  </div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>Type</label>
+    <select id="quickType" style="font-size:12px;">
+      <option value="Call">📞 Call</option>
+      <option value="Follow-Up Call">🔁 Follow-Up Call</option>
+      <option value="Drop-In">🚗 Drop-In</option>
+      <option value="Email">✉ Email</option>
+      <option value="Voicemail">📱 Voicemail</option>
+      <option value="Text">💬 Text</option>
+      <option value="Note">📝 Note</option>
+    </select>
+  </div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>Notes</label>
+    <textarea id="quickNotes" placeholder="Interested? Next step? Objection?" style="min-height:60px;font-size:12px;"></textarea>
+  </div>
+  <div>
+    <label style="font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:4px;display:block;">Quick Follow-Up</label>
+    <div class="quick-presets" id="quickFollowUpPresets">
+      <button class="quick-preset" onclick="setQuickFollowUp(1,this)">Tomorrow</button>
+      <button class="quick-preset" onclick="setQuickFollowUp(3,this)">+3 Days</button>
+      <button class="quick-preset" onclick="setQuickFollowUp(7,this)">+1 Week</button>
+      <button class="quick-preset" onclick="setQuickFollowUp(14,this)">+2 Weeks</button>
+      <button class="quick-preset" onclick="setQuickFollowUp(0,this)">None</button>
+    </div>
+    <input type="date" id="quickFollowUpDate" style="margin-top:6px;font-size:11px;">
+  </div>
+  <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
+    <button class="btn btn-secondary" onclick="toggleQuickLog()" style="font-size:11px;padding:7px 14px;">Cancel</button>
+    <button class="btn btn-success" onclick="saveQuickLog()" style="font-size:11px;padding:7px 14px;">⚡ Save</button>
+  </div>
+</div>
+
 <script>
 // =======================================================================
 // CONFIG — PASTE YOUR APPS SCRIPT URL HERE
@@ -766,6 +970,7 @@ function fetchActivities() {
       activities.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
       activitiesLoaded = true;
       renderGlobalActivity();
+      renderDashboard();
       if(selectedProspectIdx >= 0) renderProsActivity(allProspects[selectedProspectIdx]);
       if(allProspects.length) renderProspectTable(getFilteredProspects());
     } else {
@@ -797,6 +1002,7 @@ function fetchLiveData() {
   fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCustomers').then(r=>r.json()).then(data=>{
     if(Array.isArray(data)) {
       allCustomers=data; renderCustomerTable(allCustomers); showToast('✓ Loaded '+data.length+' customers','success');
+      renderDashboard();
     } else {
       console.error('getCustomers returned:', data);
       document.getElementById('dbTableBody').innerHTML='<tr><td colspan="8"><div class="no-data"><h3>Backend error</h3><p style="color:var(--danger);">'+((data&&data.error)||'Unknown error — check Apps Script deployment')+'</p></div></td></tr>';
@@ -809,6 +1015,7 @@ function fetchProspects() {
   document.getElementById('pipeTableBody').innerHTML='<tr><td colspan="9" class="loading-msg"><div class="spinner"></div><br>Fetching...</td></tr>';
   fetch(CONFIG.APPS_SCRIPT_URL+'?action=getProspects').then(r=>r.json()).then(data=>{
     allProspects=data; renderStageFilters(); renderProspectTable(allProspects);
+    renderDashboard();
   }).catch(err=>{ showToast('Prospect fetch failed','error'); });
 }
 
@@ -906,11 +1113,15 @@ function filterProspects() {
 function renderProspectTable(prospects) {
   const tbody = document.getElementById('pipeTableBody');
   document.getElementById('pipeCount').textContent = prospects.length;
-  if(!prospects.length){ tbody.innerHTML='<tr><td colspan="9"><div class="no-data"><h3>No prospects found</h3></div></td></tr>'; return; }
-  tbody.innerHTML = prospects.map((p, i) => {
+  if(!prospects.length){ tbody.innerHTML='<tr><td colspan="10"><div class="no-data"><h3>No prospects found</h3></div></td></tr>'; return; }
+
+  // Sort by urgency score (highest first)
+  const scored = prospects.map(p => ({ p, score: getUrgencyScore(p) }));
+  scored.sort((a, b) => b.score - a.score);
+
+  tbody.innerHTML = scored.map(({ p, score }) => {
     const realIdx = allProspects.indexOf(p);
     const followUp = fmtVal('Follow-Up', p['Follow-Up']);
-    // Follow-up glow logic
     let followUpHtml = followUp || '—';
     let followUpStyle = 'font-family:var(--mono);font-size:11px;';
     if (followUp) {
@@ -924,7 +1135,6 @@ function renderProspectTable(prospects) {
       }
     }
     const phone = p['Phone'] || '';
-    // Activity count & last touch
     const prosActs = activities.filter(a=>a.prospect===p['Customer'] && !a.deleted);
     const actCount = prosActs.length;
     const lastTouch = prosActs.length ? prosActs.reduce((latest,a) => new Date(a.timestamp)>new Date(latest.timestamp)?a:latest, prosActs[0]) : null;
@@ -932,11 +1142,20 @@ function renderProspectTable(prospects) {
     const daysSince = lastTouch ? Math.floor((Date.now()-new Date(lastTouch.timestamp))/(1000*60*60*24)) : 999;
     const touchColor = daysSince > 14 ? 'color:var(--danger);font-weight:600;' : daysSince > 7 ? 'color:var(--warning);font-weight:600;' : '';
     const badgeClass = actCount === 0 ? 'act-badge zero' : 'act-badge';
+
+    // Urgency badge
+    let urgencyHtml;
+    if(score >= 60) urgencyHtml = '<span class="urgency-label urgency-hot">🔥🔥🔥</span>';
+    else if(score >= 35) urgencyHtml = '<span class="urgency-label urgency-warm">🔥🔥</span>';
+    else if(score >= 15) urgencyHtml = '<span class="urgency-label urgency-cool">🔥</span>';
+    else urgencyHtml = '<span class="urgency-label urgency-cold">—</span>';
+
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
       <td><strong>${p['Customer']||''}</strong></td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
       <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phone+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
+      <td>${urgencyHtml}</td>
       <td style="font-size:11px;">${p['Source']||'—'}</td>
       <td style="${followUpStyle}">${followUpHtml}</td>
       <td style="font-size:11px;">${p['Est. Plan']||'—'}</td>
@@ -1066,6 +1285,7 @@ function closeDetail(){ document.getElementById('detailCard').classList.remove('
 function selectProspect(idx) {
   selectedProspectIdx=idx; prosEditMode=false; prosPendingEdits={};
   const p=allProspects[idx];
+  lastInteractedProspect = p['Customer'] || '';
   renderProspectTable(getFilteredProspects());
   document.getElementById('prosDetailName').textContent=p['Customer']||'';
   document.getElementById('prosDetailStage').textContent=p['Stage']||'';
@@ -1375,6 +1595,7 @@ function saveNote() {
   renderProsActivity(p);
   renderGlobalActivity();
   renderProspectTable(getFilteredProspects());
+  renderDashboard();
   showToast('✓ Activity logged: '+type,'success');
 }
 
@@ -1764,6 +1985,391 @@ function submitProspectToSheet(){
     showToast('Submit failed: '+e,'error');
     logErrorToSheet('addProspect', String(e), 'Prospect: ' + v('pr_custName'));
   });
+}
+
+// =======================================================================
+// URGENCY SCORING ENGINE (v7)
+// =======================================================================
+function getUrgencyScore(prospect) {
+  if(!prospect) return 0;
+  let score = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Follow-up urgency (exponential for overdue)
+  const fu = fmtVal('Follow-Up', prospect['Follow-Up']);
+  if(fu) {
+    const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
+    const diff = Math.floor((today - fuDate) / 86400000);
+    if(diff > 0) score += Math.min(diff * diff * 1.5, 80); // overdue: exponential
+    else if(diff === 0) score += 40; // due today
+    else if(diff >= -1) score += 25; // due tomorrow
+    else if(diff >= -3) score += 10; // due in 2-3 days
+  }
+
+  // Stage value multiplier
+  const stageBoost = { 'Proposal Sent':25, 'Negotiation':30, 'Demo Scheduled':20, 'Contacted':10, 'New Lead':5 };
+  score += stageBoost[prospect['Stage']] || 0;
+
+  // Going cold? Days since last activity
+  const acts = activities.filter(a => a.prospect === prospect['Customer'] && !a.deleted);
+  if(acts.length) {
+    const timestamps = acts.map(a => new Date(a.timestamp).getTime());
+    const lastTs = Math.max(...timestamps);
+    const daysSince = Math.floor((today.getTime() - lastTs) / 86400000);
+    if(daysSince > 14) score += 20;
+    else if(daysSince > 7) score += 10;
+    else if(daysSince > 3) score += 5;
+  } else {
+    score += 15; // never contacted = needs attention
+  }
+
+  // Low activity count = needs more effort
+  if(acts.length === 0) score += 10;
+  else if(acts.length < 3) score += 5;
+
+  // Estimated plan value boost
+  const planVal = prospect['Est. Plan'] || '';
+  if(planVal.includes('299') || planVal.includes('Critical')) score += 8;
+  else if(planVal.includes('249') || planVal.includes('Resilience')) score += 6;
+  else if(planVal.includes('199') || planVal.includes('Operational')) score += 4;
+
+  // Don't score closed deals
+  if(prospect['Stage'] === 'Closed Won' || prospect['Stage'] === 'Closed Lost') score = 0;
+
+  return Math.round(score);
+}
+
+// =======================================================================
+// DASHBOARD RENDERER (v7)
+// =======================================================================
+const EST_PLAN_MRC = {
+  'Core ($99)': 99, 'Extended ($149)': 149, 'Operational ($199)': 199,
+  'Resilience ($249)': 249, 'Critical ($299+)': 299,
+  'Core Continuity': 99, 'Extended Continuity': 149, 'Operational Continuity': 199,
+  'Resilience Continuity': 249, 'Critical Continuity': 299
+};
+const STAGE_WEIGHTS = { 'New Lead':0.05, 'Contacted':0.15, 'Demo Scheduled':0.35, 'Proposal Sent':0.55, 'Negotiation':0.75, 'Closed Won':1.0 };
+
+function renderDashboard() {
+  // MRR from active customers
+  const activeCustomers = allCustomers.filter(c => (c['Billing Status']||'').toLowerCase().includes('active'));
+  const activeMRR = activeCustomers.reduce((sum, c) => sum + parseFloat(c['Monthly MRC ($)'] || 0), 0);
+  document.getElementById('dashMRR').textContent = '$' + activeMRR.toLocaleString();
+  document.getElementById('dashMRRsub').textContent = activeCustomers.length + ' active customer' + (activeCustomers.length!==1?'s':'');
+
+  // Pipeline value (weighted by stage)
+  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost');
+  let pipelineValue = 0;
+  let rawPipelineValue = 0;
+  openProspects.forEach(p => {
+    const mrc = EST_PLAN_MRC[p['Est. Plan']] || 149;
+    const weight = STAGE_WEIGHTS[p['Stage']] || 0.1;
+    pipelineValue += mrc * weight;
+    rawPipelineValue += mrc;
+  });
+  document.getElementById('dashPipeline').textContent = '$' + Math.round(pipelineValue).toLocaleString();
+  document.getElementById('dashPipeSub').textContent = openProspects.length + ' open prospect' + (openProspects.length!==1?'s':'') + ' ($' + rawPipelineValue.toLocaleString() + ' raw)';
+
+  // Projected MRR (current MRR + 30% of raw pipeline)
+  const projectedMRR = activeMRR + (rawPipelineValue * 0.3);
+  document.getElementById('dashProjected').textContent = '$' + Math.round(projectedMRR).toLocaleString();
+
+  // Follow-ups due
+  const today = new Date(); today.setHours(0,0,0,0);
+  let dueTodayCount = 0, overdueCount = 0;
+  openProspects.forEach(p => {
+    const fu = fmtVal('Follow-Up', p['Follow-Up']);
+    if(!fu) return;
+    const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
+    const diff = Math.floor((fuDate - today) / 86400000);
+    if(diff === 0) dueTodayCount++;
+    else if(diff < 0) overdueCount++;
+  });
+  document.getElementById('dashFollowups').textContent = dueTodayCount + overdueCount;
+  document.getElementById('dashFollowupSub').textContent = overdueCount + ' overdue · ' + dueTodayCount + ' today';
+
+  // Progress bar toward $5K MRR goal
+  const goalMRR = 5000;
+  const pct = Math.min((activeMRR / goalMRR) * 100, 100);
+  document.getElementById('dashGoalPct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('dashGoalFill').style.width = pct + '%';
+  document.getElementById('dashGoalCurrent').textContent = '$' + activeMRR.toLocaleString() + ' MRR';
+
+  // Hot prospects (top 5 by urgency)
+  const scored = openProspects.map(p => ({ p, score: getUrgencyScore(p) }));
+  scored.sort((a,b) => b.score - a.score);
+  const top5 = scored.slice(0, 5);
+  const hotTbody = document.getElementById('dashHotProspects');
+  if(top5.length) {
+    hotTbody.innerHTML = top5.map(({ p, score }) => {
+      let urgClass = 'urgency-cold', urgLabel = '—';
+      if(score >= 60) { urgClass='urgency-hot'; urgLabel='🔥🔥🔥'; }
+      else if(score >= 35) { urgClass='urgency-warm'; urgLabel='🔥🔥'; }
+      else if(score >= 15) { urgClass='urgency-cool'; urgLabel='🔥'; }
+      const fu = fmtVal('Follow-Up', p['Follow-Up']);
+      let fuHtml = fu || '—';
+      if(fu) {
+        const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
+        const diff = Math.floor((fuDate - today) / 86400000);
+        if(diff === 0) fuHtml = '<span class="followup-due-today" style="font-size:10px;">' + fu + ' TODAY</span>';
+        else if(diff < 0) fuHtml = '<span class="followup-overdue" style="font-size:10px;">' + fu + ' ' + Math.abs(diff) + 'd</span>';
+      }
+      return `<tr style="cursor:pointer;" onclick="switchTab('pipeline',document.querySelectorAll('.tab-btn')[2])">
+        <td style="font-weight:600;">${p['Customer']||''}</td>
+        <td>${getStagePill(p['Stage'])}</td>
+        <td><span class="urgency-label ${urgClass}">${urgLabel}</span></td>
+        <td style="font-family:var(--mono);font-size:10px;">${fuHtml}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    hotTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:16px;">No open prospects</td></tr>';
+  }
+
+  // Milestones & Streaks
+  renderMilestones();
+  renderStreaks();
+  renderWeeklyActivity();
+}
+
+// =======================================================================
+// MOMENTUM STREAKS & DAILY SCORE (v7)
+// =======================================================================
+const ACTIVITY_POINTS = {
+  'Call': 5, 'Follow-Up Call': 5, 'Drop-In': 10, 'In-Person Meeting': 10,
+  'Virtual Meeting': 8, 'Email': 3, 'Email Received': 2, 'Proposal Sent': 15,
+  'Demo': 12, 'Voicemail': 3, 'Text': 2, 'Note': 1, 'Stage Change': 2
+};
+
+function renderStreaks() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const validActs = activities.filter(a => !a.deleted);
+
+  // Today's score
+  const todayActs = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d.getTime() === today.getTime();
+  });
+  const todayScore = todayActs.reduce((sum, a) => sum + (ACTIVITY_POINTS[a.type] || 1), 0);
+  document.getElementById('todayScore').textContent = todayScore;
+
+  // Streak count: consecutive days with activity (min 1)
+  let streak = 0;
+  let checkDate = new Date(today);
+  // If no activities today, start checking from yesterday
+  if(todayActs.length === 0) checkDate.setDate(checkDate.getDate() - 1);
+  for(let i = 0; i < 365; i++) {
+    const dayStr = checkDate.toISOString().split('T')[0];
+    const hasAct = validActs.some(a => {
+      const aDate = new Date(a.timestamp);
+      return aDate.toISOString().split('T')[0] === dayStr;
+    });
+    if(hasAct) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+    else break;
+  }
+
+  const streakEl = document.getElementById('streakText');
+  const streakSub = document.getElementById('streakSub');
+  const streakEmoji = document.getElementById('streakEmoji');
+  if(streak >= 7) {
+    streakEl.textContent = streak + '-Day Streak!';
+    streakSub.textContent = 'You\'re on fire — keep the momentum going';
+    streakEmoji.textContent = '🔥';
+  } else if(streak >= 3) {
+    streakEl.textContent = streak + '-Day Streak';
+    streakSub.textContent = 'Building momentum — nice consistency';
+    streakEmoji.textContent = '⚡';
+  } else if(streak >= 1) {
+    streakEl.textContent = streak + '-Day Streak';
+    streakSub.textContent = todayActs.length > 0 ? 'Active today — keep it rolling' : 'Get an activity in today to continue';
+    streakEmoji.textContent = '💪';
+  } else {
+    streakEl.textContent = 'No Streak Yet';
+    streakSub.textContent = 'Log an activity to start your streak';
+    streakEmoji.textContent = '⏸️';
+  }
+}
+
+function renderMilestones() {
+  const el = document.getElementById('dashMilestones');
+  const validActs = activities.filter(a => !a.deleted);
+  const activeCustomers = allCustomers.filter(c => (c['Billing Status']||'').toLowerCase().includes('active'));
+  const activeMRR = activeCustomers.reduce((sum, c) => sum + parseFloat(c['Monthly MRC ($)'] || 0), 0);
+  const closedWon = allProspects.filter(p => p['Stage'] === 'Closed Won').length;
+  const callCount = validActs.filter(a => a.type === 'Call' || a.type === 'Follow-Up Call').length;
+  const dropIns = validActs.filter(a => a.type === 'Drop-In' || a.type === 'In-Person Meeting').length;
+  const proposals = validActs.filter(a => a.type === 'Proposal Sent').length;
+  const totalActs = validActs.length;
+
+  const milestones = [
+    { label: '🎯 First Customer', earned: activeCustomers.length >= 1 },
+    { label: '📞 10 Calls Made', earned: callCount >= 10 },
+    { label: '📞 50 Calls Made', earned: callCount >= 50 },
+    { label: '🚗 5 Drop-Ins', earned: dropIns >= 5 },
+    { label: '📄 5 Proposals Sent', earned: proposals >= 5 },
+    { label: '🏆 First Closed Deal', earned: closedWon >= 1 },
+    { label: '💰 $1K MRR', earned: activeMRR >= 1000 },
+    { label: '💰 $2.5K MRR', earned: activeMRR >= 2500 },
+    { label: '💰 $5K MRR', earned: activeMRR >= 5000 },
+    { label: '📊 100 Activities', earned: totalActs >= 100 },
+    { label: '👥 5 Customers', earned: activeCustomers.length >= 5 },
+    { label: '👥 25 Customers', earned: activeCustomers.length >= 25 },
+  ];
+
+  el.innerHTML = milestones.map(m =>
+    `<span class="milestone${m.earned ? ' earned' : ''}">${m.earned ? '✓ ' : ''}${m.label}</span>`
+  ).join('');
+}
+
+function renderWeeklyActivity() {
+  const el = document.getElementById('dashWeeklyActivity');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekActs = activities.filter(a => !a.deleted && new Date(a.timestamp) >= weekAgo);
+
+  const typeCounts = {};
+  weekActs.forEach(a => { typeCounts[a.type] = (typeCounts[a.type]||0) + 1; });
+
+  if(!weekActs.length) {
+    el.innerHTML = '<span style="color:var(--text-dim);">No activities this week yet. Get after it!</span>';
+    return;
+  }
+
+  const totalPoints = weekActs.reduce((sum, a) => sum + (ACTIVITY_POINTS[a.type] || 1), 0);
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
+  Object.entries(typeCounts).sort((a,b) => b[1]-a[1]).forEach(([type, count]) => {
+    html += `<span class="pill pill-blue" style="font-size:10px;">${type}: ${count}</span>`;
+  });
+  html += '</div>';
+  html += `<div style="font-family:var(--mono);font-size:11px;">Total: <strong>${weekActs.length}</strong> activities · <strong>${totalPoints}</strong> points this week</div>`;
+  el.innerHTML = html;
+}
+
+// =======================================================================
+// QUICK LOG SYSTEM (v7)
+// =======================================================================
+let quickLogOpen = false;
+let lastInteractedProspect = '';
+let quickFollowUpDays = null;
+
+function toggleQuickLog() {
+  quickLogOpen = !quickLogOpen;
+  const modal = document.getElementById('quickLogModal');
+  const fab = document.getElementById('quickLogFab');
+  if(quickLogOpen) {
+    modal.classList.add('visible');
+    fab.textContent = '✕';
+    fab.style.background = 'var(--text-dim)';
+    populateQuickProspectList();
+    // Auto-select last interacted prospect
+    if(lastInteractedProspect) {
+      document.getElementById('quickProspect').value = lastInteractedProspect;
+      updateQuickProspect();
+    }
+    document.getElementById('quickNotes').value = '';
+    quickFollowUpDays = null;
+    document.getElementById('quickFollowUpDate').value = '';
+    document.querySelectorAll('.quick-preset').forEach(b => b.classList.remove('active'));
+  } else {
+    modal.classList.remove('visible');
+    fab.textContent = '+';
+    fab.style.background = '';
+  }
+}
+
+function populateQuickProspectList() {
+  const sel = document.getElementById('quickProspect');
+  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost');
+  // Sort by urgency
+  const scored = openProspects.map(p => ({ p, score: getUrgencyScore(p) }));
+  scored.sort((a,b) => b.score - a.score);
+  sel.innerHTML = '<option value="">— Pick prospect —</option>' +
+    scored.map(({ p }) => `<option value="${p['Customer']}">${p['Customer']}${p['Contact'] ? ' ('+p['Contact']+')' : ''}</option>`).join('');
+}
+
+function updateQuickProspect() {
+  const name = document.getElementById('quickProspect').value;
+  const display = document.getElementById('quickProspectDisplay');
+  if(name) {
+    const p = allProspects.find(pr => pr['Customer'] === name);
+    display.textContent = name + (p ? ' · ' + (p['Stage']||'') + (p['Phone'] ? ' · '+p['Phone'] : '') : '');
+    display.style.color = 'var(--accent)';
+  } else {
+    display.textContent = 'Select a prospect first';
+    display.style.color = 'var(--text-dim)';
+  }
+}
+
+function setQuickFollowUp(days, btn) {
+  document.querySelectorAll('.quick-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if(days === 0) {
+    quickFollowUpDays = null;
+    document.getElementById('quickFollowUpDate').value = '';
+  } else {
+    quickFollowUpDays = days;
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    document.getElementById('quickFollowUpDate').value = d.toISOString().split('T')[0];
+  }
+}
+
+function saveQuickLog() {
+  const prospectName = document.getElementById('quickProspect').value;
+  if(!prospectName) { showToast('Pick a prospect first','error'); return; }
+  const type = document.getElementById('quickType').value;
+  const notes = document.getElementById('quickNotes').value.trim();
+  if(!notes) { showToast('Enter a quick note','error'); return; }
+  const followUp = document.getElementById('quickFollowUpDate').value;
+
+  const pIdx = allProspects.findIndex(p => p['Customer'] === prospectName);
+  if(pIdx < 0) { showToast('Prospect not found','error'); return; }
+
+  const cfg = CAL_EVENT_CONFIG[type] || { emoji:'📝', prefix:'Follow-Up', duration:30 };
+  const p = allProspects[pIdx];
+
+  // Create activity
+  const activity = {
+    id: Date.now(),
+    prospect: prospectName,
+    type: type,
+    text: notes,
+    followUp: followUp,
+    timestamp: new Date().toISOString(),
+    user: sessionStorage.getItem('sp_user') || 'scott',
+    deleted: false
+  };
+  activities.unshift(activity);
+  lastInteractedProspect = prospectName;
+
+  // Persist to Sheets
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+      action:'addActivity',
+      data: { id:String(activity.id), prospect:activity.prospect, type:activity.type, text:activity.text, followUp:activity.followUp, timestamp:activity.timestamp, user:activity.user, deleted:'' }
+    })}).catch(e=>console.log('Quick log save failed:', e));
+
+    // Update follow-up on prospect
+    if(followUp) {
+      fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',businessName:prospectName,updates:{'Follow-Up':followUp}})})
+      .then(r=>r.json()).then(d=>{ if(d.success) allProspects[pIdx]['Follow-Up']=followUp; });
+
+      // Create calendar event
+      const calTitle = cfg.emoji + ' ' + cfg.prefix + ': ' + prospectName;
+      const calDesc = cfg.emoji + ' ' + type + ' — ' + prospectName + '\n📝 ' + notes + '\n\n— SwitchPoint Portal (Quick Log)';
+      fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+        action:'createCalendarEvent', title:calTitle, date:followUp, startHour:9, duration:cfg.duration,
+        description:calDesc, location:p['Address']||''
+      })}).then(r=>r.json()).then(d=>{
+        if(d.success) showToast('📅 Calendar event added','success');
+      }).catch(e=>{});
+    }
+  }
+
+  toggleQuickLog();
+  renderGlobalActivity();
+  renderProspectTable(getFilteredProspects());
+  renderDashboard();
+  showToast('⚡ Quick log: ' + type + ' → ' + prospectName,'success');
 }
 
 // =======================================================================
