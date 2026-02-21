@@ -53,7 +53,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .dot-live{background:var(--success);box-shadow:0 0 6px var(--success);}
 .dot-offline{background:var(--text-dim);}
 .header-badge{font-family:var(--mono);font-size:10px;color:var(--text-muted);background:rgba(255,255,255,0.88);padding:4px 10px;border-radius:20px;border:1px solid var(--border);display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm);}
-.tab-nav{display:flex;gap:2px;padding:14px 28px 0;flex-wrap:wrap;}
+.tab-nav{display:flex;gap:2px;padding:14px 28px 0;flex-wrap:wrap;max-width:1200px;margin:0 auto;}
 .tab-btn{font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 18px;border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;}
 .tab-btn:hover{color:var(--text);background:rgba(255,255,255,0.6);}
 .tab-btn.active{color:var(--text);background:var(--surface);border-color:var(--border);box-shadow:var(--shadow-sm);}
@@ -65,8 +65,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .ind-yellow{background:var(--warning-bg);color:var(--warning);}
 .ind-blue{background:var(--accent-glow);color:var(--accent);}
 .ind-orange{background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);}
-.main{padding:0 28px 48px;}
-.panel{background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);padding:28px;max-width:1200px;box-shadow:var(--shadow-sm);}
+.main{padding:0 28px 48px;max-width:1200px;margin:0 auto;}
+.panel{background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);padding:28px;max-width:1200px;margin:0 auto;box-shadow:var(--shadow-sm);}
 .tab-content{display:none;}.tab-content.active{display:block;}
 .form-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);}
 .form-header h2{font-size:19px;font-weight:600;letter-spacing:-0.3px;margin-bottom:3px;}
@@ -177,6 +177,10 @@ textarea{resize:vertical;min-height:64px;}
 .action-btn.maps:hover{background:rgba(249,115,22,0.08);box-shadow:0 8px 24px rgba(249,115,22,0.15);}
 .action-btn.note{border-color:rgba(99,102,241,0.3);color:var(--purple);}
 .action-btn.note:hover{background:var(--purple-bg);box-shadow:0 8px 24px rgba(99,102,241,0.15);}
+.action-btn.sequence{border-color:rgba(245,158,11,0.3);color:var(--warning);}
+.action-btn.sequence:hover{background:var(--warning-bg);box-shadow:0 8px 24px rgba(245,158,11,0.2);}
+.action-btn.sequence.sent{border-color:rgba(31,191,138,0.3);color:var(--success);opacity:0.7;}
+.action-btn.sequence.sent:hover{background:var(--success-bg);}
 
 /* Activity filter pills */
 .activity-filters{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0;}
@@ -385,6 +389,7 @@ textarea{resize:vertical;min-height:64px;}
       <button class="action-btn maps" onclick="openMaps()">📍 Google Maps</button>
       <button class="action-btn note" onclick="openNoteModal()">+ Log Activity</button>
       <button class="action-btn" onclick="changeStage()">⟳ Change Stage</button>
+      <button class="action-btn sequence" onclick="addToSequence()">⚡ Sequence</button>
     </div>
     <div class="detail-body">
       <div class="detail-sections" id="prosDetailSections"></div>
@@ -1017,10 +1022,38 @@ function cancelEdits() { pendingEdits={}; document.getElementById('detailSaveBar
 function saveEdits() {
   if(!CONFIG.LIVE_MODE) return showToast('Connect to Google Sheets first','error');
   if(!Object.keys(pendingEdits).length) return;
+  const c=allCustomers[selectedCustomerIdx];
   showToast('Saving...','success');
-  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateCustomer',customerId:allCustomers[selectedCustomerIdx]['Unique Customer ID'],updates:pendingEdits})})
+  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateCustomer',customerId:c['Unique Customer ID'],updates:pendingEdits})})
   .then(r=>r.json()).then(data=>{
-    if(data.success){ Object.keys(pendingEdits).forEach(k=>allCustomers[selectedCustomerIdx][k]=pendingEdits[k]); pendingEdits={}; document.getElementById('detailSaveBar').classList.remove('visible'); renderCustDetailSections(allCustomers[selectedCustomerIdx]); renderCustomerTable(allCustomers); showToast('✓ Saved to Google Sheets','success'); }
+    if(data.success){
+      // Hyper-track: log every field change
+      const changes = Object.entries(pendingEdits).map(([field, newVal]) => {
+        const oldVal = c[field] || '(empty)';
+        return field + ': ' + oldVal + ' → ' + (newVal || '(empty)');
+      });
+      const activity = {
+        id: Date.now(),
+        prospect: c['Customer Name'] || c['Unique Customer ID'],
+        type: 'Note',
+        text: '✏️ Customer Edit: ' + changes.join(' | '),
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(activity);
+      fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+        action:'addActivity',
+        data: { id:String(activity.id), prospect:activity.prospect, type:activity.type, text:activity.text, followUp:'', timestamp:activity.timestamp, user:activity.user, deleted:'' }
+      })}).catch(e=>console.log('Activity save failed:', e));
+
+      Object.keys(pendingEdits).forEach(k=>allCustomers[selectedCustomerIdx][k]=pendingEdits[k]);
+      pendingEdits={};
+      document.getElementById('detailSaveBar').classList.remove('visible');
+      renderCustDetailSections(allCustomers[selectedCustomerIdx]);
+      renderCustomerTable(allCustomers);
+      showToast('✓ Saved to Google Sheets','success');
+    }
     else showToast('Error: '+(data.error||'Unknown'),'error');
   }).catch(e=>showToast('Save failed','error'));
 }
@@ -1159,7 +1192,36 @@ function saveProsEdits() {
   showToast('Saving...','success');
   fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',businessName:p['Customer'],updates:prosPendingEdits})})
   .then(r=>r.json()).then(data=>{
-    if(data.success){ Object.keys(prosPendingEdits).forEach(k=>allProspects[selectedProspectIdx][k]=prosPendingEdits[k]); prosPendingEdits={}; document.getElementById('prosSaveBar').classList.remove('visible'); renderProsDetailSections(allProspects[selectedProspectIdx]); renderProspectTable(getFilteredProspects()); renderStageFilters(); showToast('✓ Saved to Google Sheets','success'); }
+    if(data.success){
+      // Hyper-track: log every field change as an activity
+      const changes = Object.entries(prosPendingEdits).map(([field, newVal]) => {
+        const oldVal = p[field] || '(empty)';
+        return field + ': ' + oldVal + ' → ' + (newVal || '(empty)');
+      });
+      const activity = {
+        id: Date.now(),
+        prospect: p['Customer'],
+        type: 'Note',
+        text: '✏️ Edited: ' + changes.join(' | '),
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(activity);
+      fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+        action:'addActivity',
+        data: { id:String(activity.id), prospect:activity.prospect, type:activity.type, text:activity.text, followUp:'', timestamp:activity.timestamp, user:activity.user, deleted:'' }
+      })}).catch(e=>console.log('Activity save failed:', e));
+
+      Object.keys(prosPendingEdits).forEach(k=>allProspects[selectedProspectIdx][k]=prosPendingEdits[k]);
+      prosPendingEdits={};
+      document.getElementById('prosSaveBar').classList.remove('visible');
+      renderProsDetailSections(allProspects[selectedProspectIdx]);
+      renderProsActivity(allProspects[selectedProspectIdx]);
+      renderProspectTable(getFilteredProspects());
+      renderStageFilters();
+      showToast('✓ Saved to Google Sheets','success');
+    }
     else showToast('Error: '+(data.error||'Unknown'),'error');
   }).catch(e=>showToast('Save failed','error'));
 }
@@ -1171,19 +1233,40 @@ function closeProsDetail(){ document.getElementById('prospectDetailCard').classL
 // =======================================================================
 function callProspect() {
   const p=allProspects[selectedProspectIdx];
-  if(p['Phone']) { window.open('tel:'+p['Phone']); showToast('Dialing '+p['Phone'],'success'); }
+  if(p['Phone']) {
+    window.open('tel:'+p['Phone']); showToast('Dialing '+p['Phone'],'success');
+    // Hyper-track
+    const a={id:Date.now(),prospect:p['Customer'],type:'Call',text:'📱 Dialed '+p['Phone'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    renderProsActivity(p); renderProspectTable(getFilteredProspects());
+  }
   else showToast('No phone number on file','error');
 }
 
 function emailProspect() {
   const p=allProspects[selectedProspectIdx];
-  if(p['Email']) { window.open('mailto:'+p['Email']+'?subject=SwitchPoint Backup — Following Up'); showToast('Opening email to '+p['Email'],'success'); }
+  if(p['Email']) {
+    window.open('mailto:'+p['Email']+'?subject=SwitchPoint Backup — Following Up'); showToast('Opening email to '+p['Email'],'success');
+    // Hyper-track
+    const a={id:Date.now(),prospect:p['Customer'],type:'Email',text:'✉️ Opened email to '+p['Email'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    renderProsActivity(p); renderProspectTable(getFilteredProspects());
+  }
   else showToast('No email on file','error');
 }
 
 function openMaps() {
   const p=allProspects[selectedProspectIdx];
-  if(p['Address']) window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p['Address']),'_blank');
+  if(p['Address']) {
+    window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p['Address']),'_blank');
+    // Hyper-track
+    const a={id:Date.now(),prospect:p['Customer'],type:'Note',text:'📍 Opened Google Maps — '+p['Address'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    renderProsActivity(p); renderProspectTable(getFilteredProspects());
+  }
   else showToast('No address on file','error');
 }
 
@@ -1323,6 +1406,62 @@ function changeStage() {
   document.getElementById('stageModal').classList.add('visible');
 }
 function closeStageModal(){ document.getElementById('stageModal').classList.remove('visible'); }
+
+function addToSequence() {
+  const p = allProspects[selectedProspectIdx];
+  const email = p['Email'] || '';
+  const name = p['Customer'] || '';
+  
+  if (!email) {
+    showToast('⚠️ No email address — add an email first to use sequence', 'error');
+    return;
+  }
+  
+  if (!confirm('Add ' + name + ' (' + email + ') to Instantly.ai email campaign?')) return;
+  
+  const contact = p['Contact'] || '';
+  const payload = {
+    action: 'addToInstantly',
+    sequenceData: {
+      email: email,
+      firstName: contact.split(' ')[0] || '',
+      lastName: contact.split(' ').slice(1).join(' ') || '',
+      companyName: name
+    }
+  };
+  
+  showToast('⚡ Adding to sequence...', 'success');
+  
+  fetch(CONFIG.APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      showToast('⚡ ' + name + ' added to email sequence!', 'success');
+      // Log activity
+      const activity = {
+        id: Date.now(),
+        prospect: name,
+        type: 'Email',
+        text: 'Added to Instantly.ai email campaign (' + email + ')',
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(activity);
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+          action:'addActivity',
+          data: { id:String(activity.id), prospect:activity.prospect, type:activity.type, text:activity.text, followUp:'', timestamp:activity.timestamp, user:activity.user, deleted:'' }
+        })}).catch(e=>console.log('Activity save failed:', e));
+      }
+      renderProsActivity(p);
+      renderProspectTable(getFilteredProspects());
+    } else {
+      showToast('⚠️ Sequence failed: ' + (data.error || 'Unknown error'), 'error');
+    }
+  })
+  .catch(e => showToast('⚠️ Sequence request failed', 'error'));
+}
 
 function saveStageChange() {
   const p=allProspects[selectedProspectIdx];
