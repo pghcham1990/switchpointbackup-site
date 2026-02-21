@@ -1458,9 +1458,13 @@ function addToSequence() {
       renderProspectTable(getFilteredProspects());
     } else {
       showToast('⚠️ Sequence failed: ' + (data.error || 'Unknown error'), 'error');
+      logErrorToSheet('addToInstantly', data.error || 'Unknown error', 'Prospect: ' + p['Customer'] + ' | Email: ' + email);
     }
   })
-  .catch(e => showToast('⚠️ Sequence request failed', 'error'));
+  .catch(e => {
+    showToast('⚠️ Sequence request failed: ' + e, 'error');
+    logErrorToSheet('addToInstantly', String(e), 'Prospect: ' + p['Customer'] + ' | Email: ' + email);
+  });
 }
 
 function saveStageChange() {
@@ -1732,18 +1736,41 @@ function submitProspectToSheet(){
     if(data.success){
       let msg = '✓ Prospect saved!';
       if(data.instantly) msg += ' ⚡ Added to email sequence';
-      else if(data.instantlyError) msg += ' ⚠️ Sequence failed: ' + data.instantlyError;
-      showToast(msg, 'success');
+      else if(data.instantlyError) {
+        msg += ' ⚠️ Sequence failed: ' + data.instantlyError;
+        logErrorToSheet('addProspect+instantly', data.instantlyError, 'Prospect: ' + v('pr_custName') + ' | Email: ' + v('pr_email'));
+      }
+      showToast(msg, data.instantlyError ? 'error' : 'success');
       fetchProspects();
-    } else showToast('Error: '+(data.error||'Unknown'),'error');
+    } else {
+      showToast('Error: '+(data.error||'Unknown'),'error');
+      logErrorToSheet('addProspect', data.error || 'Unknown', 'Prospect: ' + v('pr_custName'));
+    }
   })
-  .catch(e=>showToast('Submit failed','error'));
+  .catch(e=>{
+    showToast('Submit failed: '+e,'error');
+    logErrorToSheet('addProspect', String(e), 'Prospect: ' + v('pr_custName'));
+  });
 }
 
 // =======================================================================
 // TOAST & INIT
 // =======================================================================
-function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),3500);}
+function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'), type==='error' ? 8000 : 3500);}
+
+function logErrorToSheet(action, error, context) {
+  if(!CONFIG.LIVE_MODE) return;
+  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+    action:'logError',
+    data: {
+      timestamp: new Date().toISOString(),
+      action: action,
+      error: String(error),
+      context: context || '',
+      user: sessionStorage.getItem('sp_user') || 'scott'
+    }
+  })}).catch(e=>console.log('Error log failed:', e));
+}
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('pr_dateAdded').value=new Date().toISOString().split('T')[0];
