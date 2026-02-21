@@ -593,6 +593,13 @@ textarea{resize:vertical;min-height:64px;}
         <div class="form-group"><label>Follow-Up</label><input type="date" id="pr_followUp"></div>
         <div class="form-group"><label>Est. Plan</label><select id="pr_estPlan"><option value="">—</option><option>Core ($99)</option><option>Extended ($149)</option><option>Operational ($199)</option><option>Resilience ($249)</option><option>Critical ($299+)</option></select></div>
         <div class="form-group full-width"><label>Notes</label><textarea id="pr_notes"></textarea></div>
+        <div class="form-group full-width" style="margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
+            <input type="checkbox" id="pr_addToSequence" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
+            <span style="font-weight:600;font-size:13px;">⚡ Add to Email Sequence</span>
+            <span style="font-size:11px;color:var(--text-dim);font-weight:400;">(Requires email address — sends to Instantly.ai campaign)</span>
+          </label>
+        </div>
       </div>
     </div>
     <div class="form-actions">
@@ -1048,14 +1055,14 @@ function getFilteredProspects() {
 const PROS_DETAIL_FIELDS = [
   { title:'Contact Info', fields:['Customer','Contact','Phone','Email','Address','URL'] },
   { title:'Pipeline', fields:['Stage','Source','Est. Plan','Date Added','Follow-Up'] },
-  { title:'Notes', fields:['Notes'] }
+  { title:'Notes', fields:['NOTES'] }
 ];
 
 function renderProsDetailSections(p) {
   document.getElementById('prosDetailSections').innerHTML = PROS_DETAIL_FIELDS.map(sec => {
     const fh = sec.fields.map(f => {
       const val=fmtVal(f,p[f]); const empty=!val;
-      const wide=f==='Notes'||f==='Address'; const ec=prosEditMode?' editable':'';
+      const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
       // Clickable phone
       if(f==='Phone' && val) display=`<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
@@ -1120,7 +1127,7 @@ const FIELD_DROPDOWNS = {
 function startProsEdit(el,field) {
   if(el.querySelector('.detail-field-edit')) return;
   const p=allProspects[selectedProspectIdx]; const cv=prosPendingEdits[field]!==undefined?prosPendingEdits[field]:fmtVal(field,p[field]);
-  const wide=field==='Notes'||field==='Address';
+  const wide=field==='Notes'||field==='NOTES'||field==='Address';
   const opts=FIELD_DROPDOWNS[field];
   const esc=field.replace(/'/g,"\\'");
   if(opts) {
@@ -1544,6 +1551,16 @@ function clearProspect(){document.getElementById('prospectForm').reset();documen
 function submitProspectToSheet(){
   if(!CONFIG.LIVE_MODE) return showToast('Connect to Google Sheets first','error');
   const form=document.getElementById('prospectForm'); if(!form.checkValidity()){form.reportValidity();return;}
+  const addToSequence = document.getElementById('pr_addToSequence').checked;
+  const email = v('pr_email');
+  
+  // Validate email if sequence checkbox is checked
+  if(addToSequence && !email) {
+    showToast('⚠️ Email required for email sequence','error');
+    document.getElementById('pr_email').focus();
+    return;
+  }
+  
   const row={
     'Customer': v('pr_custName'),
     'Contact': v('pr_contactName'),
@@ -1551,7 +1568,7 @@ function submitProspectToSheet(){
     'Phone': v('pr_phone'),
     'Product': v('pr_product'),
     'URL': v('pr_url'),
-    'Email': v('pr_email'),
+    'Email': email,
     'Source': v('pr_source'),
     'Stage': v('pr_stage'),
     'Est. Plan': v('pr_estPlan'),
@@ -1559,8 +1576,28 @@ function submitProspectToSheet(){
     'Date Added': v('pr_dateAdded') || new Date().toISOString().split('T')[0],
     'Follow-Up': v('pr_followUp')
   };
-  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addProspect',data:row})})
-  .then(r=>r.json()).then(data=>{if(data.success){showToast('✓ Prospect saved!','success');fetchProspects();}else showToast('Error','error');})
+  
+  const payload = {action:'addProspect', data:row};
+  if(addToSequence) {
+    payload.addToSequence = true;
+    payload.sequenceData = {
+      email: email,
+      firstName: (v('pr_contactName')||'').split(' ')[0] || '',
+      lastName: (v('pr_contactName')||'').split(' ').slice(1).join(' ') || '',
+      companyName: v('pr_custName')
+    };
+  }
+  
+  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+  .then(r=>r.json()).then(data=>{
+    if(data.success){
+      let msg = '✓ Prospect saved!';
+      if(data.instantly) msg += ' ⚡ Added to email sequence';
+      else if(data.instantlyError) msg += ' ⚠️ Sequence failed: ' + data.instantlyError;
+      showToast(msg, 'success');
+      fetchProspects();
+    } else showToast('Error: '+(data.error||'Unknown'),'error');
+  })
   .catch(e=>showToast('Submit failed','error'));
 }
 
