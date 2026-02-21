@@ -197,6 +197,23 @@ textarea{resize:vertical;min-height:64px;}
 .act-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--purple-bg);color:var(--purple);}
 .act-badge.zero{background:var(--danger-bg);color:var(--danger);}
 
+/* Follow-Up Glow Effects */
+@keyframes glowDueToday {
+  0%{box-shadow:0 0 4px rgba(46,107,255,0.3), 0 0 8px rgba(31,191,138,0.2);}
+  50%{box-shadow:0 0 12px rgba(46,107,255,0.5), 0 0 24px rgba(99,102,241,0.3), 0 0 36px rgba(31,191,138,0.15);}
+  100%{box-shadow:0 0 4px rgba(46,107,255,0.3), 0 0 8px rgba(31,191,138,0.2);}
+}
+@keyframes glowOverdue {
+  0%{box-shadow:0 0 4px rgba(239,68,68,0.3);}
+  50%{box-shadow:0 0 14px rgba(239,68,68,0.5), 0 0 28px rgba(239,68,68,0.2);}
+  100%{box-shadow:0 0 4px rgba(239,68,68,0.3);}
+}
+.followup-due-today{display:inline-block;padding:2px 8px;border-radius:8px;background:linear-gradient(135deg,rgba(46,107,255,0.12),rgba(31,191,138,0.12),rgba(99,102,241,0.12));color:var(--accent) !important;font-weight:700 !important;animation:glowDueToday 2s ease-in-out infinite;}
+.followup-overdue{display:inline-block;padding:2px 8px;border-radius:8px;background:var(--danger-bg);color:var(--danger) !important;font-weight:700 !important;animation:glowOverdue 2.5s ease-in-out infinite;}
+.followup-due-today-label,.followup-overdue-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-left:4px;}
+.followup-due-today-label{color:var(--accent);}
+.followup-overdue-label{color:var(--danger);}
+
 /* ACTIVITY LOG */
 .activity-log{max-height:400px;overflow-y:auto;padding:16px;}
 .activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(18,28,45,0.06);}
@@ -881,7 +898,19 @@ function renderProspectTable(prospects) {
   tbody.innerHTML = prospects.map((p, i) => {
     const realIdx = allProspects.indexOf(p);
     const followUp = fmtVal('Follow-Up', p['Follow-Up']);
-    const isOverdue = followUp && new Date(followUp) < new Date() ? ' style="color:var(--danger);font-weight:600;"' : '';
+    // Follow-up glow logic
+    let followUpHtml = followUp || '—';
+    let followUpStyle = 'font-family:var(--mono);font-size:11px;';
+    if (followUp) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const fuDate = new Date(followUp); fuDate.setHours(0,0,0,0);
+      const diffDays = Math.floor((fuDate - today) / (1000*60*60*24));
+      if (diffDays === 0) {
+        followUpHtml = `<span class="followup-due-today">${followUp}<span class="followup-due-today-label"> TODAY</span></span>`;
+      } else if (diffDays < 0) {
+        followUpHtml = `<span class="followup-overdue">${followUp}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`;
+      }
+    }
     const phone = p['Phone'] || '';
     // Activity count & last touch
     const prosActs = activities.filter(a=>a.prospect===p['Customer'] && !a.deleted);
@@ -897,7 +926,7 @@ function renderProspectTable(prospects) {
       <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phone+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
       <td style="font-size:11px;">${p['Source']||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;"${isOverdue}>${followUp||'—'}</td>
+      <td style="${followUpStyle}">${followUpHtml}</td>
       <td style="font-size:11px;">${p['Est. Plan']||'—'}</td>
       <td><span class="${badgeClass}">${actCount}</span></td>
       <td style="font-family:var(--mono);font-size:11px;${touchColor}">${lastTouchStr}</td>
@@ -1034,6 +1063,14 @@ function renderProsDetailSections(p) {
       if(f==='Email' && val) display=`<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       // Clickable URL
       if(f==='URL' && val) { const href=val.startsWith('http')?val:'https://'+val; display=`<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
+      // Follow-Up glow
+      if(f==='Follow-Up' && val && !prosEditMode) {
+        const today=new Date(); today.setHours(0,0,0,0);
+        const fuDate=new Date(val); fuDate.setHours(0,0,0,0);
+        const diffDays=Math.floor((fuDate-today)/(1000*60*60*24));
+        if(diffDays===0) display=`<span class="followup-due-today">${val}<span class="followup-due-today-label"> TODAY</span></span>`;
+        else if(diffDays<0) display=`<span class="followup-overdue">${val}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`;
+      }
       const oc=prosEditMode?` onclick="startProsEdit(this,'${f.replace(/'/g,"\\'")}')"` :'';
       return `<div class="detail-field${wide?' wide':''}"><div class="detail-field-label">${f}</div><div class="detail-field-value${empty?' empty':''}${ec}" data-field="${f}"${oc}>${empty?(prosEditMode?'Click to edit':'Not set'):display}</div></div>`;
     }).join('');
@@ -1418,10 +1455,23 @@ function renderActivityItem(a, showProspect) {
   const deleteBtn = a.deleted
     ? '<span class="act-delete-label">[DELETED]</span>'
     : `<button class="act-delete" onclick="event.stopPropagation();deleteActivity(${a.id})" title="Delete activity">✕</button>`;
+  let followUpTag = '';
+  if (a.followUp) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const fuDate = new Date(a.followUp); fuDate.setHours(0,0,0,0);
+    const diffDays = Math.floor((fuDate - today) / (1000*60*60*24));
+    if (diffDays === 0) {
+      followUpTag = ' — <span class="followup-due-today">Follow-up: '+a.followUp+'<span class="followup-due-today-label"> TODAY</span></span>';
+    } else if (diffDays < 0) {
+      followUpTag = ' — <span class="followup-overdue">Follow-up: '+a.followUp+'<span class="followup-overdue-label"> '+Math.abs(diffDays)+'d LATE</span></span>';
+    } else {
+      followUpTag = ' — Follow-up: '+a.followUp;
+    }
+  }
   return `<div class="activity-item${deletedClass}" style="display:flex;align-items:flex-start;">
     <div class="activity-icon ${ic}">${cfg.emoji}</div>
     <div class="activity-body" style="flex:1;">
-      <div class="act-type">${a.type}${a.followUp?' — Follow-up: '+a.followUp:''}</div>
+      <div class="act-type">${a.type}${followUpTag}</div>
       <div class="act-text">${prosLabel}${a.text}</div>
       <div class="act-time">${timeStr} by ${a.user}</div>
     </div>
