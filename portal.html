@@ -1738,6 +1738,8 @@ function showApp() {
   currentUserDisplayName = sessionStorage.getItem('sp_displayName') || sessionStorage.getItem('sp_user') || '';
   applyRolePermissions();
   initDatabase();
+  // Start presence system after auth
+  setTimeout(initPresence, 1500);
 }
 
 function checkAuth() {
@@ -5554,28 +5556,7 @@ function togglePresenceBar() {
   document.body.style.paddingBottom = presenceCollapsed ? '0' : '52px';
 }
 
-// Start presence after auth
-const _origCheckAuth = typeof checkAuth === 'function' ? checkAuth : null;
-document.addEventListener('sp-auth-success', initPresence);
-// Dispatch auth event after successful login
-(function(){
-  const origSetItem = sessionStorage.setItem.bind(sessionStorage);
-  const handler = {
-    apply(target, thisArg, args) {
-      const result = origSetItem(...args);
-      if(args[0] === 'sp_role') {
-        setTimeout(initPresence, 1000);
-      }
-      return result;
-    }
-  };
-})();
-// Fallback: init presence on page load if already logged in
-setTimeout(()=>{
-  if(sessionStorage.getItem('sp_user') && !document.getElementById('presenceBar')) {
-    initPresence();
-  }
-}, 3000);
+// Presence is initialized from showApp() after successful auth
 </script>
 </body>
 </html>
