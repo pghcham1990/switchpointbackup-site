@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwitchPoint Backup — Operations Portal v9</title>
+<title>SwitchPoint Backup — Operations Portal v10</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -82,6 +82,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .section-label .badge{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;letter-spacing:0.3px;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .form-grid.three-col{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.four-col{grid-template-columns:1fr 1fr 1fr 1fr;}
 .form-grid.four-col{grid-template-columns:1fr 1fr 1fr 1fr;}
 .form-group{display:flex;flex-direction:column;gap:4px;}
 .form-group.full-width{grid-column:1/-1;}
@@ -395,6 +396,41 @@ body.wide-mode .panel{max-width:none;}
 .analytics-bar-track{flex:1;height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
 .analytics-bar-fill{height:100%;border-radius:4px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
 .analytics-bar-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:40px;text-align:right;flex-shrink:0;}
+
+/* ===== AUTO-FILL / MULTI-CONTACT (v10) ===== */
+.autofill-bar{background:linear-gradient(135deg,rgba(46,107,255,0.06),rgba(31,191,138,0.04));border:1px solid rgba(46,107,255,0.15);border-radius:var(--radius);padding:16px;margin-bottom:20px;}
+.autofill-bar h4{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.autofill-input-row{display:flex;gap:8px;align-items:center;}
+.autofill-input-row input{flex:1;font-size:13px;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);}
+.autofill-btn{font-family:var(--sans);font-size:12px;font-weight:700;padding:10px 20px;border-radius:var(--radius);border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--white);box-shadow:0 4px 16px rgba(46,107,255,0.25);transition:all 0.15s;white-space:nowrap;}
+.autofill-btn:hover{box-shadow:0 8px 24px rgba(46,107,255,0.35);transform:translateY(-1px);}
+.autofill-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.autofill-status{font-size:11px;color:var(--text-dim);margin-top:8px;min-height:16px;}
+.autofill-status.loading{color:var(--accent);}
+.autofill-status.success{color:var(--success);}
+.autofill-status.error{color:var(--danger);}
+
+/* Contact picker from Apollo results */
+.contact-picker{margin-top:12px;display:none;}
+.contact-picker.visible{display:block;}
+.contact-picker-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:8px;}
+.contact-pick{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;transition:all 0.15s;}
+.contact-pick:hover{border-color:var(--accent);background:var(--accent-glow);}
+.contact-pick.selected{border-color:var(--success);background:var(--success-bg);}
+.contact-pick input[type="checkbox"]{width:16px;height:16px;accent-color:var(--success);cursor:pointer;flex-shrink:0;}
+.contact-pick-info{flex:1;min-width:0;}
+.contact-pick-name{font-size:12px;font-weight:700;}
+.contact-pick-title{font-size:10px;color:var(--text-dim);}
+.contact-pick-email{font-size:11px;color:var(--accent);font-family:var(--mono);}
+
+/* Multi-contact display in prospect detail */
+.multi-contacts{margin-top:8px;}
+.multi-contact-row{display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:4px;font-size:11px;flex-wrap:wrap;}
+.multi-contact-row .mc-name{font-weight:700;min-width:120px;}
+.multi-contact-row .mc-title{color:var(--text-dim);min-width:100px;}
+.multi-contact-row .mc-email{color:var(--accent);font-family:var(--mono);}
+.multi-contact-row .mc-actions{margin-left:auto;display:flex;gap:4px;}
+.mc-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--accent-glow);color:var(--accent);}
 
 /* ===== DEMO TAB (v9) ===== */
 .demo-hero{text-align:center;padding:48px 24px 36px;position:relative;overflow:hidden;}
@@ -978,11 +1014,28 @@ body.wide-mode .panel{max-width:none;}
 <div id="tab-prospect" class="tab-content">
 <div class="panel">
   <div class="form-header"><h2>Add New Prospect</h2><p>Log a new prospect for pipeline tracking.</p><div style="margin-top:8px;"><span class="sheet-badge sheet-pros">PROSPECTS TAB</span></div></div>
+
+  <!-- AUTO-FILL BAR (v10) -->
+  <div class="autofill-bar">
+    <h4>🔍 Quick Add from Google Maps</h4>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Paste a Google Maps URL and we'll auto-fill business details + find contacts via Apollo.</p>
+    <div class="autofill-input-row">
+      <input type="text" id="autoFillUrl" placeholder="Paste Google Maps URL here — e.g. https://google.com/maps/place/..." autocomplete="off">
+      <button class="autofill-btn" id="autoFillBtn" onclick="runAutoFill()">🔍 Auto-Fill</button>
+    </div>
+    <div class="autofill-status" id="autoFillStatus"></div>
+    <!-- Apollo contact picker -->
+    <div class="contact-picker" id="contactPicker">
+      <div class="contact-picker-header">👥 Contacts Found — check who to add</div>
+      <div id="contactPickerList"></div>
+    </div>
+  </div>
+
   <form id="prospectForm" onsubmit="return handleProspectSubmit(event)">
     <div class="form-section"><div class="section-label">Business & Contact</div>
       <div class="form-grid three-col">
         <div class="form-group"><label>Business Name <span class="req">*</span></label><input id="pr_custName" required></div>
-        <div class="form-group"><label>Contact</label><input id="pr_contactName"></div>
+        <div class="form-group"><label>Primary Contact</label><input id="pr_contactName"></div>
         <div class="form-group full-width"><label>Address</label><input id="pr_address"></div>
         <div class="form-group"><label>Phone</label><input type="tel" id="pr_phone"></div>
         <div class="form-group"><label>Email</label><input type="email" id="pr_email"></div>
@@ -993,6 +1046,16 @@ body.wide-mode .panel{max-width:none;}
         <div class="form-group"><label>Date Added</label><input type="date" id="pr_dateAdded"></div>
         <div class="form-group"><label>Follow-Up</label><input type="date" id="pr_followUp"></div>
         <div class="form-group"><label>Est. Plan</label><select id="pr_estPlan"><option value="">—</option><option>Core ($99)</option><option>Extended ($149)</option><option>Operational ($199)</option><option>Resilience ($249)</option><option>Critical ($299+)</option></select></div>
+      </div>
+    </div>
+    <!-- ADDITIONAL CONTACTS (v10) -->
+    <div class="form-section">
+      <div class="section-label">Additional Contacts <span class="badge" style="background:var(--accent-glow);color:var(--accent);">OPTIONAL</span></div>
+      <div id="additionalContacts"></div>
+      <button type="button" class="btn btn-secondary" onclick="addContactRow()" style="font-size:11px;margin-top:8px;">+ Add Contact</button>
+    </div>
+    <div class="form-section"><div class="section-label">Notes & Sequence</div>
+      <div class="form-grid">
         <div class="form-group full-width"><label>Notes</label><textarea id="pr_notes"></textarea></div>
         <div class="form-group full-width" style="margin-top:4px;">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
@@ -1854,7 +1917,25 @@ function renderProsDetailSections(p) {
       const oc=prosEditMode?` onclick="startProsEdit(this,'${f.replace(/'/g,"\\'")}')"` :'';
       return `<div class="detail-field${wide?' wide':''}"><div class="detail-field-label">${f}</div><div class="detail-field-value${empty?' empty':''}${ec}" data-field="${f}"${oc}>${empty?(prosEditMode?'Click to edit':'Not set'):display}</div></div>`;
     }).join('');
-    return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}</div></div>`;
+
+    // Add multi-contact display after Contact Info section
+    let contactsHtml = '';
+    if(sec.title === 'Contact Info' && p['Contacts']) {
+      try {
+        const contacts = JSON.parse(p['Contacts']);
+        if(contacts.length > 0) {
+          contactsHtml = '<div class="multi-contacts"><div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin:12px 0 6px;">Additional Contacts</div>' +
+            contacts.map(c => `<div class="multi-contact-row">
+              <span class="mc-name">${c.name||'—'}</span>
+              <span class="mc-title">${c.title||''}</span>
+              ${c.email ? '<span class="mc-email"><a href="mailto:'+c.email+'" style="color:var(--accent);text-decoration:none;">'+c.email+'</a></span>' : ''}
+              ${c.phone ? '<span style="font-family:var(--mono);font-size:10px;"><a href="tel:'+c.phone+'" style="color:var(--success);text-decoration:none;">'+c.phone+'</a></span>' : ''}
+            </div>`).join('') + '</div>';
+        }
+      } catch(e) {}
+    }
+
+    return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}${contactsHtml}</div></div>`;
   }).join('');
 }
 
@@ -2443,7 +2524,7 @@ function submitToSheet(){
 // =======================================================================
 function handleProspectSubmit(e){e.preventDefault();const row=[v('pr_custName'),v('pr_contactName'),v('pr_address'),v('pr_phone'),v('pr_product'),v('pr_url'),v('pr_email'),v('pr_source'),v('pr_stage'),v('pr_estPlan'),v('pr_notes'),v('pr_dateAdded')||new Date().toISOString().split('T')[0],v('pr_followUp')];storedTSV.pros=row.join('\t');document.getElementById('outProsPre').textContent=formatOutput(['Customer','Contact','Address','Phone','Product','URL','Email','Source','Stage','Est. Plan','Notes','Date Added','Follow-Up'],row);document.getElementById('prospectOutput').classList.add('visible');navigator.clipboard.writeText(storedTSV.pros).then(()=>showToast('✓ Prospect row copied!','success')).catch(()=>{});return false;}
 function copyProspectTSV(){navigator.clipboard.writeText(storedTSV.pros).then(()=>showToast('✓ Copied!','success'));}
-function clearProspect(){document.getElementById('prospectForm').reset();document.getElementById('pr_product').value='LTE Failover';document.getElementById('prospectOutput').classList.remove('visible');showToast('Cleared','success');}
+function clearProspect(){document.getElementById('prospectForm').reset();document.getElementById('pr_product').value='LTE Failover';document.getElementById('prospectOutput').classList.remove('visible');document.getElementById('autoFillUrl').value='';document.getElementById('autoFillStatus').textContent='';document.getElementById('contactPicker').classList.remove('visible');document.getElementById('additionalContacts').innerHTML='';autoFillContacts=[];additionalContactCount=0;showToast('Cleared','success');}
 
 function submitProspectToSheet(){
   if(!CONFIG.LIVE_MODE) return showToast('Connect to Google Sheets first','error');
@@ -2457,6 +2538,9 @@ function submitProspectToSheet(){
     document.getElementById('pr_email').focus();
     return;
   }
+
+  // Gather additional contacts
+  const additionalContacts = getAdditionalContacts();
   
   const row={
     'Customer': v('pr_custName'),
@@ -2473,6 +2557,11 @@ function submitProspectToSheet(){
     'Date Added': v('pr_dateAdded') || new Date().toISOString().split('T')[0],
     'Follow-Up': v('pr_followUp')
   };
+
+  // Add contacts JSON if we have additional contacts
+  if(additionalContacts.length > 0) {
+    row['Contacts'] = JSON.stringify(additionalContacts);
+  }
   
   const payload = {action:'addProspect', data:row};
   if(addToSequence) {
@@ -2488,10 +2577,14 @@ function submitProspectToSheet(){
     };
   }
   
+  const contactCount = 1 + additionalContacts.length;
+  showToast('⏳ Saving prospect' + (contactCount > 1 ? ' + ' + contactCount + ' contacts' : '') + '...', 'success');
+
   fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
   .then(r=>r.json()).then(data=>{
     if(data.success){
       let msg = '✓ Prospect saved!';
+      if(additionalContacts.length) msg += ' (' + contactCount + ' contacts)';
       if(data.instantly) msg += ' ⚡ Added to email sequence';
       else if(data.instantlyError) {
         msg += ' ⚠️ Sequence failed: ' + data.instantlyError;
@@ -3320,6 +3413,174 @@ function copyReport() {
   const body = document.getElementById('reportBody');
   const text = body.innerText;
   navigator.clipboard.writeText(text).then(() => showToast('✓ Report copied to clipboard','success')).catch(() => showToast('Copy failed','error'));
+}
+
+// =======================================================================
+// AUTO-FILL FROM GOOGLE MAPS (v10)
+// =======================================================================
+let autoFillContacts = []; // contacts returned by Apollo
+
+function runAutoFill() {
+  const url = document.getElementById('autoFillUrl').value.trim();
+  if(!url || !url.includes('google.com/maps')) {
+    showAutoFillStatus('Paste a valid Google Maps URL', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('autoFillBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Looking up...';
+  showAutoFillStatus('Step 1/3: Parsing URL...', 'loading');
+  document.getElementById('contactPicker').classList.remove('visible');
+  autoFillContacts = [];
+
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'autoFillProspect', data: { mapsUrl: url } })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.textContent = '🔍 Auto-Fill';
+
+    if(!data.success) {
+      showAutoFillStatus('Error: ' + (data.error || 'Unknown error'), 'error');
+      return;
+    }
+
+    // Fill business fields
+    const biz = data.business || {};
+    if(biz.name) document.getElementById('pr_custName').value = biz.name;
+    if(biz.address) document.getElementById('pr_address').value = biz.address;
+    if(biz.phone) document.getElementById('pr_phone').value = biz.phone;
+    if(biz.website) document.getElementById('pr_url').value = biz.website;
+    // Auto-set source to Google Maps
+    document.getElementById('pr_source').value = 'Google Maps';
+
+    // Handle contacts
+    const contacts = data.contacts || [];
+    if(contacts.length > 0) {
+      autoFillContacts = contacts;
+
+      // Auto-fill primary contact with the first result
+      const primary = contacts[0];
+      if(primary.name && primary.name.trim()) document.getElementById('pr_contactName').value = primary.name.trim();
+      if(primary.email) document.getElementById('pr_email').value = primary.email;
+
+      // Show contact picker if multiple contacts
+      if(contacts.length > 1) {
+        renderContactPicker(contacts);
+        showAutoFillStatus('✓ Found ' + contacts.length + ' contacts — select who to add', 'success');
+      } else {
+        showAutoFillStatus('✓ Business + 1 contact auto-filled!', 'success');
+      }
+    } else {
+      showAutoFillStatus('✓ Business details filled — no contacts found in Apollo', 'success');
+    }
+
+    // Trigger auto-format on filled fields
+    ['pr_custName','pr_address','pr_phone','pr_url','pr_contactName','pr_email'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el && el.value) autoFormatField(el);
+    });
+  })
+  .catch(e => {
+    btn.disabled = false;
+    btn.textContent = '🔍 Auto-Fill';
+    showAutoFillStatus('Request failed: ' + e, 'error');
+  });
+}
+
+function showAutoFillStatus(msg, type) {
+  const el = document.getElementById('autoFillStatus');
+  el.textContent = msg;
+  el.className = 'autofill-status ' + (type || '');
+}
+
+function renderContactPicker(contacts) {
+  const picker = document.getElementById('contactPicker');
+  const list = document.getElementById('contactPickerList');
+  list.innerHTML = contacts.map((c, i) => {
+    const checked = i === 0 ? 'checked' : '';
+    return `<div class="contact-pick${i===0?' selected':''}" onclick="toggleContactPick(${i}, this)">
+      <input type="checkbox" ${checked} data-contact-idx="${i}" onclick="event.stopPropagation(); toggleContactPick(${i}, this.closest('.contact-pick'))">
+      <div class="contact-pick-info">
+        <div class="contact-pick-name">${c.name || 'Unknown'}${i===0?' <span class="mc-badge">PRIMARY</span>':''}</div>
+        <div class="contact-pick-title">${c.title || 'No title'}</div>
+        ${c.email ? '<div class="contact-pick-email">' + c.email + '</div>' : '<div style="font-size:10px;color:var(--text-dim);">No email found</div>'}
+      </div>
+    </div>`;
+  }).join('');
+  picker.classList.add('visible');
+}
+
+function toggleContactPick(idx, el) {
+  const checkbox = el.querySelector('input[type="checkbox"]');
+  checkbox.checked = !checkbox.checked;
+  el.classList.toggle('selected', checkbox.checked);
+
+  // Sync primary contact with first checked contact
+  const checkedBoxes = document.querySelectorAll('#contactPickerList input[type="checkbox"]:checked');
+  if(checkedBoxes.length > 0) {
+    const firstIdx = parseInt(checkedBoxes[0].getAttribute('data-contact-idx'));
+    const primary = autoFillContacts[firstIdx];
+    if(primary) {
+      document.getElementById('pr_contactName').value = primary.name || '';
+      document.getElementById('pr_email').value = primary.email || '';
+    }
+  }
+
+  // Build additional contacts from remaining checked items
+  buildAdditionalContacts();
+}
+
+function buildAdditionalContacts() {
+  const container = document.getElementById('additionalContacts');
+  const checkedBoxes = document.querySelectorAll('#contactPickerList input[type="checkbox"]:checked');
+  const indices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute('data-contact-idx')));
+
+  // Skip the first checked one (that's the primary), add rest as additional
+  container.innerHTML = '';
+  indices.slice(1).forEach(idx => {
+    const c = autoFillContacts[idx];
+    if(c) addContactRow(c.name, c.email, c.title, c.phone);
+  });
+}
+
+// =======================================================================
+// MULTI-CONTACT MANAGEMENT (v10)
+// =======================================================================
+let additionalContactCount = 0;
+
+function addContactRow(name, email, title, phone) {
+  additionalContactCount++;
+  const id = additionalContactCount;
+  const container = document.getElementById('additionalContacts');
+  const row = document.createElement('div');
+  row.className = 'form-grid four-col';
+  row.id = 'addContact_' + id;
+  row.style.marginBottom = '8px';
+  row.innerHTML = `
+    <div class="form-group"><label>Contact Name</label><input class="ac-name" value="${name||''}"></div>
+    <div class="form-group"><label>Email</label><input class="ac-email" type="email" value="${email||''}"></div>
+    <div class="form-group"><label>Role / Title</label><input class="ac-title" value="${title||''}"></div>
+    <div class="form-group" style="display:flex;align-items:flex-end;gap:6px;">
+      <div style="flex:1;"><label>Phone</label><input class="ac-phone" type="tel" value="${phone||''}"></div>
+      <button type="button" onclick="document.getElementById('addContact_${id}').remove()" style="font-size:14px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;color:var(--danger);margin-bottom:1px;" title="Remove">✕</button>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+function getAdditionalContacts() {
+  const rows = document.querySelectorAll('#additionalContacts .form-grid');
+  return Array.from(rows).map(row => ({
+    name: row.querySelector('.ac-name')?.value || '',
+    email: row.querySelector('.ac-email')?.value || '',
+    title: row.querySelector('.ac-title')?.value || '',
+    phone: row.querySelector('.ac-phone')?.value || ''
+  })).filter(c => c.name || c.email);
 }
 
 // =======================================================================
