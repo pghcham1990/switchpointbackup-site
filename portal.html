@@ -1063,7 +1063,7 @@ body.wide-mode .panel{max-width:none;}
     <h4>🔍 Quick Add from Google Maps</h4>
     <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Paste a Google Maps URL and we'll auto-fill business details + find contacts via Apollo.</p>
     <div class="autofill-input-row">
-      <input type="text" id="autoFillUrl" placeholder="Paste Google Maps URL here — e.g. https://google.com/maps/place/..." autocomplete="off">
+      <input type="text" id="autoFillUrl" placeholder="Paste Google Maps URL (desktop or mobile share link)" autocomplete="off">
       <button class="autofill-btn" id="autoFillBtn" onclick="runAutoFill()">🔍 Auto-Fill</button>
     </div>
     <div class="autofill-status" id="autoFillStatus"></div>
@@ -3640,6 +3640,7 @@ function copyReport() {
 // STAY AWAY LIST — FSN Account Conflict Detection (v11)
 // =======================================================================
 let stayAwayList = []; // loaded from StayAway sheet
+let stayAwayData = []; // full records with name + address
 
 function loadStayAwayList() {
   if(!CONFIG.LIVE_MODE) return;
@@ -3647,7 +3648,11 @@ function loadStayAwayList() {
     .then(r => r.json())
     .then(data => {
       if(Array.isArray(data)) {
-        stayAwayList = data.map(r => (r['Business Name'] || '').toUpperCase().trim()).filter(Boolean);
+        stayAwayData = data.map(r => ({
+          name: (r['Business Name'] || '').toUpperCase().trim(),
+          address: (r['Address'] || r['Service Address'] || r['City'] || '').toUpperCase().trim()
+        })).filter(r => r.name);
+        stayAwayList = stayAwayData.map(r => r.name);
         console.log('StayAway list loaded: ' + stayAwayList.length + ' businesses');
       }
     })
@@ -3659,31 +3664,47 @@ function checkStayAway(businessName) {
   const input = businessName.toUpperCase().trim();
   if(!input) return null;
 
-  // Exact match
+  // Common words to IGNORE in fuzzy matching — these cause false positives
+  const NOISE_WORDS = new Set([
+    'INC', 'LLC', 'CORP', 'COMPANY', 'CO', 'GROUP', 'THE', 'AND', 'OF', 'AT',
+    'CHURCH', 'SCHOOL', 'DISTRICT', 'BOROUGH', 'TOWNSHIP', 'COUNTY', 'CITY',
+    'FIRST', 'SECOND', 'THIRD', 'NEW', 'OLD', 'NORTH', 'SOUTH', 'EAST', 'WEST',
+    'NATIONAL', 'AMERICAN', 'UNITED', 'CENTRAL', 'COMMUNITY', 'SERVICES',
+    'ASSOCIATES', 'PARTNERS', 'ENTERPRISE', 'ENTERPRISES', 'SOLUTIONS',
+    'INDUSTRIES', 'SYSTEMS', 'MANAGEMENT', 'PROPERTIES', 'CONSTRUCTION',
+    'ELECTRIC', 'DENTAL', 'MEDICAL', 'FAMILY', 'HOME', 'AUTO', 'FIRE',
+    'INSURANCE', 'AGENCY', 'OFFICE', 'CENTER', 'SUPPLY', 'EQUIPMENT',
+    'PROFESSIONAL', 'GENERAL', 'REGIONAL', 'INTERNATIONAL', 'GLOBAL'
+  ]);
+
+  // 1) Exact match — always flag
   for(const name of stayAwayList) {
     if(name === input) return name;
   }
 
-  // Fuzzy: input contains a StayAway name or vice versa
+  // 2) Strong contains — only if the contained string is 10+ chars AND is
+  //    more than 50% the length of the longer string (prevents "Grace" matching "Grace Evangelical Lutheran Church")
   for(const name of stayAwayList) {
-    // Skip very short names to avoid false positives
-    if(name.length < 5) continue;
-    // Check if either contains the other
+    if(name.length < 10) continue;
+    const longer = Math.max(input.length, name.length);
+    const shorter = Math.min(input.length, name.length);
+    if(shorter / longer < 0.5) continue; // too different in length
     if(input.includes(name) || name.includes(input)) return name;
   }
 
-  // Word-based fuzzy: check if key words match (3+ letter words)
-  const inputWords = input.split(/[\s,.\-\/]+/).filter(w => w.length >= 3);
-  if(inputWords.length < 2) return null;
+  // 3) Meaningful-word matching — strip noise words, require 80%+ match on meaningful words
+  const inputWords = input.split(/[\s,.\-\/]+/).filter(w => w.length >= 3 && !NOISE_WORDS.has(w));
+  if(inputWords.length < 1) return null;
 
   for(const name of stayAwayList) {
-    const nameWords = name.split(/[\s,.\-\/]+/).filter(w => w.length >= 3);
-    if(nameWords.length < 2) continue;
-    // Count matching words
+    const nameWords = name.split(/[\s,.\-\/]+/).filter(w => w.length >= 3 && !NOISE_WORDS.has(w));
+    if(nameWords.length < 1) continue;
+
     const matches = inputWords.filter(w => nameWords.includes(w)).length;
-    // If 60%+ of the shorter name's words match, flag it
-    const threshold = Math.ceil(Math.min(inputWords.length, nameWords.length) * 0.6);
-    if(matches >= threshold && matches >= 2) return name;
+    const shorter = Math.min(inputWords.length, nameWords.length);
+
+    // Require 80%+ of the meaningful words to match AND at least 2 meaningful word matches
+    if(matches >= 2 && matches / shorter >= 0.8) return name;
   }
 
   return null;
@@ -3764,8 +3785,8 @@ let autoFillContacts = []; // contacts returned by Apollo
 
 function runAutoFill() {
   const url = document.getElementById('autoFillUrl').value.trim();
-  if(!url || !url.includes('google.com/maps')) {
-    showAutoFillStatus('Paste a valid Google Maps URL', 'error');
+  if(!url || (!url.includes('google.com/maps') && !url.includes('maps.app.goo.gl') && !url.includes('goo.gl/maps'))) {
+    showAutoFillStatus('Paste a valid Google Maps URL (desktop or mobile)', 'error');
     return;
   }
 
