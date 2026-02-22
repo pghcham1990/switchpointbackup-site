@@ -443,9 +443,9 @@
       transform:translateY(-2px);filter:brightness(1.06);
     }
     @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .btn.portal-btn{background:linear-gradient(135deg,#00D9D9,#2D3E50);color:#fff;border:0;box-shadow:0 4px 14px rgba(0,217,217,.25);text-shadow:0 1px 2px rgba(0,0,0,.12);font-size:.85em}
+    .btn.portal-btn:hover{box-shadow:0 8px 24px rgba(0,217,217,.35);transform:translateY(-2px);filter:brightness(1.08)}
     .btn:disabled{opacity:.55;cursor:not-allowed;filter:none;transform:none}
-    .btn.portal-btn{background:linear-gradient(135deg,rgba(0,184,184,0.08),rgba(0,217,217,0.12));border:1px solid rgba(0,184,184,0.25);color:#00898a;font-weight:700;font-size:13px;letter-spacing:0.2px;}
-    .btn.portal-btn:hover{background:linear-gradient(135deg,rgba(0,184,184,0.15),rgba(0,217,217,0.2));border-color:rgba(0,184,184,0.4);box-shadow:0 8px 24px rgba(0,184,184,0.15);transform:translateY(-2px);}
 
     header{padding:52px 0 24px}
     .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;align-items:start}
@@ -1014,7 +1014,7 @@
         <a href="#service-area">Service area</a>
         <a href="#faq">FAQ</a>
         <a class="btn js-contact-focus" href="#contact">Contact</a>
-        <a class="btn portal-btn" href="/portal.html">🔐 Client Portal</a>
+        <a class="btn portal-btn" href="portal.html">🔐 Client Portal</a>
         <a class="btn primary js-contact-focus" href="#contact">Request a proposal</a>
       </div>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
@@ -1713,9 +1713,9 @@
               <h3>Ready to get started?</h3>
               <p class="muted" style="font-size:14px">Send us your business name, service address, and current internet provider. We'll check LTE signal availability and reply with next steps.</p>
               <div class="chip-row">
-                <a class="chip" href="/cdn-cgi/l/email-protection#9eedfff2fbeddeede9f7eafdf6eef1f7f0eafcfffdf5ebeeb0fdf1f3" aria-label="Email sales at switchpointbackup.com" style="width:100%">
+                <a class="chip" href="/cdn-cgi/l/email-protection#a8dbc9c4cddbe8dbdfc1dccbc0d8c7c1c6dccac9cbc3ddd886cbc7c5" aria-label="Email sales at switchpointbackup.com" style="width:100%">
                   <span class="cdot email" aria-hidden="true"></span>
-                  <span class="__cf_email__" data-cfemail="5b283a373e281b282c322f38332b3432352f393a38302e2b75383436">[email&#160;protected]</span>
+                  <span class="__cf_email__" data-cfemail="a3d0c2cfc6d0e3d0d4cad7c0cbd3cccacdd7c1c2c0c8d6d38dc0ccce">[email&#160;protected]</span>
                 </a>
                 <a class="chip" href="tel:+14123298790" aria-label="Call 412-329-8790" style="width:100%">
                   <span class="cdot phone" aria-hidden="true"></span>
@@ -1811,4 +1811,13 @@
     if('IntersectionObserver' in window){
       var io=new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          if(entry.isIntersecting){entry.target.class
+          if(entry.isIntersecting){entry.target.classList.add('visible');io.unobserve(entry.target);}
+        });
+      },{threshold:0.12});
+      reveals.forEach(function(el){io.observe(el);});
+    }else{
+      reveals.forEach(function(el){el.classList.add('visible');});
+    }
+  </script>
+</body>
+</html>
