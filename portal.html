@@ -865,7 +865,17 @@ body.wide-mode .panel{max-width:none;}
         <button class="detail-close" onclick="closeDetail()">✕ Close</button>
       </div>
     </div>
-    <div class="detail-body"><div class="detail-sections" id="detailSections"></div></div>
+    <div class="detail-body"><div class="detail-sections" id="detailSections"></div>
+      <!-- CUSTOMER ACTIVITY TIMELINE (v11.2) -->
+      <div style="margin-top:16px;">
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div class="activity-log" id="custActivityLog"><div class="activity-empty">No activities logged yet.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="detail-save-bar" id="detailSaveBar">
       <span class="unsaved" id="unsavedCount">0 unsaved changes</span>
       <button class="btn btn-secondary" onclick="cancelEdits()">Cancel</button>
@@ -1987,6 +1997,7 @@ function selectCustomer(idx) {
   document.getElementById('editToggleBtn').textContent='✎ Edit'; document.getElementById('editToggleBtn').style.color='var(--accent)';
   document.getElementById('detailSaveBar').classList.remove('visible');
   renderCustDetailSections(c);
+  renderCustActivity(c);
   const card=document.getElementById('detailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
   // Apply saved section states
   applySectionStates(card);
@@ -2084,6 +2095,20 @@ function saveEdits() {
 }
 
 function closeDetail(){ document.getElementById('detailCard').classList.remove('visible'); selectedCustomerIdx=-1; renderCustomerTable(allCustomers); }
+
+// Render activity timeline for a customer
+function renderCustActivity(c) {
+  const name = c['Customer Name'] || '';
+  const custActs = activities.filter(a => !a.deleted && a.prospect && a.prospect.toLowerCase() === name.toLowerCase());
+  const log = document.getElementById('custActivityLog');
+  if(!custActs.length) { log.innerHTML = '<div class="activity-empty">No activities logged yet. Edits, calls, and notes will appear here.</div>'; return; }
+  log.innerHTML = custActs.slice(0,30).map(a => {
+    const d = new Date(a.timestamp);
+    const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const userBadge = a.user ? '<span style="font-size:9px;font-weight:600;color:var(--text-dim);background:var(--surface-2);padding:1px 5px;border-radius:4px;margin-left:6px;">'+a.user+'</span>' : '';
+    return `<div class="activity-item"><div class="activity-time">${ts}${userBadge}</div><div class="activity-text">${a.text}</div></div>`;
+  }).join('');
+}
 
 // =======================================================================
 // PROSPECT DETAIL CARD
@@ -2785,7 +2810,13 @@ function submitToSheet(){
   const form=document.getElementById('onboardForm'); if(!form.checkValidity()){form.reportValidity();return;}
   const btn=document.getElementById('submitSheetBtn'); btn.textContent='⏳ Submitting...'; btn.disabled=true;
   fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addAll',customer:collectCustomersRow(),hardware:collectHardwareRow(),sim:collectSimRow()})})
-  .then(r=>r.json()).then(data=>{btn.textContent='🚀 Submit to Google Sheet';btn.disabled=false;if(data.success){showToast('✓ All rows written!','success');fetchLiveData();}else showToast('Error: '+(data.error||'Unknown'),'error');})
+  .then(r=>r.json()).then(data=>{btn.textContent='🚀 Submit to Google Sheet';btn.disabled=false;if(data.success){showToast('✓ All rows written!','success');
+      // Audit — log new customer onboarding
+      const custName = document.getElementById('ob_custName').value || 'Unknown';
+      const auditAct = {id:Date.now(), prospect:custName, type:'Note', text:'🎉 New customer onboarded: '+custName+' | Plan: '+(document.getElementById('ob_plan').value||'—')+' | MRC: $'+(document.getElementById('ob_mrc').value||'0'), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+      activities.unshift(auditAct);
+      if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(auditAct.id),prospect:auditAct.prospect,type:auditAct.type,text:auditAct.text,followUp:'',timestamp:auditAct.timestamp,user:auditAct.user,deleted:''}})}).catch(e=>{});
+      fetchLiveData();}else showToast('Error: '+(data.error||'Unknown'),'error');})
   .catch(e=>{btn.textContent='🚀 Submit to Google Sheet';btn.disabled=false;showToast('Submit failed','error');});
 }
 
@@ -2861,6 +2892,10 @@ function submitProspectToSheet(){
         logErrorToSheet('addProspect+instantly', data.instantlyError, 'Prospect: ' + v('pr_custName') + ' | Email: ' + v('pr_email'));
       }
       showToast(msg, data.instantlyError ? 'error' : 'success');
+      // Audit — log new prospect creation
+      const auditAct = {id:Date.now(), prospect:row['Customer'], type:'Note', text:'🆕 New prospect added: '+row['Customer']+(row['Source']?' (Source: '+row['Source']+')':'')+(row['Est. Plan']?' | Plan: '+row['Est. Plan']:''), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+      activities.unshift(auditAct);
+      if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(auditAct.id),prospect:auditAct.prospect,type:auditAct.type,text:auditAct.text,followUp:'',timestamp:auditAct.timestamp,user:auditAct.user,deleted:''}})}).catch(e=>{});
       fetchProspects();
     } else {
       showToast('Error: '+(data.error||'Unknown'),'error');
@@ -4161,6 +4196,11 @@ function savePartnerEdits() {
   const p = allPartners[selectedPartnerIdx];
   const partnerId = p['Partner ID'];
   if(!partnerId) { showToast('No Partner ID — cannot save','error'); return; }
+  // Capture old→new BEFORE applying changes
+  const changes = Object.entries(partnerPendingEdits).map(([field, newVal]) => {
+    const oldVal = p[field] || '(empty)';
+    return field + ': ' + oldVal + ' → ' + (newVal || '(empty)');
+  });
 
   fetch(CONFIG.APPS_SCRIPT_URL, {
     method:'POST',
@@ -4175,7 +4215,7 @@ function savePartnerEdits() {
       renderPartnerCards(allPartners);
       showToast('✓ Partner updated','success');
       // Audit
-      const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Note', text:'✏️ Updated partner: '+Object.keys(partnerPendingEdits).join(', '), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+      const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Note', text:'✏️ Partner Edit: '+changes.join(' | '), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
       activities.unshift(a);
       if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
     } else { showToast('Error: '+(data.error||'Unknown'),'error'); }
@@ -4226,7 +4266,8 @@ function renderPartnerActivity(p) {
   log.innerHTML = pActs.slice(0,30).map(a => {
     const d = new Date(a.timestamp);
     const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    return `<div class="activity-item"><div class="activity-time">${ts}</div><div class="activity-text">${a.text}</div></div>`;
+    const userBadge = a.user ? '<span style="font-size:9px;font-weight:600;color:var(--text-dim);background:var(--surface-2);padding:1px 5px;border-radius:4px;margin-left:6px;">'+a.user+'</span>' : '';
+    return `<div class="activity-item"><div class="activity-time">${ts}${userBadge}</div><div class="activity-text">${a.text}</div></div>`;
   }).join('');
 }
 
