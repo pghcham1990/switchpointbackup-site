@@ -3856,7 +3856,7 @@ function restoreLastTab() {
   try {
     const lastTab = localStorage.getItem('sp_lastTab');
     if(lastTab) {
-      const tabBtn = document.querySelector('.tab-btn[onclick*="\\'' + lastTab + '\\'"]');
+      const tabBtn = document.querySelector('.tab-btn[onclick*="' + lastTab + '"]');
       if(tabBtn) {
         switchTab(lastTab, tabBtn);
       }
