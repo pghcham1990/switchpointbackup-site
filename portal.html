@@ -5428,22 +5428,25 @@ function initPresence() {
   // Add bottom padding to body so content isn't hidden behind bar
   if(!presenceCollapsed) document.body.style.paddingBottom = '52px';
   
-  // Send first heartbeat immediately
-  sendHeartbeat();
+  // Send first heartbeat, THEN fetch online users after it completes
+  sendHeartbeat().then(()=>{
+    fetchOnlineUsers();
+  }).catch(()=>{
+    fetchOnlineUsers();
+  });
   
-  // Heartbeat every 30 seconds
-  presenceInterval = setInterval(sendHeartbeat, 30000);
-  
-  // Fetch online users immediately, then every 30 seconds
-  fetchOnlineUsers();
-  setInterval(fetchOnlineUsers, 30000);
+  // Heartbeat every 30 seconds, fetch shortly after
+  presenceInterval = setInterval(()=>{
+    sendHeartbeat();
+    setTimeout(fetchOnlineUsers, 3000);
+  }, 30000);
 }
 
 function sendHeartbeat() {
-  if(!CONFIG.LIVE_MODE) return;
+  if(!CONFIG.LIVE_MODE) return Promise.resolve();
   const user = sessionStorage.getItem('sp_user');
-  if(!user) return;
-  fetch(CONFIG.APPS_SCRIPT_URL, {
+  if(!user) return Promise.resolve();
+  return fetch(CONFIG.APPS_SCRIPT_URL, {
     method: 'POST',
     headers: {'Content-Type':'text/plain'},
     body: JSON.stringify({
@@ -5474,14 +5477,27 @@ function renderPresenceBar(users) {
   const currentUser = sessionStorage.getItem('sp_user');
   const currentRole = sessionStorage.getItem('sp_role');
   
-  // Non-admin users: show only SP logo, no user details or count
+  // ── CUSTOMER / PARTNER VIEW: anonymous bubbles ──
   if(currentRole !== 'Admin' && currentRole !== 'Employee') {
+    const adminsOnline = users.filter(u => u.role === 'Admin' || u.role === 'Employee').length;
+    const othersOnline = users.filter(u => u.username.toLowerCase() !== (currentUser||'').toLowerCase()).length;
+    let html = '';
+    // Show SP support status
+    if(adminsOnline > 0) {
+      html += '<div style="display:flex;align-items:center;gap:8px;"><div class="presence-bubble admin" style="cursor:default;"><div class="presence-pulse"></div>SP</div><span style="font-size:11px;color:#10b981;font-weight:600;">Support Online</span></div>';
+    } else {
+      html += '<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-dim);">SP</div><span style="font-size:11px;color:var(--text-muted);">Support Offline</span></div>';
+    }
+    // Show anonymous count of others
+    if(othersOnline > 0) {
+      html += '<div class="presence-divider"></div><span style="font-size:11px;color:var(--text-muted);">'+othersOnline+' other'+(othersOnline!==1?'s':'')+' online</span>';
+    }
     countEl.parentElement.style.display = 'none';
-    container.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><div class="logo-mark" style="width:28px;height:28px;font-size:10px;border:1px solid rgba(255,255,255,0.1);">SP</div><span style="font-size:11px;color:var(--text-muted);">SwitchPoint Portal</span></div>';
+    container.innerHTML = html;
     return;
   }
   
-  // Group by role
+  // ── ADMIN VIEW: full detail with rich bubbles ──
   const admins = users.filter(u => u.role === 'Admin' || u.role === 'Employee');
   const partners = users.filter(u => u.role === 'Partner');
   const customers = users.filter(u => u.role === 'Customer');
@@ -5506,16 +5522,25 @@ function renderPresenceBar(users) {
     html += '</div>';
   }
   
+  if(!users.length) {
+    html = '<span style="font-size:11px;color:var(--text-muted);">No users online</span>';
+  }
+  
   container.innerHTML = html;
 }
 
 function renderBubble(user, roleClass, currentUser) {
   const initials = (user.displayName || user.username || '?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   const isYou = user.username.toLowerCase() === (currentUser||'').toLowerCase();
-  const label = (user.displayName || user.username) + (isYou ? ' (you)' : '');
-  const clickAction = isYou ? '' : 'onclick="navigateToUser(\''+user.role+'\',\''+encodeURIComponent(user.linkedRecord||user.displayName)+'\',\''+encodeURIComponent(user.displayName)+'\')"';
-  return '<div class="presence-bubble '+roleClass+'" '+clickAction+'>'
-    +'<div class="presence-tooltip">'+label+'<br><span style="font-size:9px;color:var(--text-dim);">'+user.role+'</span></div>'
+  const name = user.displayName || user.username;
+  const linked = user.linkedRecord || '';
+  const clickAction = isYou ? '' : 'onclick="navigateToUser(\''+user.role+'\',\''+encodeURIComponent(linked||name)+'\',\''+encodeURIComponent(name)+'\')"';
+  const cursorStyle = isYou ? 'cursor:default;' : '';
+  return '<div class="presence-bubble '+roleClass+'" style="'+cursorStyle+'" '+clickAction+'>'
+    +'<div class="presence-tooltip">'
+    +'<div style="font-weight:700;">'+name+(isYou?' <span style="opacity:0.5;">(you)</span>':'')+'</div>'
+    +'<div style="font-size:9px;color:var(--text-dim);margin-top:2px;">'+user.role+(linked?' · '+linked:'')+'</div>'
+    +'</div>'
     +'<div class="presence-pulse"></div>'
     +initials
     +'</div>';
