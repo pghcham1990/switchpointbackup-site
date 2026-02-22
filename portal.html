@@ -695,15 +695,15 @@ body.wide-mode .panel{max-width:none;}
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <div class="login-logo"><div class="logo-mark" style="width:48px;height:48px;font-size:20px;">SP</div></div>
-    <h1 class="login-title">SwitchPoint<span>Operations Portal</span></h1>
-    <p class="login-subtitle">Authorized access only</p>
+    <h1 class="login-title">SwitchPoint<span>Portal</span></h1>
+    <p class="login-subtitle">Customers · Partners · Team</p>
     <form onsubmit="return handleLogin(event)">
       <div class="login-field"><label>Username</label><input type="text" id="loginUser" placeholder="Username" autocomplete="username" required></div>
       <div class="login-field"><label>Password</label><input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" required></div>
       <div id="loginError" class="login-error"></div>
       <button type="submit" class="login-btn">Sign In</button>
     </form>
-    <div class="login-footer">SwitchPoint Backup LLC — Internal Use Only</div>
+    <div class="login-footer">SwitchPoint Backup LLC — Secure Portal Access</div>
   </div>
 </div>
 
@@ -715,11 +715,13 @@ body.wide-mode .panel{max-width:none;}
     <div class="logo-text">SwitchPoint<span>Operations Portal</span></div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
+    <span id="userDisplay" style="font-size:11px;font-weight:600;color:var(--text-muted);background:var(--surface-2);padding:4px 10px;border-radius:var(--radius);"></span>
     <div class="header-badge"><span class="connection-dot" id="connDot"></span><span id="connLabel">Checking...</span></div>
     <button onclick="logout()" style="font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);background:rgba(255,255,255,0.88);color:var(--text-muted);cursor:pointer;box-shadow:var(--shadow-sm);transition:all 0.15s;">Logout</button>
   </div>
 </header>
 
+<div id="adminApp">
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('dashboard',this)">Dashboard<span class="tab-indicator ind-green">LIVE</span></button>
   <button class="tab-btn" onclick="switchTab('database',this)">Customers<span class="tab-indicator ind-blue">VIEW</span></button>
@@ -1433,9 +1435,39 @@ body.wide-mode .panel{max-width:none;}
   </div>
 </div>
 </main>
+</div><!-- /adminApp -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PARTNER PORTAL VIEW (v12)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="partnerPortal" style="display:none;">
+  <main style="padding:24px;max-width:960px;margin:0 auto;">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-size:22px;font-weight:700;margin:0;">Partner Portal</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin:4px 0 0;">Your referrals, linked accounts, and activity with SwitchPoint.</p>
+    </div>
+    <div id="partnerPortalContent">
+      <div style="text-align:center;padding:40px;"><div class="spinner"></div><br>Loading...</div>
+    </div>
+  </main>
 </div>
 
-<!-- NOTE MODAL -->
+<!-- ═══════════════════════════════════════════════════════════════
+     CUSTOMER PORTAL VIEW (v12)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="customerPortal" style="display:none;">
+  <main style="padding:24px;max-width:960px;margin:0 auto;">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-size:22px;font-weight:700;margin:0;">My SwitchPoint</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin:4px 0 0;">Your service status, billing, and support — all in one place.</p>
+    </div>
+    <div id="customerPortalContent">
+      <div style="text-align:center;padding:40px;"><div class="spinner"></div><br>Loading...</div>
+    </div>
+  </main>
+</div>
+
+</div><!-- /appMain -->
 <div class="modal-overlay" id="noteModal">
   <div class="modal-box">
     <h3>Log Activity</h3>
@@ -1605,22 +1637,384 @@ const CONFIG = {
 // =======================================================================
 // LOGIN
 // =======================================================================
+// =======================================================================
+// AUTHENTICATION — Role-based auth against Users sheet (v12)
+// =======================================================================
+// Roles: Admin (full access), Employee (restricted), Partner (their data), Customer (their data)
 const PORTAL_USERS = [
-  { username: 'scott', password: 'SwitchPoint2026!' },
+  { username: 'scott', password: 'SwitchPoint2026!', role: 'Admin', displayName: 'Scott Rocca' },
 ];
+
+let currentUserRole = '';
+let currentUserLinkedRecord = '';
+let currentUserDisplayName = '';
 
 function handleLogin(e) {
   e.preventDefault();
-  const user = document.getElementById('loginUser').value.trim().toLowerCase();
+  const user = document.getElementById('loginUser').value.trim();
   const pass = document.getElementById('loginPass').value;
-  const match = PORTAL_USERS.find(u => u.username.toLowerCase() === user && u.password === pass);
-  if (match) { sessionStorage.setItem('sp_auth','true'); sessionStorage.setItem('sp_user',match.username); showApp(); }
-  else { document.getElementById('loginError').textContent='Invalid username or password'; document.getElementById('loginPass').value=''; }
+  const btn = document.querySelector('.login-btn');
+  const errEl = document.getElementById('loginError');
+  btn.textContent = '⏳ Signing in...'; btn.disabled = true; errEl.textContent = '';
+
+  // Try local fallback first (for admin if backend is down)
+  const localMatch = PORTAL_USERS.find(u => u.username.toLowerCase() === user.toLowerCase() && u.password === pass);
+
+  // Authenticate against Users sheet
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({ action:'authenticate', username: user, password: pass })
+  }).then(r=>r.json()).then(data=>{
+    btn.textContent = 'Sign In'; btn.disabled = false;
+    if(data.success) {
+      sessionStorage.setItem('sp_auth','true');
+      sessionStorage.setItem('sp_user', data.username);
+      sessionStorage.setItem('sp_role', data.role);
+      sessionStorage.setItem('sp_displayName', data.displayName || data.username);
+      sessionStorage.setItem('sp_linkedRecord', data.linkedRecord || '');
+      currentUserRole = data.role;
+      currentUserLinkedRecord = data.linkedRecord || '';
+      currentUserDisplayName = data.displayName || data.username;
+      showApp();
+    } else if(localMatch) {
+      // Fallback to local auth (admin emergency access)
+      sessionStorage.setItem('sp_auth','true');
+      sessionStorage.setItem('sp_user', localMatch.username);
+      sessionStorage.setItem('sp_role', localMatch.role || 'Admin');
+      sessionStorage.setItem('sp_displayName', localMatch.displayName || localMatch.username);
+      sessionStorage.setItem('sp_linkedRecord', '');
+      currentUserRole = localMatch.role || 'Admin';
+      currentUserDisplayName = localMatch.displayName || localMatch.username;
+      showApp();
+    } else {
+      errEl.textContent = data.error || 'Invalid username or password';
+      document.getElementById('loginPass').value = '';
+    }
+  }).catch(err=>{
+    btn.textContent = 'Sign In'; btn.disabled = false;
+    // Network error — try local fallback
+    if(localMatch) {
+      sessionStorage.setItem('sp_auth','true');
+      sessionStorage.setItem('sp_user', localMatch.username);
+      sessionStorage.setItem('sp_role', localMatch.role || 'Admin');
+      sessionStorage.setItem('sp_displayName', localMatch.displayName || localMatch.username);
+      currentUserRole = localMatch.role || 'Admin';
+      currentUserDisplayName = localMatch.displayName || localMatch.username;
+      showApp();
+    } else {
+      errEl.textContent = 'Connection failed. Try again.';
+    }
+  });
   return false;
 }
-function showApp() { document.getElementById('loginScreen').style.display='none'; document.getElementById('appMain').style.display='block'; initDatabase(); }
-function checkAuth() { if(sessionStorage.getItem('sp_auth')==='true') showApp(); }
-function logout() { sessionStorage.clear(); document.getElementById('loginScreen').style.display='flex'; document.getElementById('appMain').style.display='none'; document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; }
+
+function showApp() {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appMain').style.display='block';
+  currentUserRole = sessionStorage.getItem('sp_role') || 'Admin';
+  currentUserLinkedRecord = sessionStorage.getItem('sp_linkedRecord') || '';
+  currentUserDisplayName = sessionStorage.getItem('sp_displayName') || sessionStorage.getItem('sp_user') || '';
+  applyRolePermissions();
+  initDatabase();
+}
+
+function checkAuth() {
+  if(sessionStorage.getItem('sp_auth')==='true') showApp();
+}
+
+function logout() {
+  // Audit logout
+  const user = sessionStorage.getItem('sp_user');
+  if(user && CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(Date.now()),prospect:'System',type:'Note',text:'🔓 Logout: '+user,followUp:'',timestamp:new Date().toISOString(),user:user,deleted:''}})}).catch(e=>{});
+  }
+  sessionStorage.clear();
+  currentUserRole = '';
+  currentUserLinkedRecord = '';
+  currentUserDisplayName = '';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appMain').style.display='none';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// =======================================================================
+// ROLE-BASED PERMISSIONS (v12)
+// =======================================================================
+function applyRolePermissions() {
+  const role = currentUserRole;
+  const allTabs = document.querySelectorAll('.tab-btn');
+  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo'];
+  const employeeTabs = ['dashboard','pipeline','activity','prospect','demo'];
+  const partnerTabs = ['partner-home'];
+  const customerTabs = ['customer-home'];
+
+  // Show/hide main admin app vs role-specific views
+  const adminApp = document.getElementById('adminApp');
+  const partnerPortal = document.getElementById('partnerPortal');
+  const customerPortal = document.getElementById('customerPortal');
+
+  if(role === 'Admin') {
+    if(adminApp) adminApp.style.display = 'block';
+    if(partnerPortal) partnerPortal.style.display = 'none';
+    if(customerPortal) customerPortal.style.display = 'none';
+    allTabs.forEach(t => t.style.display = '');
+    // Update header
+    document.getElementById('connLabel').textContent = 'Live — Admin';
+  }
+  else if(role === 'Employee') {
+    if(adminApp) adminApp.style.display = 'block';
+    if(partnerPortal) partnerPortal.style.display = 'none';
+    if(customerPortal) customerPortal.style.display = 'none';
+    allTabs.forEach(t => {
+      const onclick = t.getAttribute('onclick') || '';
+      const tabId = onclick.match(/switchTab\('([^']+)'/);
+      if(tabId && !employeeTabs.includes(tabId[1])) t.style.display = 'none';
+    });
+    document.getElementById('connLabel').textContent = 'Live — Employee';
+  }
+  else if(role === 'Partner') {
+    if(adminApp) adminApp.style.display = 'none';
+    if(partnerPortal) partnerPortal.style.display = 'block';
+    if(customerPortal) customerPortal.style.display = 'none';
+    loadPartnerPortalData();
+  }
+  else if(role === 'Customer') {
+    if(adminApp) adminApp.style.display = 'none';
+    if(partnerPortal) partnerPortal.style.display = 'none';
+    if(customerPortal) customerPortal.style.display = 'block';
+    loadCustomerPortalData();
+  }
+
+  // Update user display in header
+  const userDisplay = document.getElementById('userDisplay');
+  if(userDisplay) userDisplay.textContent = currentUserDisplayName + ' (' + role + ')';
+}
+
+// =======================================================================
+// PARTNER PORTAL VIEW (v12)
+// =======================================================================
+function loadPartnerPortalData() {
+  const linkedRecord = currentUserLinkedRecord;
+  const container = document.getElementById('partnerPortalContent');
+  if(!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner"></div><br>Loading your portal...</div>';
+
+  // Fetch partner data and linked accounts
+  Promise.all([
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getPartners').then(r=>r.json()),
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getActivities').then(r=>r.json())
+  ]).then(([partners, acts]) => {
+    const myPartner = partners.find(p => (p['Name']||'').toLowerCase() === linkedRecord.toLowerCase() || (p['Partner ID']||'') === linkedRecord);
+    
+    if(!myPartner) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;"><h3>Welcome, '+currentUserDisplayName+'</h3><p style="color:var(--text-muted);">Your partner profile is being set up. Contact Scott for assistance.</p></div>';
+      return;
+    }
+
+    const linked = (myPartner['Linked Accounts']||'').split(',').map(s=>s.trim()).filter(s=>s);
+    const myActs = (acts||[]).filter(a => !a.deleted && a.prospect === 'Partner: '+myPartner['Name']);
+
+    container.innerHTML = `
+      <div class="panel" style="max-width:900px;margin:0 auto;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+          <div class="partner-avatar" style="width:56px;height:56px;font-size:22px;">${(myPartner['Name']||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+          <div>
+            <h2 style="margin:0;font-size:20px;">${myPartner['Name']}</h2>
+            <p style="margin:2px 0 0;color:var(--text-muted);font-size:13px;">${myPartner['Company']||''} · ${myPartner['Specialty']||''} · ${myPartner['Location']||''}</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;">
+          <div style="background:var(--surface-2);padding:16px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:24px;font-weight:700;">${myPartner['Deals Closed Together']||'0'}</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;">Deals Together</div>
+          </div>
+          <div style="background:var(--surface-2);padding:16px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:24px;font-weight:700;">$${Number(myPartner['Total Revenue Shared']||0).toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;">Revenue Shared</div>
+          </div>
+          <div style="background:var(--surface-2);padding:16px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:24px;font-weight:700;">${linked.length}</div>
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;">Linked Accounts</div>
+          </div>
+        </div>
+
+        ${linked.length ? '<div class="detail-section" style="margin-bottom:16px;"><div class="detail-section-header" onclick="toggleSection(this)">🏢 Your Linked Accounts</div><div class="detail-section-body" style="display:block;"><div class="linked-chips">'+linked.map(l=>'<span class="linked-chip chip-customer">🏢 '+l+'</span>').join('')+'</div></div></div>' : ''}
+
+        <div class="detail-section" style="margin-bottom:16px;">
+          <div class="detail-section-header" onclick="toggleSection(this)">📝 Submit a Referral</div>
+          <div class="detail-section-body" style="display:block;">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Know a business that needs internet backup? Submit their info and we'll follow up.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="form-group"><label>Business Name <span class="req">*</span></label><input id="ref_business" placeholder="Name of the business"></div>
+              <div class="form-group"><label>Contact Name</label><input id="ref_contact" placeholder="Who should we talk to?"></div>
+              <div class="form-group"><label>Phone</label><input id="ref_phone" placeholder="Best number to reach them"></div>
+              <div class="form-group"><label>Email</label><input id="ref_email" placeholder="Their email address"></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Notes</label><textarea id="ref_notes" placeholder="Anything helpful — why they need it, best time to call, etc." style="min-height:50px;"></textarea></div>
+            </div>
+            <button class="btn btn-success" onclick="submitReferral()" style="margin-top:10px;">🚀 Submit Referral</button>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Recent Activity</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div class="activity-log">${myActs.length ? myActs.slice(0,20).map(a=>{
+              const d=new Date(a.timestamp);
+              const ts=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+              return '<div class="activity-item"><div class="activity-time">'+ts+'</div><div class="activity-text">'+a.text+'</div></div>';
+            }).join('') : '<div class="activity-empty">No activity yet.</div>'}</div>
+          </div>
+        </div>
+      </div>`;
+  }).catch(err => {
+    container.innerHTML = '<div style="text-align:center;padding:40px;"><h3>Connection Error</h3><p style="color:var(--danger);">'+err.message+'</p></div>';
+  });
+}
+
+function submitReferral() {
+  const business = document.getElementById('ref_business').value.trim();
+  if(!business) { showToast('Business name is required','error'); return; }
+  const referralData = {
+    'Customer': business,
+    'Contact': document.getElementById('ref_contact').value.trim(),
+    'Phone': document.getElementById('ref_phone').value.trim(),
+    'Email': document.getElementById('ref_email').value.trim(),
+    'NOTES': 'Partner referral from '+currentUserDisplayName+': '+(document.getElementById('ref_notes').value.trim()||'No notes'),
+    'Source': 'Partner Referral',
+    'Stage': 'New Lead',
+    'Date Added': new Date().toISOString().split('T')[0]
+  };
+  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addProspect',data:referralData})})
+  .then(r=>r.json()).then(data=>{
+    if(data.success||data.row) {
+      showToast('✓ Referral submitted! We\'ll follow up.','success');
+      ['ref_business','ref_contact','ref_phone','ref_email','ref_notes'].forEach(id=>document.getElementById(id).value='');
+      // Audit
+      fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(Date.now()),prospect:'Partner: '+currentUserDisplayName,type:'Note',text:'📨 Referral submitted: '+business,followUp:'',timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user'),deleted:''}})}).catch(e=>{});
+    } else showToast('Error: '+(data.error||'Unknown'),'error');
+  }).catch(e=>showToast('Submit failed','error'));
+}
+
+// =======================================================================
+// CUSTOMER PORTAL VIEW (v12)
+// =======================================================================
+function loadCustomerPortalData() {
+  const linkedRecord = currentUserLinkedRecord;
+  const container = document.getElementById('customerPortalContent');
+  if(!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner"></div><br>Loading your portal...</div>';
+
+  Promise.all([
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getCustomers').then(r=>r.json()),
+    fetch(CONFIG.APPS_SCRIPT_URL+'?action=getActivities').then(r=>r.json())
+  ]).then(([customers, acts]) => {
+    const myCust = customers.find(c => (c['Customer Name']||'').toLowerCase() === linkedRecord.toLowerCase() || (c['Unique Customer ID']||'') === linkedRecord);
+
+    if(!myCust) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;"><h3>Welcome, '+currentUserDisplayName+'</h3><p style="color:var(--text-muted);">Your account is being set up. Contact support@switchpointbackup.com for help.</p></div>';
+      return;
+    }
+
+    const plan = myCust['Service Plan']||'—';
+    const mrc = myCust['Monthly MRC ($)']||'0';
+    const isp = myCust['Primary ISP']||'—';
+    const lastFailover = myCust['Last Failover Event']||'None recorded';
+    const lteUsage = myCust['Current Cycle LTE Usage (GB)']||'0';
+    const dataCap = myCust['Data Cap (GB)']||'—';
+    const billingStatus = myCust['Billing Status']||'—';
+    const myActs = (acts||[]).filter(a => !a.deleted && (a.prospect||'').toLowerCase() === (myCust['Customer Name']||'').toLowerCase());
+
+    container.innerHTML = `
+      <div class="panel" style="max-width:900px;margin:0 auto;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+          <div class="logo-mark" style="width:56px;height:56px;font-size:20px;">SP</div>
+          <div>
+            <h2 style="margin:0;font-size:20px;">${myCust['Customer Name']}</h2>
+            <p style="margin:2px 0 0;color:var(--text-muted);font-size:13px;">${myCust['Unique Customer ID']||''} · ${plan} · $${mrc}/mo</p>
+          </div>
+          <div style="margin-left:auto;"><span class="pill" style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 12px;">Active</span></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
+          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Service Plan</div>
+            <div style="font-size:15px;font-weight:700;">${plan}</div>
+          </div>
+          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Monthly Cost</div>
+            <div style="font-size:15px;font-weight:700;">$${mrc}</div>
+          </div>
+          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">LTE Usage</div>
+            <div style="font-size:15px;font-weight:700;">${lteUsage} / ${dataCap} GB</div>
+          </div>
+          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Last Failover</div>
+            <div style="font-size:13px;font-weight:600;">${lastFailover}</div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-bottom:16px;">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Your Service Details</div>
+          <div class="detail-section-body">
+            <div class="detail-field"><div class="detail-field-label">Primary ISP</div><div class="detail-field-value">${isp}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Billing Status</div><div class="detail-field-value">${billingStatus}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Service Address</div><div class="detail-field-value">${myCust['Service Address']||'On file'}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Primary Contact</div><div class="detail-field-value">${myCust['Primary Contact Name']||'—'}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Contact Email</div><div class="detail-field-value">${myCust['Primary Contact Email']||'—'}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Support Level</div><div class="detail-field-value">${myCust['Support Level']||'Standard'}</div></div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-bottom:16px;">
+          <div class="detail-section-header" onclick="toggleSection(this)">🎫 Submit a Support Request</div>
+          <div class="detail-section-body" style="display:block;">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Need help? Submit a request and we'll get back to you ASAP.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="form-group"><label>Priority</label><select id="tkt_priority"><option>Normal</option><option>High — Service Affected</option><option>Critical — Internet Down</option></select></div>
+              <div class="form-group"><label>Category</label><select id="tkt_category"><option>General Question</option><option>Billing</option><option>Service Issue</option><option>Add/Change Contact</option><option>Other</option></select></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Subject <span class="req">*</span></label><input id="tkt_subject" placeholder="Brief description of your request"></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Details</label><textarea id="tkt_details" placeholder="Tell us more about what you need..." style="min-height:60px;"></textarea></div>
+            </div>
+            <button class="btn btn-success" onclick="submitSupportTicket()" style="margin-top:10px;">🎫 Submit Request</button>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Recent Activity</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div class="activity-log">${myActs.length ? myActs.slice(0,20).map(a=>{
+              const d=new Date(a.timestamp);
+              const ts=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+              return '<div class="activity-item"><div class="activity-time">'+ts+'</div><div class="activity-text">'+a.text+'</div></div>';
+            }).join('') : '<div class="activity-empty">No activity history yet.</div>'}</div>
+          </div>
+        </div>
+      </div>`;
+  }).catch(err => {
+    container.innerHTML = '<div style="text-align:center;padding:40px;"><h3>Connection Error</h3><p style="color:var(--danger);">'+err.message+'</p></div>';
+  });
+}
+
+function submitSupportTicket() {
+  const subject = document.getElementById('tkt_subject').value.trim();
+  if(!subject) { showToast('Subject is required','error'); return; }
+  const priority = document.getElementById('tkt_priority').value;
+  const category = document.getElementById('tkt_category').value;
+  const details = document.getElementById('tkt_details').value.trim();
+  const emoji = priority.includes('Critical') ? '🚨' : (priority.includes('High') ? '⚠️' : '🎫');
+  const actText = emoji+' Support Request ['+priority+'] '+category+': '+subject+(details?' — '+details:'');
+  
+  fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(Date.now()),prospect:currentUserLinkedRecord||currentUserDisplayName,type:'Note',text:actText,followUp:'',timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user'),deleted:''}})})
+  .then(r=>r.json()).then(data=>{
+    showToast('✓ Support request submitted! We\'ll be in touch.','success');
+    ['tkt_subject','tkt_details'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('tkt_priority').selectedIndex=0;
+    document.getElementById('tkt_category').selectedIndex=0;
+  }).catch(e=>showToast('Submit failed','error'));
+}
 
 // =======================================================================
 // AUTO-FORMAT ENGINE (v9) — Clean inputs on blur
