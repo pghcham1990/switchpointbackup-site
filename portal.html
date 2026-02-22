@@ -688,6 +688,28 @@ body.wide-mode .panel{max-width:none;}
 .login-btn:hover{box-shadow:0 12px 40px rgba(46,107,255,0.35);transform:translateY(-2px);filter:brightness(1.06);}
 .login-error{color:var(--danger);font-size:12px;min-height:18px;margin-top:4px;margin-bottom:4px;}
 .login-footer{margin-top:24px;font-size:10px;color:var(--text-dim);letter-spacing:0.3px;}
+/* Presence Bar — Who's Online */
+.presence-bar{position:fixed;bottom:0;left:0;right:0;z-index:900;background:rgba(12,18,32,0.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.08);padding:8px 20px;display:flex;align-items:center;gap:12px;transition:transform 0.3s ease;}
+.presence-bar.hidden{transform:translateY(100%);}
+.presence-count{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.presence-count span{color:var(--accent);font-size:13px;}
+.presence-divider{width:1px;height:20px;background:rgba(255,255,255,0.1);}
+.presence-group{display:flex;align-items:center;gap:6px;}
+.presence-group-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-right:2px;}
+.presence-group-label.admin{color:#2e6bff;}
+.presence-group-label.partner{color:#f59e0b;}
+.presence-group-label.customer{color:#10b981;}
+.presence-bubble{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;transition:all 0.2s ease;position:relative;border:2px solid rgba(255,255,255,0.15);}
+.presence-bubble:hover{transform:scale(1.2);border-color:rgba(255,255,255,0.4);z-index:10;}
+.presence-bubble.admin{background:linear-gradient(135deg,#2e6bff,#1d4ed8);}
+.presence-bubble.partner{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.presence-bubble.customer{background:linear-gradient(135deg,#10b981,#059669);}
+.presence-bubble .presence-pulse{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid rgba(12,18,32,0.9);animation:pulse 2s infinite;}
+.presence-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(12,18,32,0.95);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s ease;font-size:11px;color:#fff;}
+.presence-bubble:hover .presence-tooltip{opacity:1;}
+.presence-toggle{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all 0.2s;}
+.presence-toggle:hover{background:rgba(255,255,255,0.12);}
+@media(max-width:768px){.presence-bar{padding:6px 12px;gap:8px;}.presence-bubble{width:28px;height:28px;font-size:10px;}.presence-group-label{display:none;}}
 </style>
 </head>
 <body>
@@ -5375,6 +5397,185 @@ document.addEventListener('DOMContentLoaded',()=>{
   updateDemoAlertTime();
   checkAuth();
 });
+
+// =======================================================================
+// PRESENCE SYSTEM — Who's Online (v12)
+// =======================================================================
+let presenceInterval = null;
+let presenceCollapsed = localStorage.getItem('sp_presence_collapsed') === 'true';
+
+function initPresence() {
+  // Only run for logged-in users in live mode
+  if(!CONFIG.LIVE_MODE || !sessionStorage.getItem('sp_user')) return;
+  
+  // Create the bar HTML
+  const bar = document.createElement('div');
+  bar.id = 'presenceBar';
+  bar.className = 'presence-bar' + (presenceCollapsed ? ' hidden' : '');
+  bar.innerHTML = '<div class="presence-count"><span>0</span> online</div><div id="presenceUsers" style="display:flex;align-items:center;gap:12px;flex:1;overflow-x:auto;"></div><div class="presence-toggle" onclick="togglePresenceBar()" title="Toggle online bar">👥</div>';
+  document.body.appendChild(bar);
+  
+  // Add expand button when collapsed
+  const expandBtn = document.createElement('div');
+  expandBtn.id = 'presenceExpand';
+  expandBtn.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:899;width:40px;height:40px;border-radius:50%;background:rgba(12,18,32,0.8);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.2s;'+(presenceCollapsed?'':'display:none;');
+  expandBtn.innerHTML = '👥';
+  expandBtn.onclick = function(){ togglePresenceBar(); };
+  document.body.appendChild(expandBtn);
+  
+  // Add bottom padding to body so content isn't hidden behind bar
+  if(!presenceCollapsed) document.body.style.paddingBottom = '52px';
+  
+  // Send first heartbeat immediately
+  sendHeartbeat();
+  
+  // Heartbeat every 30 seconds
+  presenceInterval = setInterval(sendHeartbeat, 30000);
+  
+  // Fetch online users immediately, then every 30 seconds
+  fetchOnlineUsers();
+  setInterval(fetchOnlineUsers, 30000);
+}
+
+function sendHeartbeat() {
+  if(!CONFIG.LIVE_MODE) return;
+  const user = sessionStorage.getItem('sp_user');
+  if(!user) return;
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({
+      action: 'heartbeat',
+      username: user,
+      role: sessionStorage.getItem('sp_role') || '',
+      displayName: sessionStorage.getItem('sp_displayName') || user,
+      linkedRecord: sessionStorage.getItem('sp_linkedRecord') || ''
+    })
+  }).catch(e=>{});
+}
+
+function fetchOnlineUsers() {
+  if(!CONFIG.LIVE_MODE) return;
+  fetch(CONFIG.APPS_SCRIPT_URL + '?action=getOnlineUsers').then(r=>r.json()).then(users=>{
+    if(!Array.isArray(users)) return;
+    renderPresenceBar(users);
+  }).catch(e=>{});
+}
+
+function renderPresenceBar(users) {
+  const container = document.getElementById('presenceUsers');
+  const countEl = document.querySelector('.presence-count span');
+  if(!container) return;
+  
+  countEl.textContent = users.length;
+  
+  const currentUser = sessionStorage.getItem('sp_user');
+  const currentRole = sessionStorage.getItem('sp_role');
+  
+  // Non-admin users: show only SP logo, no user details or count
+  if(currentRole !== 'Admin' && currentRole !== 'Employee') {
+    countEl.parentElement.style.display = 'none';
+    container.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><div class="logo-mark" style="width:28px;height:28px;font-size:10px;border:1px solid rgba(255,255,255,0.1);">SP</div><span style="font-size:11px;color:var(--text-muted);">SwitchPoint Portal</span></div>';
+    return;
+  }
+  
+  // Group by role
+  const admins = users.filter(u => u.role === 'Admin' || u.role === 'Employee');
+  const partners = users.filter(u => u.role === 'Partner');
+  const customers = users.filter(u => u.role === 'Customer');
+  
+  let html = '';
+  
+  if(admins.length) {
+    html += '<div class="presence-group"><span class="presence-group-label admin">Staff</span>';
+    html += admins.map(u => renderBubble(u, 'admin', currentUser)).join('');
+    html += '</div>';
+  }
+  if(partners.length) {
+    if(admins.length) html += '<div class="presence-divider"></div>';
+    html += '<div class="presence-group"><span class="presence-group-label partner">Partners</span>';
+    html += partners.map(u => renderBubble(u, 'partner', currentUser)).join('');
+    html += '</div>';
+  }
+  if(customers.length) {
+    if(admins.length || partners.length) html += '<div class="presence-divider"></div>';
+    html += '<div class="presence-group"><span class="presence-group-label customer">Customers</span>';
+    html += customers.map(u => renderBubble(u, 'customer', currentUser)).join('');
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function renderBubble(user, roleClass, currentUser) {
+  const initials = (user.displayName || user.username || '?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const isYou = user.username.toLowerCase() === (currentUser||'').toLowerCase();
+  const label = (user.displayName || user.username) + (isYou ? ' (you)' : '');
+  const clickAction = isYou ? '' : 'onclick="navigateToUser(\''+user.role+'\',\''+encodeURIComponent(user.linkedRecord||user.displayName)+'\',\''+encodeURIComponent(user.displayName)+'\')"';
+  return '<div class="presence-bubble '+roleClass+'" '+clickAction+'>'
+    +'<div class="presence-tooltip">'+label+'<br><span style="font-size:9px;color:var(--text-dim);">'+user.role+'</span></div>'
+    +'<div class="presence-pulse"></div>'
+    +initials
+    +'</div>';
+}
+
+function navigateToUser(role, linkedRecord, displayName) {
+  linkedRecord = decodeURIComponent(linkedRecord);
+  displayName = decodeURIComponent(displayName);
+  const currentRole = sessionStorage.getItem('sp_role');
+  
+  // Only admins can navigate to user records
+  if(currentRole !== 'Admin' && currentRole !== 'Employee') return;
+  
+  if(role === 'Partner') {
+    // Navigate to Partners tab and find this partner
+    switchTab('partners');
+    setTimeout(()=>{
+      const searchInput = document.querySelector('#partnerSearch');
+      if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
+    }, 500);
+  } else if(role === 'Customer') {
+    // Navigate to Customers tab and find this customer
+    switchTab('customers');
+    setTimeout(()=>{
+      const searchInput = document.querySelector('#customerSearch');
+      if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
+    }, 500);
+  }
+}
+
+function togglePresenceBar() {
+  presenceCollapsed = !presenceCollapsed;
+  localStorage.setItem('sp_presence_collapsed', presenceCollapsed);
+  const bar = document.getElementById('presenceBar');
+  const expand = document.getElementById('presenceExpand');
+  if(bar) bar.classList.toggle('hidden', presenceCollapsed);
+  if(expand) expand.style.display = presenceCollapsed ? 'flex' : 'none';
+  document.body.style.paddingBottom = presenceCollapsed ? '0' : '52px';
+}
+
+// Start presence after auth
+const _origCheckAuth = typeof checkAuth === 'function' ? checkAuth : null;
+document.addEventListener('sp-auth-success', initPresence);
+// Dispatch auth event after successful login
+(function(){
+  const origSetItem = sessionStorage.setItem.bind(sessionStorage);
+  const handler = {
+    apply(target, thisArg, args) {
+      const result = origSetItem(...args);
+      if(args[0] === 'sp_role') {
+        setTimeout(initPresence, 1000);
+      }
+      return result;
+    }
+  };
+})();
+// Fallback: init presence on page load if already logged in
+setTimeout(()=>{
+  if(sessionStorage.getItem('sp_user') && !document.getElementById('presenceBar')) {
+    initPresence();
+  }
+}, 3000);
 </script>
 </body>
 </html>
