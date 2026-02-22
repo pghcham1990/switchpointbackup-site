@@ -5558,20 +5558,40 @@ function navigateToUser(role, linkedRecord, displayName) {
   // Only admins can navigate to user records
   if(currentRole !== 'Admin' && currentRole !== 'Employee') return;
   
+  showToast('Navigating to ' + displayName, 'info');
+  
   if(role === 'Partner') {
     switchTab('partners');
-    setTimeout(()=>{
-      const searchInput = document.getElementById('partnerSearch');
-      if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
-    }, 500);
+    attemptSearch('partnerSearch', linkedRecord || displayName, 0);
   } else if(role === 'Customer') {
     switchTab('customers');
-    setTimeout(()=>{
-      const searchInput = document.getElementById('dbSearch');
-      if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
-    }, 500);
+    attemptSearch('dbSearch', linkedRecord || displayName, 0);
   }
-  showToast('Navigating to ' + displayName, 'info');
+}
+
+function attemptSearch(inputId, query, attempt) {
+  if(attempt > 5) return; // give up after 5 tries
+  const searchInput = document.getElementById(inputId);
+  if(!searchInput) { setTimeout(()=>attemptSearch(inputId, query, attempt+1), 500); return; }
+  
+  // Check if data is loaded
+  const hasData = (inputId === 'dbSearch' && allCustomers && allCustomers.length > 0) ||
+                  (inputId === 'partnerSearch' && allPartners && allPartners.length > 0);
+  
+  if(!hasData) {
+    // Data not loaded yet, retry in 1 second
+    setTimeout(()=>attemptSearch(inputId, query, attempt+1), 1000);
+    return;
+  }
+  
+  searchInput.value = query;
+  searchInput.dispatchEvent(new Event('input'));
+  
+  // Auto-click the first result row after a short delay
+  setTimeout(()=>{
+    const firstRow = document.querySelector('#tab-customers .table-row, #tab-partners .partner-card');
+    if(firstRow) firstRow.click();
+  }, 300);
 }
 
 function togglePresenceBar() {
