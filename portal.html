@@ -1930,7 +1930,14 @@ function loadCustomerPortalData() {
     const lteUsage = myCust['Current Cycle LTE Usage (GB)']||'0';
     const dataCap = myCust['Data Cap (GB)']||'—';
     const billingStatus = myCust['Billing Status']||'—';
-    const myActs = (acts||[]).filter(a => !a.deleted && (a.prospect||'').toLowerCase() === (myCust['Customer Name']||'').toLowerCase());
+    const myActs = (acts||[]).map(a=>({
+      text: a['Notes']||a['text']||'',
+      prospect: a['Prospect']||a['prospect']||'',
+      timestamp: a['Timestamp']||a['timestamp']||'',
+      user: a['User']||a['user']||'',
+      deleted: (a['Deleted']||a['deleted']||'')==='true',
+      ticketStatus: a['Ticket Status']||a['ticketStatus']||''
+    })).filter(a => !a.deleted && a.prospect.toLowerCase() === (myCust['Customer Name']||'').toLowerCase()).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
 
     container.innerHTML = `
       <div class="panel" style="max-width:900px;margin:0 auto;">
@@ -1997,7 +2004,7 @@ function loadCustomerPortalData() {
               return tickets.slice(0,20).map(a=>{
                 const d=new Date(a.timestamp);
                 const ts=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-                const status = (a['Ticket Status']||'').trim().toLowerCase();
+                const status = (a.ticketStatus||'').trim().toLowerCase();
                 const isClosed = status === 'closed';
                 const badge = isClosed
                   ? '<span style="display:inline-block;background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:8px;">✓ CLOSED</span>'
