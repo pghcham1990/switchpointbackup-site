@@ -407,6 +407,14 @@ body.wide-mode .panel{max-width:none;}
 .stayaway-dismiss{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(239,68,68,0.2);background:none;color:var(--danger);cursor:pointer;font-weight:600;flex-shrink:0;}
 @keyframes shakeOnce{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(2px);}}
 
+/* StayAway suggestion dropdown */
+.sa-suggest{display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--bg);border:1px solid rgba(239,68,68,0.2);border-radius:0 0 var(--radius) var(--radius);max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+.sa-suggest.visible{display:block;}
+.sa-suggest-header{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--danger);padding:6px 10px 4px;opacity:0.7;}
+.sa-suggest-item{font-size:11px;padding:5px 10px;color:var(--text-dim);cursor:default;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(0,0,0,0.03);}
+.sa-suggest-item:last-child{border-bottom:none;}
+.sa-suggest-item .sa-dot{width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0;opacity:0.5;}
+.sa-suggest-item mark{background:rgba(239,68,68,0.12);color:var(--danger);font-weight:600;border-radius:2px;padding:0 1px;}
 /* Pipeline StayAway badge */
 .sa-badge{display:inline-block;font-size:8px;font-weight:800;padding:2px 5px;border-radius:4px;background:rgba(239,68,68,0.12);color:var(--danger);text-transform:uppercase;letter-spacing:0.5px;margin-left:6px;vertical-align:middle;}
 
@@ -569,6 +577,28 @@ body.wide-mode .panel{max-width:none;}
 .milestone-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .milestone{font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.88);border:1px solid var(--border);color:var(--text-dim);}
 .milestone.earned{background:linear-gradient(135deg,rgba(31,191,138,0.12),rgba(46,107,255,0.08));border-color:rgba(31,191,138,0.25);color:var(--success);}
+.milestone.earned.rarity-rare{background:linear-gradient(135deg,rgba(46,107,255,0.12),rgba(46,107,255,0.06));border-color:rgba(46,107,255,0.3);color:#4e8cff;}
+.milestone.earned.rarity-epic{background:linear-gradient(135deg,rgba(163,53,238,0.12),rgba(163,53,238,0.06));border-color:rgba(163,53,238,0.3);color:#a335ee;}
+.milestone.earned.rarity-legendary{background:linear-gradient(135deg,rgba(255,128,0,0.15),rgba(255,165,0,0.06));border-color:rgba(255,128,0,0.35);color:#ff8000;}
+.milestone.earned.rarity-mythic{background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(255,215,0,0.08));border-color:rgba(231,76,60,0.35);color:#e74c3c;text-shadow:0 0 6px rgba(231,76,60,0.3);}
+/* Achievement modal */
+.achieve-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:20px;}
+.achieve-modal.visible{display:flex;}
+.achieve-modal-content{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:28px;}
+.achieve-cat-header{font-size:13px;font-weight:700;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);color:var(--text-muted);}
+.achieve-cat-header:first-child{margin-top:0;}
+.achieve-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:11px;}
+.achieve-row .a-icon{width:24px;text-align:center;font-size:14px;}
+.achieve-row .a-label{flex:1;font-weight:600;}
+.achieve-row .a-rarity{font-size:9px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;padding:2px 6px;border-radius:4px;}
+.a-rarity.common{color:var(--text-dim);background:rgba(0,0,0,0.05);}
+.a-rarity.rare{color:#4e8cff;background:rgba(46,107,255,0.08);}
+.a-rarity.epic{color:#a335ee;background:rgba(163,53,238,0.08);}
+.a-rarity.legendary{color:#ff8000;background:rgba(255,128,0,0.08);}
+.a-rarity.mythic{color:#e74c3c;background:rgba(231,76,60,0.08);}
+.achieve-row.locked .a-label{color:var(--text-dim);}
+.achieve-row.earned .a-label{color:var(--text);}
+.achieve-progress{font-size:10px;color:var(--text-dim);margin-top:8px;text-align:center;}
 
 @media(max-width:768px){
   .dash-grid{grid-template-columns:1fr 1fr;}.dash-row2{grid-template-columns:1fr;}
@@ -1056,7 +1086,7 @@ body.wide-mode .panel{max-width:none;}
     </div>
     <div class="form-section"><div class="section-label">Business & Contact</div>
       <div class="form-grid three-col">
-        <div class="form-group"><label>Business Name <span class="req">*</span></label><input id="pr_custName" required></div>
+        <div class="form-group" style="position:relative;"><label>Business Name <span class="req">*</span></label><input id="pr_custName" required><div class="sa-suggest" id="saSuggest"></div></div>
         <div class="form-group"><label>Primary Contact</label><input id="pr_contactName"></div>
         <div class="form-group full-width"><label>Address</label><input id="pr_address"></div>
         <div class="form-group"><label>Phone</label><input type="tel" id="pr_phone"></div>
@@ -1237,6 +1267,16 @@ body.wide-mode .panel{max-width:none;}
 </div>
 </div>
 
+<!-- ACHIEVEMENTS MODAL (v11) -->
+<div class="achieve-modal" id="achieveModal" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="achieve-modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="font-size:18px;font-weight:700;">🏆 All Achievements</h2>
+      <button onclick="document.getElementById('achieveModal').classList.remove('visible')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dim);">✕</button>
+    </div>
+    <div id="achieveModalBody"></div>
+  </div>
+</div>
 </main>
 </div>
 
@@ -3303,35 +3343,161 @@ function getMilestoneData() {
   const activeCustomers = allCustomers.filter(c => (c['Billing Status']||'').toLowerCase().includes('active'));
   const activeMRR = activeCustomers.reduce((sum, c) => sum + parseFloat(c['Monthly MRC ($)'] || 0), 0);
   const closedWon = allProspects.filter(p => p['Stage'] === 'Closed Won');
+  const closedLost = allProspects.filter(p => p['Stage'] === 'Closed Lost');
   const callActs = validActs.filter(a => a.type === 'Call' || a.type === 'Follow-Up Call');
   const dropIns = validActs.filter(a => a.type === 'Drop-In' || a.type === 'In-Person Meeting');
   const proposals = validActs.filter(a => a.type === 'Proposal Sent');
+  const emails = validActs.filter(a => a.type === 'Email' || a.type === 'Cold Email');
+  const notes = validActs.filter(a => a.type === 'Note');
+  const stageChanges = validActs.filter(a => a.type === 'Stage Change');
+  const uniqueProspectsTouched = new Set(validActs.map(a => a.prospect)).size;
+  const totalProspects = allProspects.length;
+  const demoScheduled = allProspects.filter(p => p['Stage'] === 'Demo Scheduled');
+  const negotiation = allProspects.filter(p => p['Stage'] === 'Negotiation');
+  const proposalSent = allProspects.filter(p => p['Stage'] === 'Proposal Sent');
+
+  // Days active (from first activity to today)
+  const firstAct = validActs.length ? validActs.reduce((earliest, a) => new Date(a.timestamp) < new Date(earliest.timestamp) ? a : earliest, validActs[0]) : null;
+  const daysActive = firstAct ? Math.floor((Date.now() - new Date(firstAct.timestamp)) / (1000*60*60*24)) : 0;
+
+  // Streak data (consecutive days with activity)
+  const actDates = [...new Set(validActs.map(a => new Date(a.timestamp).toISOString().split('T')[0]))].sort().reverse();
+
+  // Week activity counts
+  const thisWeek = validActs.filter(a => (Date.now() - new Date(a.timestamp)) < 7*24*60*60*1000);
+  const bestWeekCount = thisWeek.length; // simplified
+
+  // Sources used
+  const sourcesUsed = new Set(allProspects.map(p => p['Source']).filter(Boolean)).size;
+
+  // Close rate
+  const closeRate = (closedWon.length + closedLost.length) > 0 ? closedWon.length / (closedWon.length + closedLost.length) : 0;
+
+  const rec = (items, maxShow) => items.slice(0, maxShow||5).map(a => {
+    if(a.timestamp) return {name:a.prospect||a['Customer']||a['Customer Name']||'', detail:(a.text||a.type||'').substring(0,60), date:new Date(a.timestamp).toLocaleDateString()};
+    return {name:a['Customer']||a['Customer Name']||a['Customer']||'', detail:(a['Service Plan']||a['Est. Plan']||a['Stage']||''), date:a['Service Start Date']||a['Date Added']||''};
+  });
+
+  const custRec = (custs, maxShow) => custs.slice(0, maxShow||5).map(c => ({name:c['Customer Name']||'', detail:'$'+(c['Monthly MRC ($)']||0)+'/mo · '+(c['Service Plan']||''), date:c['Service Start Date']||''}));
+
+  const countRec = (label, count, detail) => [{name:label, detail:detail||'', date:''}];
 
   return [
-    { label:'🎯 First Customer', earned:activeCustomers.length>=1, records:activeCustomers.slice(0,5).map(c => ({name:c['Customer Name'], detail:'$'+(c['Monthly MRC ($)']||0)+'/mo · '+(c['Service Plan']||''), date:c['Service Start Date']||''})) },
-    { label:'📞 10 Calls Made', earned:callActs.length>=10, records:callActs.slice(0,10).map(a => ({name:a.prospect, detail:a.text.substring(0,60), date:new Date(a.timestamp).toLocaleDateString()})) },
-    { label:'📞 50 Calls Made', earned:callActs.length>=50, records:[{name:callActs.length+' total calls', detail:'Across '+new Set(callActs.map(a=>a.prospect)).size+' prospects', date:''}] },
-    { label:'🚗 5 Drop-Ins', earned:dropIns.length>=5, records:dropIns.slice(0,5).map(a => ({name:a.prospect, detail:a.text.substring(0,60), date:new Date(a.timestamp).toLocaleDateString()})) },
-    { label:'📄 5 Proposals Sent', earned:proposals.length>=5, records:proposals.slice(0,5).map(a => ({name:a.prospect, detail:a.text.substring(0,60), date:new Date(a.timestamp).toLocaleDateString()})) },
-    { label:'🏆 First Closed Deal', earned:closedWon.length>=1, records:closedWon.slice(0,3).map(p => {
-      const acts = validActs.filter(a=>a.prospect===p['Customer']).length;
-      return {name:p['Customer'], detail:acts+' touches · '+(p['Est. Plan']||''), date:p['Date Added']||''};
-    }) },
-    { label:'💰 $1K MRR', earned:activeMRR>=1000, records:activeCustomers.map(c => ({name:c['Customer Name'], detail:'$'+(c['Monthly MRC ($)']||0)+'/mo', date:''})) },
-    { label:'💰 $2.5K MRR', earned:activeMRR>=2500, records:[{name:'$'+activeMRR.toLocaleString()+' MRR', detail:activeCustomers.length+' customers', date:''}] },
-    { label:'💰 $5K MRR', earned:activeMRR>=5000, records:[{name:'🎉 Goal achieved!', detail:'$'+activeMRR.toLocaleString()+' MRR', date:''}] },
-    { label:'📊 100 Activities', earned:validActs.length>=100, records:[{name:validActs.length+' total activities', detail:'Across '+new Set(validActs.map(a=>a.prospect)).size+' prospects', date:''}] },
-    { label:'👥 5 Customers', earned:activeCustomers.length>=5, records:activeCustomers.slice(0,5).map(c => ({name:c['Customer Name'], detail:'$'+(c['Monthly MRC ($)']||0)+'/mo', date:c['Service Start Date']||''})) },
-    { label:'👥 25 Customers', earned:activeCustomers.length>=25, records:[{name:activeCustomers.length+' customers', detail:'$'+activeMRR.toLocaleString()+' total MRR', date:''}] },
+    // ===== 👑 CUSTOMERS =====
+    { cat:'👑', label:'First Customer', earned:activeCustomers.length>=1, rarity:'legendary', records:custRec(activeCustomers) },
+    { cat:'👑', label:'5 Customers', earned:activeCustomers.length>=5, rarity:'epic', records:custRec(activeCustomers) },
+    { cat:'👑', label:'10 Customers', earned:activeCustomers.length>=10, rarity:'epic', records:countRec(activeCustomers.length+' customers', 0, '$'+activeMRR.toLocaleString()+' MRR') },
+    { cat:'👑', label:'25 Customers', earned:activeCustomers.length>=25, rarity:'legendary', records:countRec(activeCustomers.length+' customers', 0, '$'+activeMRR.toLocaleString()+' MRR') },
+    { cat:'👑', label:'50 Customers', earned:activeCustomers.length>=50, rarity:'mythic', records:countRec('HALFWAY THERE', 0, activeCustomers.length+' customers · $'+activeMRR.toLocaleString()+' MRR') },
+    { cat:'👑', label:'75 Customers', earned:activeCustomers.length>=75, rarity:'mythic', records:countRec('W-2 KILLER', 0, activeCustomers.length+' customers') },
+    { cat:'👑', label:'100 Customers', earned:activeCustomers.length>=100, rarity:'mythic', records:countRec('🏆 CENTURION', 0, 'Triple-digit customer base') },
+
+    // ===== 💰 REVENUE =====
+    { cat:'💰', label:'$500 MRR', earned:activeMRR>=500, rarity:'rare', records:countRec('$'+activeMRR.toLocaleString()+' MRR', 0, activeCustomers.length+' customers') },
+    { cat:'💰', label:'$1K MRR', earned:activeMRR>=1000, rarity:'epic', records:countRec('$'+activeMRR.toLocaleString()+' MRR', 0, 'Four figures monthly') },
+    { cat:'💰', label:'$2.5K MRR', earned:activeMRR>=2500, rarity:'epic', records:countRec('$'+activeMRR.toLocaleString()+' MRR', 0, '$30K/yr run rate') },
+    { cat:'💰', label:'$5K MRR', earned:activeMRR>=5000, rarity:'legendary', records:countRec('🎯 GOAL ACHIEVED', 0, '$60K/yr — SwitchPoint is real') },
+    { cat:'💰', label:'$7.5K MRR', earned:activeMRR>=7500, rarity:'legendary', records:countRec('$'+activeMRR.toLocaleString()+' MRR', 0, '$90K/yr run rate') },
+    { cat:'💰', label:'$10K MRR', earned:activeMRR>=10000, rarity:'mythic', records:countRec('🔥 W-2 REPLACED', 0, 'Six figures from SwitchPoint alone') },
+    { cat:'💰', label:'$15K MRR', earned:activeMRR>=15000, rarity:'mythic', records:countRec('$180K/yr', 0, 'You built an empire') },
+    { cat:'💰', label:'$25K MRR', earned:activeMRR>=25000, rarity:'mythic', records:countRec('$300K/yr', 0, 'Generational wealth territory') },
+
+    // ===== 🏆 DEALS =====
+    { cat:'🏆', label:'First Closed Deal', earned:closedWon.length>=1, rarity:'legendary', records:rec(closedWon) },
+    { cat:'🏆', label:'5 Deals Closed', earned:closedWon.length>=5, rarity:'epic', records:rec(closedWon) },
+    { cat:'🏆', label:'10 Deals Closed', earned:closedWon.length>=10, rarity:'epic', records:countRec(closedWon.length+' deals closed', 0, 'Double digits') },
+    { cat:'🏆', label:'25 Deals Closed', earned:closedWon.length>=25, rarity:'legendary', records:countRec(closedWon.length+' deals closed', 0, 'Quarter century of wins') },
+    { cat:'🏆', label:'50 Deals Closed', earned:closedWon.length>=50, rarity:'mythic', records:countRec('CLOSER', 0, closedWon.length+' lifetime closes') },
+    { cat:'🏆', label:'50% Close Rate', earned:closeRate>=0.5 && (closedWon.length+closedLost.length)>=5, rarity:'legendary', records:countRec(Math.round(closeRate*100)+'% close rate', 0, closedWon.length+'W / '+closedLost.length+'L') },
+
+    // ===== 📞 CALLS =====
+    { cat:'📞', label:'First Call', earned:callActs.length>=1, rarity:'common', records:rec(callActs,1) },
+    { cat:'📞', label:'10 Calls', earned:callActs.length>=10, rarity:'common', records:rec(callActs) },
+    { cat:'📞', label:'25 Calls', earned:callActs.length>=25, rarity:'rare', records:countRec(callActs.length+' calls made', 0, new Set(callActs.map(a=>a.prospect)).size+' prospects called') },
+    { cat:'📞', label:'50 Calls', earned:callActs.length>=50, rarity:'rare', records:countRec(callActs.length+' calls', 0, 'Phone warrior') },
+    { cat:'📞', label:'100 Calls', earned:callActs.length>=100, rarity:'epic', records:countRec('DIALER', 0, callActs.length+' lifetime calls') },
+    { cat:'📞', label:'250 Calls', earned:callActs.length>=250, rarity:'epic', records:countRec('PHONE DEMON', 0, callActs.length+' calls') },
+    { cat:'📞', label:'500 Calls', earned:callActs.length>=500, rarity:'legendary', records:countRec('CALL CENTER OF ONE', 0, callActs.length+' calls') },
+    { cat:'📞', label:'1,000 Calls', earned:callActs.length>=1000, rarity:'mythic', records:countRec('☎️ LEGENDARY DIALER', 0, 'One thousand calls') },
+    { cat:'📞', label:'5,000 Calls', earned:callActs.length>=5000, rarity:'mythic', records:countRec('THE PHONE IS PART OF YOUR HAND', 0, callActs.length+' calls') },
+
+    // ===== 🚗 DROP-INS =====
+    { cat:'🚗', label:'First Drop-In', earned:dropIns.length>=1, rarity:'common', records:rec(dropIns,1) },
+    { cat:'🚗', label:'5 Drop-Ins', earned:dropIns.length>=5, rarity:'common', records:rec(dropIns) },
+    { cat:'🚗', label:'10 Drop-Ins', earned:dropIns.length>=10, rarity:'rare', records:countRec(dropIns.length+' drop-ins', 0, 'Boots on the ground') },
+    { cat:'🚗', label:'25 Drop-Ins', earned:dropIns.length>=25, rarity:'rare', records:countRec('ROAD WARRIOR', 0, dropIns.length+' visits') },
+    { cat:'🚗', label:'50 Drop-Ins', earned:dropIns.length>=50, rarity:'epic', records:countRec('TERRITORY OWNED', 0, dropIns.length+' visits') },
+    { cat:'🚗', label:'100 Drop-Ins', earned:dropIns.length>=100, rarity:'epic', records:countRec('THEY ALL KNOW YOUR NAME', 0, dropIns.length+' visits') },
+    { cat:'🚗', label:'250 Drop-Ins', earned:dropIns.length>=250, rarity:'legendary', records:countRec('LEGENDARY HUSTLER', 0, dropIns.length+' drop-ins') },
+    { cat:'🚗', label:'500 Drop-Ins', earned:dropIns.length>=500, rarity:'mythic', records:countRec('THE MAP IS YOU', 0, dropIns.length+' drop-ins') },
+
+    // ===== ✉️ EMAILS =====
+    { cat:'✉️', label:'10 Emails', earned:emails.length>=10, rarity:'common', records:rec(emails) },
+    { cat:'✉️', label:'50 Emails', earned:emails.length>=50, rarity:'rare', records:countRec(emails.length+' emails sent', 0, '') },
+    { cat:'✉️', label:'100 Emails', earned:emails.length>=100, rarity:'epic', records:countRec('INBOX COMMANDER', 0, emails.length+' emails') },
+    { cat:'✉️', label:'500 Emails', earned:emails.length>=500, rarity:'legendary', records:countRec('EMAIL MACHINE', 0, emails.length+' emails') },
+
+    // ===== 📄 PROPOSALS =====
+    { cat:'📄', label:'First Proposal', earned:proposals.length>=1, rarity:'rare', records:rec(proposals,1) },
+    { cat:'📄', label:'5 Proposals', earned:proposals.length>=5, rarity:'rare', records:rec(proposals) },
+    { cat:'📄', label:'10 Proposals', earned:proposals.length>=10, rarity:'epic', records:countRec(proposals.length+' proposals sent', 0, '') },
+    { cat:'📄', label:'25 Proposals', earned:proposals.length>=25, rarity:'epic', records:countRec('PROPOSAL MACHINE', 0, proposals.length+' sent') },
+    { cat:'📄', label:'50 Proposals', earned:proposals.length>=50, rarity:'legendary', records:countRec('DEAL ARCHITECT', 0, proposals.length+' proposals') },
+
+    // ===== 📊 ACTIVITY VOLUME =====
+    { cat:'📊', label:'25 Activities', earned:validActs.length>=25, rarity:'common', records:countRec(validActs.length+' total', 0, 'Getting started') },
+    { cat:'📊', label:'50 Activities', earned:validActs.length>=50, rarity:'common', records:countRec(validActs.length+' activities', 0, '') },
+    { cat:'📊', label:'100 Activities', earned:validActs.length>=100, rarity:'rare', records:countRec('TRIPLE DIGITS', 0, validActs.length+' activities') },
+    { cat:'📊', label:'250 Activities', earned:validActs.length>=250, rarity:'rare', records:countRec(validActs.length+' activities', 0, '') },
+    { cat:'📊', label:'500 Activities', earned:validActs.length>=500, rarity:'epic', records:countRec('GRINDER', 0, validActs.length+' logged') },
+    { cat:'📊', label:'1,000 Activities', earned:validActs.length>=1000, rarity:'epic', records:countRec('THE MACHINE', 0, validActs.length+' activities') },
+    { cat:'📊', label:'2,500 Activities', earned:validActs.length>=2500, rarity:'legendary', records:countRec('UNSTOPPABLE', 0, validActs.length+' activities') },
+    { cat:'📊', label:'5,000 Activities', earned:validActs.length>=5000, rarity:'legendary', records:countRec('FORCE OF NATURE', 0, validActs.length) },
+    { cat:'📊', label:'10,000 Activities', earned:validActs.length>=10000, rarity:'mythic', records:countRec('⚡ TEN THOUSAND', 0, 'Absolutely insane') },
+
+    // ===== 🗺️ PIPELINE =====
+    { cat:'🗺️', label:'10 Prospects', earned:totalProspects>=10, rarity:'common', records:countRec(totalProspects+' in pipeline', 0, '') },
+    { cat:'🗺️', label:'25 Prospects', earned:totalProspects>=25, rarity:'common', records:countRec(totalProspects+' prospects', 0, '') },
+    { cat:'🗺️', label:'50 Prospects', earned:totalProspects>=50, rarity:'rare', records:countRec('PIPELINE BUILDER', 0, totalProspects+' prospects') },
+    { cat:'🗺️', label:'100 Prospects', earned:totalProspects>=100, rarity:'epic', records:countRec('CENTURY PIPELINE', 0, totalProspects+' prospects') },
+    { cat:'🗺️', label:'250 Prospects', earned:totalProspects>=250, rarity:'epic', records:countRec('TERRITORY MAPPED', 0, totalProspects+' prospects') },
+    { cat:'🗺️', label:'500 Prospects', earned:totalProspects>=500, rarity:'legendary', records:countRec('HALF A THOUSAND', 0, totalProspects) },
+    { cat:'🗺️', label:'1,000 Prospects', earned:totalProspects>=1000, rarity:'mythic', records:countRec('PIPELINE OVERLORD', 0, totalProspects+' prospects') },
+    { cat:'🗺️', label:'Touched 50 Prospects', earned:uniqueProspectsTouched>=50, rarity:'epic', records:countRec(uniqueProspectsTouched+' prospects contacted', 0, '') },
+
+    // ===== 🔥 SPECIAL / HIDDEN =====
+    { cat:'🔥', label:'First Demo Scheduled', earned:demoScheduled.length>=1, rarity:'rare', records:rec(demoScheduled) },
+    { cat:'🔥', label:'First Negotiation', earned:negotiation.length>=1, rarity:'epic', records:rec(negotiation) },
+    { cat:'🔥', label:'30-Day Veteran', earned:daysActive>=30, rarity:'rare', records:countRec(daysActive+' days active', 0, 'One month in the game') },
+    { cat:'🔥', label:'90-Day Veteran', earned:daysActive>=90, rarity:'epic', records:countRec(daysActive+' days', 0, 'Quarter of a year') },
+    { cat:'🔥', label:'365-Day Veteran', earned:daysActive>=365, rarity:'legendary', records:countRec('ONE FULL YEAR', 0, daysActive+' days in the trenches') },
+    { cat:'🔥', label:'Multi-Source Hunter', earned:sourcesUsed>=4, rarity:'rare', records:countRec(sourcesUsed+' lead sources used', 0, 'Diversified prospecting') },
+    { cat:'🔥', label:'20+ Activities in a Week', earned:thisWeek.length>=20, rarity:'epic', records:countRec(thisWeek.length+' this week', 0, 'Beast mode activated') },
+    { cat:'🔥', label:'Stage Mover', earned:stageChanges.length>=10, rarity:'rare', records:countRec(stageChanges.length+' stage changes', 0, 'Pipeline in motion') },
+    { cat:'🔥', label:'Pipeline Velocity', earned:stageChanges.length>=50, rarity:'legendary', records:countRec(stageChanges.length+' moves', 0, 'Deals flying through stages') },
   ];
 }
 
 function renderMilestones() {
   const el = document.getElementById('dashMilestones');
   const milestones = getMilestoneData();
-  el.innerHTML = milestones.map((m, i) =>
-    `<span class="milestone${m.earned?' earned':''}" onclick="toggleMilestoneDetail(${i})">${m.earned?'✓ ':''}${m.label}</span>`
-  ).join('') + '<div class="milestone-detail" id="milestoneDetail"></div>';
+  const earned = milestones.filter(m => m.earned);
+  const unearned = milestones.filter(m => !m.earned);
+  // Show earned first, then next 3 unearned as targets
+  const nextUp = unearned.slice(0, 3);
+  const display = [...earned, ...nextUp];
+  const totalCount = milestones.length;
+  const earnedCount = earned.length;
+
+  const rarityClass = (r) => r === 'mythic' ? 'rarity-mythic' : r === 'legendary' ? 'rarity-legendary' : r === 'epic' ? 'rarity-epic' : r === 'rare' ? 'rarity-rare' : '';
+
+  el.innerHTML = `<div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">${earnedCount} / ${totalCount} unlocked</div>` +
+    display.map((m, i) => {
+      const globalIdx = milestones.indexOf(m);
+      return `<span class="milestone${m.earned?' earned':''} ${rarityClass(m.rarity)}" onclick="toggleMilestoneDetail(${globalIdx})">${m.earned?'✓ ':'🔒 '}${m.cat} ${m.label}</span>`;
+    }).join('') +
+    (unearned.length > 3 ? `<span class="milestone" onclick="showAllAchievements()" style="cursor:pointer;background:var(--accent-glow);color:var(--accent);border-color:rgba(46,107,255,0.2);">👁️ View All ${totalCount} Achievements</span>` : '') +
+    '<div class="milestone-detail" id="milestoneDetail"></div>';
 }
 
 function toggleMilestoneDetail(idx) {
@@ -3350,6 +3516,37 @@ function toggleMilestoneDetail(idx) {
       </div>`
     ).join('') : '<div style="font-size:11px;color:var(--text-dim);">Keep going — this milestone is within reach!</div>');
   detail.classList.add('open');
+}
+
+function showAllAchievements() {
+  const milestones = getMilestoneData();
+  const earned = milestones.filter(m => m.earned).length;
+  const total = milestones.length;
+
+  // Group by category
+  const cats = {};
+  const catNames = {'👑':'Customers','💰':'Revenue','🏆':'Deals','📞':'Calls','🚗':'Drop-Ins','✉️':'Emails','📄':'Proposals','📊':'Activity','🗺️':'Pipeline','🔥':'Special'};
+  milestones.forEach(m => {
+    if(!cats[m.cat]) cats[m.cat] = [];
+    cats[m.cat].push(m);
+  });
+
+  const body = document.getElementById('achieveModalBody');
+  body.innerHTML = `<div class="achieve-progress">${earned} / ${total} unlocked (${Math.round(earned/total*100)}%)</div>
+    <div style="height:6px;background:var(--border);border-radius:3px;margin:8px 0 16px;overflow:hidden;">
+      <div style="height:100%;width:${(earned/total*100)}%;background:linear-gradient(90deg,var(--success),var(--accent));border-radius:3px;transition:width 0.6s;"></div>
+    </div>` +
+    Object.entries(cats).map(([cat, items]) => {
+      const catEarned = items.filter(m=>m.earned).length;
+      return `<div class="achieve-cat-header">${cat} ${catNames[cat]||''} <span style="float:right;font-weight:400;font-size:11px;">${catEarned}/${items.length}</span></div>` +
+        items.map(m => `<div class="achieve-row ${m.earned?'earned':'locked'}">
+          <div class="a-icon">${m.earned?'✅':'🔒'}</div>
+          <div class="a-label">${m.label}</div>
+          <div class="a-rarity ${m.rarity}">${m.rarity}</div>
+        </div>`).join('');
+    }).join('');
+
+  document.getElementById('achieveModal').classList.add('visible');
 }
 
 // =======================================================================
@@ -3507,18 +3704,58 @@ document.addEventListener('DOMContentLoaded', () => {
     nameField.addEventListener('input', () => {
       clearTimeout(saTimeout);
       saTimeout = setTimeout(() => {
-        const match = checkStayAway(nameField.value);
+        const val = nameField.value.trim();
+        const match = checkStayAway(val);
         if(match) showStayAwayWarning(match);
         else document.getElementById('stayAwayWarning').classList.remove('visible');
-      }, 500);
+        // Elastic search suggestions
+        showSaSuggestions(val);
+      }, 300);
     });
-    // Also check on blur (after auto-fill populates)
     nameField.addEventListener('change', () => {
       const match = checkStayAway(nameField.value);
       if(match) showStayAwayWarning(match);
     });
+    // Hide suggestions on blur (with slight delay so clicks register)
+    nameField.addEventListener('blur', () => {
+      setTimeout(() => document.getElementById('saSuggest').classList.remove('visible'), 200);
+    });
+    nameField.addEventListener('focus', () => {
+      const val = nameField.value.trim();
+      if(val.length >= 3) showSaSuggestions(val);
+    });
   }
 });
+
+function showSaSuggestions(input) {
+  const el = document.getElementById('saSuggest');
+  if(!input || input.length < 3 || stayAwayList.length === 0) { el.classList.remove('visible'); return; }
+
+  const upper = input.toUpperCase();
+  const words = upper.split(/[\s,.\-\/]+/).filter(w => w.length >= 3);
+  if(!words.length) { el.classList.remove('visible'); return; }
+
+  // Find matches: any StayAway name containing ANY of the search words
+  const matches = stayAwayList.filter(name => {
+    return words.some(w => name.includes(w));
+  }).slice(0, 8); // Max 8 suggestions
+
+  if(!matches.length) { el.classList.remove('visible'); return; }
+
+  // Highlight matching text
+  const highlight = (name) => {
+    let display = name;
+    words.forEach(w => {
+      const regex = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      display = display.replace(regex, '<mark>$1</mark>');
+    });
+    return display;
+  };
+
+  el.innerHTML = '<div class="sa-suggest-header">⛔ Stay Away matches (' + matches.length + ')</div>' +
+    matches.map(m => `<div class="sa-suggest-item"><span class="sa-dot"></span>${highlight(m)}</div>`).join('');
+  el.classList.add('visible');
+}
 
 // =======================================================================
 // AUTO-FILL FROM GOOGLE MAPS (v10)
