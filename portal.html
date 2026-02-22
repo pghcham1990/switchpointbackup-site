@@ -1777,12 +1777,18 @@ function applyRolePermissions() {
     if(adminApp) adminApp.style.display = 'none';
     if(partnerPortal) partnerPortal.style.display = 'block';
     if(customerPortal) customerPortal.style.display = 'none';
+    // Hide admin-only UI elements
+    document.getElementById('speedDialFab').style.display = 'none';
+    document.getElementById('quickLogFab').style.display = 'none';
     loadPartnerPortalData();
   }
   else if(role === 'Customer') {
     if(adminApp) adminApp.style.display = 'none';
     if(partnerPortal) partnerPortal.style.display = 'none';
     if(customerPortal) customerPortal.style.display = 'block';
+    // Hide admin-only UI elements
+    document.getElementById('speedDialFab').style.display = 'none';
+    document.getElementById('quickLogFab').style.display = 'none';
     loadCustomerPortalData();
   }
 
@@ -2185,7 +2191,7 @@ function fetchActivities() {
 function initDatabase() {
   if (CONFIG.LIVE_MODE && CONFIG.APPS_SCRIPT_URL) {
     document.getElementById('connDot').className='connection-dot dot-live';
-    document.getElementById('connLabel').textContent='Live — Google Sheets';
+    document.getElementById('connLabel').textContent = (currentUserRole === 'Admin' || currentUserRole === 'Employee') ? 'Live — Google Sheets' : 'Live';
     fetchLiveData();
     fetchProspects();
     fetchActivities();
