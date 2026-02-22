@@ -306,6 +306,19 @@ textarea{resize:vertical;min-height:64px;}
 .quick-log-fab{position:fixed;bottom:28px;left:28px;z-index:200;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--white);font-size:22px;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(46,107,255,0.35);display:flex;align-items:center;justify-content:center;transition:all 0.2s cubic-bezier(.4,0,.2,1);}
 .quick-log-fab:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(46,107,255,0.45);}
 .quick-log-fab:active{transform:scale(0.95);}
+
+/* ===== SPEED DIAL LAUNCHER (v11.1) ===== */
+.speed-dial-fab{position:fixed;bottom:90px;left:28px;z-index:200;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1e293b,#334155);color:var(--white);font-size:16px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:all 0.2s cubic-bezier(.4,0,.2,1);}
+.speed-dial-fab:hover{transform:scale(1.1);box-shadow:0 10px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.2);}
+.speed-dial-fab:active{transform:scale(0.95);}
+.speed-dial-menu{position:fixed;bottom:90px;left:80px;z-index:201;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,0.3);display:none;min-width:220px;max-height:70vh;overflow-y:auto;}
+.speed-dial-menu.visible{display:block;animation:fadeSlideUp 0.2s ease-out;}
+.speed-dial-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);padding:8px 12px 4px;margin-top:4px;}
+.speed-dial-section:first-child{margin-top:0;}
+.speed-dial-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--text-primary);font-size:13px;font-weight:500;transition:all 0.15s ease;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+.speed-dial-link:hover{background:rgba(46,107,255,0.08);color:var(--accent);}
+.speed-dial-link .sd-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.speed-dial-link .sd-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .quick-modal{position:fixed;bottom:90px;left:28px;z-index:200;width:360px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);display:none;animation:slideUp 0.25s cubic-bezier(.16,1,.3,1);}
 .quick-modal.visible{display:block;}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -604,6 +617,8 @@ body.wide-mode .panel{max-width:none;}
   .dash-grid{grid-template-columns:1fr 1fr;}.dash-row2{grid-template-columns:1fr;}
   .quick-modal{left:16px;right:16px;width:auto;bottom:86px;}
   .quick-log-fab{bottom:20px;left:20px;width:48px;height:48px;font-size:20px;}
+  .speed-dial-fab{bottom:78px;left:20px;width:40px;height:40px;font-size:14px;}
+  .speed-dial-menu{left:20px;bottom:128px;right:20px;min-width:auto;}
   .header{padding:10px 14px;}.tab-nav{padding:10px 14px 0;}.main{padding:0 14px 32px;}.panel{padding:16px;}
   .form-grid,.form-grid.three-col,.form-grid.four-col{grid-template-columns:1fr;}
   .detail-section-body{grid-template-columns:1fr 1fr;}.db-search-bar{flex-wrap:wrap;}.login-card{margin:20px;padding:32px 24px;}
@@ -1384,6 +1399,12 @@ body.wide-mode .panel{max-width:none;}
     </div>
     <div class="report-body" id="reportBody"><div class="loading-msg">Generating report...</div></div>
   </div>
+</div>
+
+<!-- SPEED DIAL LAUNCHER (v11.1) -->
+<button class="speed-dial-fab" id="speedDialFab" onclick="toggleSpeedDial()" title="Quick Links">⚙️</button>
+<div class="speed-dial-menu" id="speedDialMenu">
+  <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:12px;">Loading links...</div>
 </div>
 
 <!-- QUICK LOG FAB -->
@@ -2541,6 +2562,8 @@ function switchTab(id, btn) {
   // Remove wide mode if leaving pipeline or if switching to table view
   if(id !== 'pipeline' || currentPipeView !== 'kanban') document.body.classList.remove('wide-mode');
   else if(id === 'pipeline' && currentPipeView === 'kanban') document.body.classList.add('wide-mode');
+  // Remember last tab
+  try { localStorage.setItem('sp_lastTab', id); } catch(e) {}
 }
 
 function switchOutputTab(id, btn) {
@@ -2900,6 +2923,30 @@ function renderWeeklyActivity() {
 let quickLogOpen = false;
 let lastInteractedProspect = '';
 let quickFollowUpDays = null;
+
+// SPEED DIAL LAUNCHER (v11.1)
+function toggleSpeedDial() {
+  const menu = document.getElementById('speedDialMenu');
+  const fab = document.getElementById('speedDialFab');
+  const isOpen = menu.classList.contains('visible');
+  if(isOpen) {
+    menu.classList.remove('visible');
+    fab.textContent = '⚙️';
+  } else {
+    menu.classList.add('visible');
+    fab.textContent = '✕';
+    // Close if clicking outside
+    setTimeout(() => {
+      document.addEventListener('click', function closeSD(e) {
+        if(!menu.contains(e.target) && e.target !== fab) {
+          menu.classList.remove('visible');
+          fab.textContent = '⚙️';
+          document.removeEventListener('click', closeSD);
+        }
+      });
+    }, 10);
+  }
+}
 
 function toggleQuickLog() {
   quickLogOpen = !quickLogOpen;
@@ -3716,9 +3763,112 @@ function showStayAwayWarning(matchedName) {
   el.classList.add('visible');
 }
 
+// =======================================================================
+// QUICK LINKS — Loaded from Google Sheet "QuickLinks" tab (v11.1)
+// =======================================================================
+// Sheet columns: Section | Name | URL | Icon | Color
+// Example row: SwitchPoint Tools | Gmail | https://mail.google.com/... | ✉️ | #ea4335
+
+function loadQuickLinks() {
+  if(!CONFIG.LIVE_MODE) return;
+  fetch(CONFIG.APPS_SCRIPT_URL + '?action=getQuickLinks')
+    .then(r => r.json())
+    .then(data => {
+      if(!Array.isArray(data) || data.length === 0) {
+        document.getElementById('speedDialMenu').innerHTML =
+          '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px;">No links found.<br>Add a "QuickLinks" tab to your Google Sheet.</div>';
+        return;
+      }
+      renderQuickLinks(data);
+    })
+    .catch(e => {
+      console.log('QuickLinks load failed:', e);
+      document.getElementById('speedDialMenu').innerHTML =
+        '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px;">Failed to load links.</div>';
+    });
+}
+
+function renderQuickLinks(data) {
+  const menu = document.getElementById('speedDialMenu');
+  let html = '';
+  let currentSection = '';
+
+  data.forEach(row => {
+    const section = (row['Section'] || '').trim();
+    const name = (row['Name'] || '').trim();
+    const url = (row['URL'] || '').trim();
+    const icon = (row['Icon'] || '🔗').trim();
+    const color = (row['Color'] || '#2e6bff').trim();
+
+    if(!name || !url) return;
+
+    if(section && section !== currentSection) {
+      currentSection = section;
+      html += '<div class="speed-dial-section">' + section + '</div>';
+    }
+
+    html += '<a class="speed-dial-link" href="' + url + '" target="_blank" onclick="trackQuickLink(\'' + name.replace(/'/g, "\\'") + '\', \'' + url.replace(/'/g, "\\'") + '\')">' +
+      '<span class="sd-icon" style="background:' + hexToRgba(color, 0.12) + ';color:' + color + ';">' + icon + '</span>' +
+      '<span class="sd-label">' + name + '</span></a>';
+  });
+
+  menu.innerHTML = html || '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:12px;">No links configured.</div>';
+}
+
+function hexToRgba(hex, alpha) {
+  // Convert hex color to rgba for icon backgrounds
+  hex = hex.replace('#', '');
+  if(hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  const r = parseInt(hex.substring(0,2), 16) || 0;
+  const g = parseInt(hex.substring(2,4), 16) || 0;
+  const b = parseInt(hex.substring(4,6), 16) || 0;
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function trackQuickLink(name, url) {
+  const a = {
+    id: Date.now(),
+    prospect: 'SwitchPoint Operations',
+    type: 'Note',
+    text: '⚙️ Quick Link: ' + name + ' — ' + url,
+    timestamp: new Date().toISOString(),
+    user: sessionStorage.getItem('sp_user') || 'scott',
+    deleted: false
+  };
+  activities.unshift(a);
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'addActivity',
+        data: { id: String(a.id), prospect: a.prospect, type: a.type, text: a.text, followUp: '', timestamp: a.timestamp, user: a.user, deleted: '' }
+      })
+    }).catch(e => console.log('QuickLink audit failed:', e));
+  }
+}
+
+// =======================================================================
+// TAB MEMORY — Remember last active tab across refreshes (v11.1)
+// =======================================================================
+
+function restoreLastTab() {
+  try {
+    const lastTab = localStorage.getItem('sp_lastTab');
+    if(lastTab) {
+      const tabBtn = document.querySelector('.tab-btn[onclick*="\\'' + lastTab + '\\'"]');
+      if(tabBtn) {
+        switchTab(lastTab, tabBtn);
+      }
+    }
+  } catch(e) {}
+}
+
 // Attach real-time check to business name field
 document.addEventListener('DOMContentLoaded', () => {
   loadStayAwayList();
+  loadQuickLinks();
+  restoreLastTab();
   const nameField = document.getElementById('pr_custName');
   if(nameField) {
     let saTimeout;
