@@ -1989,13 +1989,34 @@ function loadCustomerPortalData() {
         </div>
 
         <div class="detail-section">
-          <div class="detail-section-header" onclick="toggleSection(this)">📋 Recent Activity</div>
+          <div class="detail-section-header" onclick="toggleSection(this)">🎫 My Support Tickets</div>
           <div class="detail-section-body" style="display:block;padding:0;">
-            <div class="activity-log">${myActs.length ? myActs.slice(0,20).map(a=>{
+            <div class="activity-log">${(()=>{
+              const tickets = myActs.filter(a=>a.text&&(a.text.includes('Support Request')||a.text.includes('🎫')||a.text.includes('🚨')));
+              if(!tickets.length) return '<div class="activity-empty">No support tickets yet. Use the form above to submit one.</div>';
+              return tickets.slice(0,20).map(a=>{
+                const d=new Date(a.timestamp);
+                const ts=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+                const status = (a['Ticket Status']||'').trim().toLowerCase();
+                const isClosed = status === 'closed';
+                const badge = isClosed
+                  ? '<span style="display:inline-block;background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:8px;">✓ CLOSED</span>'
+                  : '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:8px;">● OPEN</span>';
+                const textStyle = isClosed ? 'opacity:0.6;' : '';
+                return '<div class="activity-item" style="'+textStyle+'"><div class="activity-time">'+ts+'</div><div class="activity-text">'+badge+a.text+'</div></div>';
+              }).join('');
+            })()}</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Recent Activity</div>
+          <div class="detail-section-body" style="padding:0;">
+            <div class="activity-log">${myActs.length ? myActs.filter(a=>!a.text||(!a.text.includes('Support Request')&&!a.text.includes('🎫')&&!a.text.includes('🚨'))).slice(0,15).map(a=>{
               const d=new Date(a.timestamp);
               const ts=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
               return '<div class="activity-item"><div class="activity-time">'+ts+'</div><div class="activity-text">'+a.text+'</div></div>';
-            }).join('') : '<div class="activity-empty">No activity history yet.</div>'}</div>
+            }).join('') || '<div class="activity-empty">No activity history yet.</div>' : '<div class="activity-empty">No activity history yet.</div>'}</div>
           </div>
         </div>
       </div>`;
@@ -2019,6 +2040,8 @@ function submitSupportTicket() {
     ['tkt_subject','tkt_details'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('tkt_priority').selectedIndex=0;
     document.getElementById('tkt_category').selectedIndex=0;
+    // Reload the customer portal to show the new ticket
+    setTimeout(()=>loadCustomerPortalData(), 1500);
   }).catch(e=>showToast('Submit failed','error'));
 }
 
