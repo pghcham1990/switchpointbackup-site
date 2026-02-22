@@ -346,6 +346,26 @@ textarea{resize:vertical;min-height:64px;}
 .partner-add-section.visible{display:block;}
 .partner-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 .partner-form-grid .full-width{grid-column:1/-1;}
+.linked-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.linked-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:16px;cursor:pointer;transition:all 0.15s;}
+.linked-chip.chip-customer{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);}
+.linked-chip.chip-customer:hover{background:rgba(16,185,129,0.2);}
+.linked-chip.chip-prospect{background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);}
+.linked-chip.chip-prospect:hover{background:rgba(249,115,22,0.2);}
+.linked-chip.chip-partner{background:rgba(0,217,217,0.1);color:#00b8b8;border:1px solid rgba(0,217,217,0.2);}
+.linked-chip.chip-partner:hover{background:rgba(0,217,217,0.2);}
+.linked-chip .chip-remove{font-size:13px;opacity:0.6;cursor:pointer;margin-left:2px;}.linked-chip .chip-remove:hover{opacity:1;}
+.link-autocomplete{position:relative;}
+.link-autocomplete input{width:100%;font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);outline:none;}
+.link-autocomplete input:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px var(--accent-glow);}
+.link-suggestions{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);max-height:200px;overflow-y:auto;z-index:50;display:none;box-shadow:var(--shadow);}
+.link-suggestions.visible{display:block;}
+.link-suggestion{padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.link-suggestion:last-child{border-bottom:none;}
+.link-suggestion:hover{background:var(--surface-2);}
+.link-suggestion .ls-type{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;}
+.link-suggestion .ls-type.ls-cust{background:rgba(16,185,129,0.1);color:#10b981;}
+.link-suggestion .ls-type.ls-pros{background:rgba(249,115,22,0.1);color:#f97316;}
 .quick-modal{position:fixed;bottom:90px;left:28px;z-index:200;width:360px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);display:none;animation:slideUp 0.25s cubic-bezier(.16,1,.3,1);}
 .quick-modal.visible{display:block;}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -1968,6 +1988,8 @@ function selectCustomer(idx) {
   document.getElementById('detailSaveBar').classList.remove('visible');
   renderCustDetailSections(c);
   const card=document.getElementById('detailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Apply saved section states
+  applySectionStates(card);
 }
 
 function renderCustDetailSections(c) {
@@ -1980,6 +2002,12 @@ function renderCustDetailSections(c) {
     }).join('');
     return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}</div></div>`;
   }).join('');
+  // Append linked partners section (v11.2)
+  const custName = c['Customer Name'] || '';
+  const partnerHtml = renderPartnerChipsFor(custName);
+  if(partnerHtml) document.getElementById('detailSections').innerHTML += partnerHtml;
+  // Apply saved section collapse states
+  applySectionStates(document.getElementById('detailSections'));
 }
 
 function toggleEditMode() {
@@ -2074,6 +2102,8 @@ function selectProspect(idx) {
   renderJourneyTimeline(p);
   showProspectMap(p);
   const card=document.getElementById('prospectDetailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Apply saved section states to static sections (Location, Journey, Activity)
+  applySectionStates(card);
 }
 
 function getFilteredProspects() {
@@ -2133,6 +2163,12 @@ function renderProsDetailSections(p) {
 
     return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}${contactsHtml}</div></div>`;
   }).join('');
+  // Append linked partners section (v11.2)
+  const prosName = p['Customer'] || '';
+  const partnerHtml = renderPartnerChipsFor(prosName);
+  if(partnerHtml) document.getElementById('prosDetailSections').innerHTML += partnerHtml;
+  // Apply saved section collapse states
+  applySectionStates(document.getElementById('prosDetailSections'));
 }
 
 function showProspectMap(p) {
@@ -2660,7 +2696,43 @@ function renderActivityItem(a, showProspect) {
 // =======================================================================
 // SECTION TOGGLE
 // =======================================================================
-function toggleSection(header) { header.classList.toggle('collapsed'); const body=header.nextElementSibling; if(body) body.classList.toggle('collapsed'); }
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  if(body) body.classList.toggle('collapsed');
+  // Save section state per user
+  try {
+    const user = sessionStorage.getItem('sp_user') || 'default';
+    const key = 'sp_sections_' + user;
+    const states = JSON.parse(localStorage.getItem(key) || '{}');
+    const sectionName = header.textContent.trim();
+    states[sectionName] = header.classList.contains('collapsed') ? 'closed' : 'open';
+    localStorage.setItem(key, JSON.stringify(states));
+  } catch(e) {}
+}
+
+// Apply saved section states (or default to collapsed)
+function applySectionStates(container) {
+  if(!container) return;
+  try {
+    const user = sessionStorage.getItem('sp_user') || 'default';
+    const key = 'sp_sections_' + user;
+    const states = JSON.parse(localStorage.getItem(key) || '{}');
+    container.querySelectorAll('.detail-section-header').forEach(header => {
+      const sectionName = header.textContent.trim();
+      const body = header.nextElementSibling;
+      if(states[sectionName] === 'open') {
+        // User explicitly opened this — keep it open
+        header.classList.remove('collapsed');
+        if(body) body.classList.remove('collapsed');
+      } else {
+        // Default to collapsed, or user explicitly closed it
+        header.classList.add('collapsed');
+        if(body) body.classList.add('collapsed');
+      }
+    });
+  } catch(e) {}
+}
 
 // =======================================================================
 // TAB SWITCHING
@@ -3994,25 +4066,26 @@ function selectPartner(idx) {
   const card = document.getElementById('partnerDetailCard');
   card.classList.add('visible');
   card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Apply saved section states to static sections (Activity Timeline)
+  applySectionStates(card);
 }
 
 function renderPartnerDetailSections(p) {
   document.getElementById('partnerDetailSections').innerHTML = PARTNER_DETAIL_FIELDS.map(sec => {
     const fh = sec.fields.map(f => {
+      if (f === 'Linked Accounts') {
+        const chipHtml = renderLinkedChips(p['Linked Accounts'], partnerEditMode);
+        return `<div class="detail-field wide"><div class="detail-field-label">${f}</div><div class="detail-field-value">${chipHtml}</div></div>`;
+      }
       const val = fmtVal(f, p[f]);
       const empty = !val;
-      const wide = f==='Notes'||f==='Linked Accounts';
+      const wide = f==='Notes';
       const ec = partnerEditMode ? ' editable' : '';
       let display = val;
-      // Clickable phone
       if(f==='Phone' && val) display = `<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
-      // Clickable email
       if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
-      // Clickable LinkedIn
       if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
-      // Currency formatting
       if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
-      // Follow-Up glow
       if(f==='Next Follow-Up' && val && !partnerEditMode) {
         const today=new Date(); today.setHours(0,0,0,0);
         const fuDate=new Date(val); fuDate.setHours(0,0,0,0);
@@ -4022,13 +4095,14 @@ function renderPartnerDetailSections(p) {
       }
       const hint = PARTNER_FIELD_HINTS[f] || 'Click to edit';
       const emptyText = partnerEditMode ? hint : `<span class="partner-empty-field">${hint}</span>`;
-      const oc = partnerEditMode ? ` onclick="startPartnerEdit(this,'${f.replace(/'/g,"\\\\'")}')"` : '';
+      const oc = partnerEditMode ? ` onclick="startPartnerEdit(this,'${f.replace(/'/g,"\\'")}')"` : '';
       return `<div class="detail-field${wide?' wide':''}"><div class="detail-field-label">${f}</div><div class="detail-field-value${empty?' empty':''}${ec}" data-field="${f}"${oc}>${empty?emptyText:display}</div></div>`;
     }).join('');
     return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}</div></div>`;
   }).join('');
+  // Apply saved section collapse states
+  applySectionStates(document.getElementById('partnerDetailSections'));
 }
-
 function closePartnerDetail() {
   document.getElementById('partnerDetailCard').classList.remove('visible');
   selectedPartnerIdx = -1;
@@ -4211,6 +4285,155 @@ function submitPartner() {
       if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
     } else { showToast('Error: '+(data.error||'Unknown'),'error'); }
   }).catch(e=>showToast('Add failed: '+e.message,'error'));
+}
+
+// =======================================================================
+// LINKED ACCOUNTS SYSTEM (v11.2) — Bidirectional partner ↔ customer/prospect linking
+// =======================================================================
+
+// Get all linkable accounts (customers + prospects) for autocomplete
+function getLinkableAccounts() {
+  const accounts = [];
+  allCustomers.forEach((c, i) => {
+    accounts.push({ name: c['Customer Name'] || '', type: 'Customer', id: c['Unique Customer ID'] || '', idx: i });
+  });
+  allProspects.forEach((p, i) => {
+    accounts.push({ name: p['Customer'] || '', type: 'Prospect', id: '', idx: i });
+  });
+  return accounts;
+}
+
+// Parse linked accounts string into array
+function parseLinkedAccounts(str) {
+  if (!str) return [];
+  return str.split(',').map(s => s.trim()).filter(s => s.length > 0);
+}
+
+// Render linked account chips (clickable, navigates to that record)
+function renderLinkedChips(linkedStr, editable) {
+  const linked = parseLinkedAccounts(linkedStr);
+  if (!linked.length && !editable) return '<span class="partner-empty-field">Prospect or customer names they are involved with</span>';
+  
+  let html = '<div class="linked-chips">';
+  linked.forEach(name => {
+    // Determine if it's a customer or prospect
+    const custIdx = allCustomers.findIndex(c => (c['Customer Name']||'').toLowerCase() === name.toLowerCase());
+    const prosIdx = allProspects.findIndex(p => (p['Customer']||'').toLowerCase() === name.toLowerCase());
+    
+    if (custIdx >= 0) {
+      html += `<span class="linked-chip chip-customer" onclick="event.stopPropagation();jumpToCustomer(${custIdx})">🏢 ${name}${editable ? ' <span class="chip-remove" onclick="event.stopPropagation();removeLinkedAccount(\''+name.replace(/'/g,"\\'")+'\')">✕</span>' : ''}</span>`;
+    } else if (prosIdx >= 0) {
+      html += `<span class="linked-chip chip-prospect" onclick="event.stopPropagation();jumpToProspect(${prosIdx})">🎯 ${name}${editable ? ' <span class="chip-remove" onclick="event.stopPropagation();removeLinkedAccount(\''+name.replace(/'/g,"\\'")+'\')">✕</span>' : ''}</span>`;
+    } else {
+      html += `<span class="linked-chip chip-prospect">${name}${editable ? ' <span class="chip-remove" onclick="event.stopPropagation();removeLinkedAccount(\''+name.replace(/'/g,"\\'")+'\')">✕</span>' : ''}</span>`;
+    }
+  });
+  html += '</div>';
+  
+  if (editable) {
+    html += `<div class="link-autocomplete" style="margin-top:8px;">
+      <input type="text" placeholder="Type a customer or prospect name to link..." oninput="showLinkSuggestions(this)" onblur="setTimeout(()=>hideLinkSuggestions(),200)">
+      <div class="link-suggestions" id="linkSuggestions"></div>
+    </div>`;
+  }
+  return html;
+}
+
+function showLinkSuggestions(input) {
+  const q = input.value.toLowerCase().trim();
+  const box = document.getElementById('linkSuggestions');
+  if (!q || q.length < 2) { box.classList.remove('visible'); return; }
+  
+  const accounts = getLinkableAccounts();
+  const currentLinked = parseLinkedAccounts(allPartners[selectedPartnerIdx]['Linked Accounts'] || '');
+  const matches = accounts.filter(a => 
+    a.name.toLowerCase().includes(q) && !currentLinked.some(l => l.toLowerCase() === a.name.toLowerCase())
+  ).slice(0, 8);
+  
+  if (!matches.length) { box.classList.remove('visible'); return; }
+  
+  box.innerHTML = matches.map(m => 
+    `<div class="link-suggestion" onmousedown="addLinkedAccount('${m.name.replace(/'/g,"\\'")}')">
+      <span class="ls-type ${m.type==='Customer'?'ls-cust':'ls-pros'}">${m.type}</span>
+      <span>${m.name}</span>
+      ${m.id ? '<span style="font-size:10px;color:var(--text-dim);font-family:var(--mono);">'+m.id+'</span>' : ''}
+    </div>`
+  ).join('');
+  box.classList.add('visible');
+}
+
+function hideLinkSuggestions() {
+  const box = document.getElementById('linkSuggestions');
+  if (box) box.classList.remove('visible');
+}
+
+function addLinkedAccount(name) {
+  const p = allPartners[selectedPartnerIdx];
+  const current = parseLinkedAccounts(p['Linked Accounts'] || '');
+  if (current.some(l => l.toLowerCase() === name.toLowerCase())) return;
+  current.push(name);
+  const newVal = current.join(', ');
+  p['Linked Accounts'] = newVal;
+  partnerPendingEdits['Linked Accounts'] = newVal;
+  document.getElementById('partnerSaveBar').classList.add('visible');
+  document.getElementById('partnerUnsavedCount').textContent = Object.keys(partnerPendingEdits).length + ' unsaved change' + (Object.keys(partnerPendingEdits).length > 1 ? 's' : '');
+  renderPartnerDetailSections(p);
+  // Audit
+  const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Note', text:'🔗 Linked account: '+name, timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+  activities.unshift(a);
+  if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+}
+
+function removeLinkedAccount(name) {
+  const p = allPartners[selectedPartnerIdx];
+  const current = parseLinkedAccounts(p['Linked Accounts'] || '');
+  const filtered = current.filter(l => l.toLowerCase() !== name.toLowerCase());
+  const newVal = filtered.join(', ');
+  p['Linked Accounts'] = newVal;
+  partnerPendingEdits['Linked Accounts'] = newVal;
+  document.getElementById('partnerSaveBar').classList.add('visible');
+  document.getElementById('partnerUnsavedCount').textContent = Object.keys(partnerPendingEdits).length + ' unsaved change' + (Object.keys(partnerPendingEdits).length > 1 ? 's' : '');
+  renderPartnerDetailSections(p);
+}
+
+// CROSS-NAVIGATION — Jump between tabs
+function jumpToCustomer(idx) {
+  const tabBtn = document.querySelector('.tab-btn[onclick*="database"]');
+  if (tabBtn) switchTab('database', tabBtn);
+  setTimeout(() => selectCustomer(idx), 200);
+}
+
+function jumpToProspect(idx) {
+  const tabBtn = document.querySelector('.tab-btn[onclick*="pipeline"]');
+  if (tabBtn) switchTab('pipeline', tabBtn);
+  setTimeout(() => selectProspect(idx), 200);
+}
+
+function jumpToPartner(idx) {
+  const tabBtn = document.querySelector('.tab-btn[onclick*="partners"]');
+  if (tabBtn) switchTab('partners', tabBtn);
+  setTimeout(() => selectPartner(idx), 200);
+}
+
+// Get partners linked to a specific account name
+function getLinkedPartners(accountName) {
+  if (!accountName) return [];
+  return allPartners.filter(p => {
+    const linked = parseLinkedAccounts(p['Linked Accounts'] || '');
+    return linked.some(l => l.toLowerCase() === accountName.toLowerCase());
+  });
+}
+
+// Render partner chips for customer/prospect detail cards
+function renderPartnerChipsFor(accountName) {
+  const partners = getLinkedPartners(accountName);
+  if (!partners.length) return '';
+  return '<div style="margin-top:16px;"><div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">🤝 Partners</div><div class="detail-section-body" style="display:block;"><div class="linked-chips">' +
+    partners.map(p => {
+      const idx = allPartners.indexOf(p);
+      return `<span class="linked-chip chip-partner" onclick="jumpToPartner(${idx})">🤝 ${p['Name']}${p['Company']?' — '+p['Company']:''}${p['Specialty']?' ('+p['Specialty']+')':''}</span>`;
+    }).join('') +
+    '</div></div></div></div>';
 }
 
 // =======================================================================
