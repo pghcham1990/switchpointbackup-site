@@ -65,6 +65,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .ind-yellow{background:var(--warning-bg);color:var(--warning);}
 .ind-blue{background:var(--accent-glow);color:var(--accent);}
 .ind-orange{background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);}
+.ind-teal{background:rgba(0,217,217,0.1);color:#00b8b8;border:1px solid rgba(0,217,217,0.2);}
 .main{padding:0 28px 48px;max-width:1200px;margin:0 auto;}
 .panel{background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);padding:28px;max-width:1200px;margin:0 auto;box-shadow:var(--shadow-sm);}
 .tab-content{display:none;}.tab-content.active{display:block;}
@@ -319,6 +320,32 @@ textarea{resize:vertical;min-height:64px;}
 .speed-dial-link:hover{background:rgba(46,107,255,0.08);color:var(--accent);}
 .speed-dial-link .sd-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .speed-dial-link .sd-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ===== PARTNERS TAB (v11.2) ===== */
+.partner-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:16px;}
+.partner-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.partner-card:hover{border-color:var(--border-focus);box-shadow:var(--shadow);transform:translateY(-2px);}
+.partner-card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.partner-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#00b8b8,#00d9d9);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.partner-card-name{font-size:15px;font-weight:700;color:var(--text);}
+.partner-card-company{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.partner-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.partner-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:0.4px;}
+.partner-tag.specialty{background:rgba(0,217,217,0.1);color:#00b8b8;border:1px solid rgba(0,217,217,0.2);}
+.partner-tag.type{background:rgba(139,92,246,0.1);color:#8b5cf6;border:1px solid rgba(139,92,246,0.15);}
+.partner-tag.status-active{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);}
+.partner-tag.status-inactive{background:rgba(156,163,175,0.1);color:#9ca3af;border:1px solid rgba(156,163,175,0.2);}
+.partner-card-meta{font-size:11px;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:12px;}
+.partner-card-meta span{display:flex;align-items:center;gap:4px;}
+.partner-stat-row{display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.partner-stat{text-align:center;flex:1;}
+.partner-stat-val{font-size:16px;font-weight:700;color:var(--text);}
+.partner-stat-label{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;}
+.partner-empty-field{color:var(--text-dim);font-style:italic;font-size:11px;}
+.partner-add-section{background:var(--surface-2);border:1px dashed var(--border);border-radius:var(--radius-lg);padding:20px;margin-top:16px;display:none;}
+.partner-add-section.visible{display:block;}
+.partner-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.partner-form-grid .full-width{grid-column:1/-1;}
 .quick-modal{position:fixed;bottom:90px;left:28px;z-index:200;width:360px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);display:none;animation:slideUp 0.25s cubic-bezier(.16,1,.3,1);}
 .quick-modal.visible{display:block;}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -680,6 +707,7 @@ body.wide-mode .panel{max-width:none;}
   <button class="tab-btn" onclick="switchTab('activity',this)">Activity<span class="tab-indicator ind-purple">LOG</span></button>
   <button class="tab-btn" onclick="switchTab('onboard',this)">New Customer<span class="tab-indicator ind-green">ONBOARD</span></button>
   <button class="tab-btn" onclick="switchTab('prospect',this)">+ Prospect<span class="tab-indicator ind-cyan">ADD</span></button>
+  <button class="tab-btn" onclick="switchTab('partners',this)">Partners<span class="tab-indicator ind-teal">NETWORK</span></button>
   <button class="tab-btn" onclick="switchTab('demo',this)">Demo<span class="tab-indicator ind-orange">SHOW</span></button>
 </div>
 
@@ -1143,6 +1171,88 @@ body.wide-mode .panel{max-width:none;}
   <div id="prospectOutput" class="output-panel">
     <div class="output-tabs-row"><button class="output-tab active">PROSPECTS</button></div>
     <div class="output-content active"><button class="copy-row-btn" onclick="copyProspectTSV()">📋 Copy</button><pre id="outProsPre"></pre></div>
+  </div>
+</div>
+</div>
+
+<!-- ======== PARTNERS TAB (v11.2) ======== -->
+<div id="tab-partners" class="tab-content">
+<div class="panel">
+  <div class="form-header"><h2>Partner Network</h2><p>Your referral partners, co-sellers, and consultants. People you work deals with.</p><div style="margin-top:8px;"><span class="sheet-badge" style="background:rgba(0,217,217,0.1);color:#00b8b8;border:1px solid rgba(0,217,217,0.2);">PARTNERSHIP TAB</span></div></div>
+  <div class="db-search-bar">
+    <input type="text" id="partnerSearch" placeholder="Search by name, company, specialty..." oninput="filterPartners()">
+    <div class="db-stat">Showing <strong id="partnerCount">0</strong> partners</div>
+    <button class="btn btn-secondary" onclick="refreshPartners()">↻ Refresh</button>
+    <button class="btn btn-primary" onclick="toggleAddPartner()" id="addPartnerToggle">+ Add Partner</button>
+  </div>
+
+  <!-- ADD PARTNER FORM -->
+  <div class="partner-add-section" id="partnerAddSection">
+    <div class="form-header" style="padding:0 0 12px;"><h3 style="font-size:15px;">➕ New Partner</h3><p style="font-size:11px;">Fill in what you know — you can always add more later.</p></div>
+    <div class="partner-form-grid">
+      <div class="form-group"><label>Name <span class="req">*</span></label><input id="pa_name" placeholder="First & last name of your contact"></div>
+      <div class="form-group"><label>Company</label><input id="pa_company" placeholder="Their business name (if they have one)"></div>
+      <div class="form-group"><label>Phone</label><input id="pa_phone" placeholder="Cell or office number to reach them"></div>
+      <div class="form-group"><label>Email</label><input id="pa_email" placeholder="Their email address"></div>
+      <div class="form-group"><label>LinkedIn</label><input id="pa_linkedin" placeholder="Paste their LinkedIn profile URL"></div>
+      <div class="form-group"><label>Specialty</label><select id="pa_specialty">
+        <option value="">— What are they good at? —</option>
+        <option>IT / MSP</option><option>Networking</option><option>Security</option><option>Telecom</option><option>General Contractor</option><option>Sales / Business Dev</option><option>Everything</option><option>Other</option>
+      </select></div>
+      <div class="form-group"><label>Location</label><input id="pa_location" placeholder="City or area they cover (e.g. Pittsburgh, PA)"></div>
+      <div class="form-group"><label>Relationship Type</label><select id="pa_relType">
+        <option value="">— How do you work together? —</option>
+        <option>Referral</option><option>Co-Sell</option><option>Consultant</option><option>Intel</option><option>Mixed</option>
+      </select></div>
+      <div class="form-group"><label>Status</label><select id="pa_status">
+        <option value="Active">Active — you're currently working together</option>
+        <option value="Inactive">Inactive — on pause for now</option>
+      </select></div>
+      <div class="form-group full-width"><label>Notes</label><textarea id="pa_notes" placeholder="How you met, what they bring to the table, anything useful to remember..." style="min-height:60px;"></textarea></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="toggleAddPartner()">Cancel</button>
+      <button class="btn btn-success" onclick="submitPartner()">🚀 Add Partner</button>
+    </div>
+  </div>
+
+  <!-- PARTNER CARDS -->
+  <div class="partner-cards" id="partnerCards">
+    <div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1;"><div class="spinner"></div><br>Loading partners...</div>
+  </div>
+
+  <!-- PARTNER DETAIL CARD -->
+  <div class="detail-card" id="partnerDetailCard">
+    <div class="detail-card-header">
+      <h3><span id="partnerDetailName"></span><span class="pill" id="partnerDetailStatus" style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;"></span></h3>
+      <div style="display:flex;gap:8px;">
+        <button class="detail-close" id="partnerEditToggle" onclick="togglePartnerEditMode()" style="color:var(--accent);border-color:rgba(59,130,246,0.3);">✎ Edit</button>
+        <button class="detail-close" onclick="closePartnerDetail()">✕ Close</button>
+      </div>
+    </div>
+    <!-- PARTNER ACTION BAR -->
+    <div class="prospect-actions-bar">
+      <button class="action-btn call" onclick="callPartner()">📞 Call</button>
+      <button class="action-btn email-act" onclick="emailPartner()">✉ Email</button>
+      <button class="action-btn note" onclick="openPartnerNote()">+ Log Note</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-sections" id="partnerDetailSections"></div>
+      <!-- PARTNER ACTIVITY TIMELINE -->
+      <div style="margin-top:16px;">
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div class="activity-log" id="partnerActivityLog"><div class="activity-empty">No activities logged yet.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-save-bar" id="partnerSaveBar">
+      <span class="unsaved" id="partnerUnsavedCount">0 unsaved changes</span>
+      <button class="btn btn-secondary" onclick="cancelPartnerEdits()">Cancel</button>
+      <button class="btn btn-success" onclick="savePartnerEdits()">💾 Save to Google Sheet</button>
+    </div>
   </div>
 </div>
 </div>
@@ -1655,6 +1765,7 @@ function initDatabase() {
     fetchLiveData();
     fetchProspects();
     fetchActivities();
+    fetchPartners();
   } else {
     document.getElementById('connDot').className='connection-dot dot-offline';
     document.getElementById('connLabel').textContent='Offline Mode';
@@ -3761,6 +3872,345 @@ function showStayAwayWarning(matchedName) {
   const el = document.getElementById('stayAwayWarning');
   document.getElementById('stayAwayMatch').textContent = 'Matched: "' + matchedName + '" in your Stay Away list.';
   el.classList.add('visible');
+}
+
+// =======================================================================
+// PARTNERS NETWORK (v11.2) — Partner cards, detail view, CRUD, audit
+// =======================================================================
+let allPartners = [];
+let selectedPartnerIdx = -1;
+let partnerEditMode = false;
+let partnerPendingEdits = {};
+
+const PARTNER_FIELD_HINTS = {
+  'Partner ID': 'Auto-generated ID like P-001',
+  'Name': 'First & last name of your contact',
+  'Company': 'Their business name (if they have one)',
+  'Phone': 'Cell or office number to reach them',
+  'Email': 'Their email address',
+  'LinkedIn': 'Paste their LinkedIn profile URL',
+  'Specialty': 'What they are good at — IT, networking, telecom, etc.',
+  'Location': 'City or area they cover (e.g. Ohio, Pittsburgh PA)',
+  'Status': 'Active = working together now, Inactive = on pause',
+  'Relationship Type': 'How you work together — referral, co-sell, consultant, etc.',
+  'Notes': 'How you met, what they bring to the table, anything useful',
+  'Linked Accounts': 'Prospect or customer names they are involved with',
+  'Deals Closed Together': 'How many deals you have done together',
+  'Total Revenue Shared': 'Total $ you have paid or split with them',
+  'Last Payment ($)': 'Amount of the most recent payment to them',
+  'Last Payment Date': 'When you last paid them',
+  'Last Contact Date': 'When you last talked or met with them',
+  'Next Follow-Up': 'When you plan to reach out next'
+};
+
+const PARTNER_DETAIL_FIELDS = [
+  { title:'👤 Contact Info', fields:['Name','Company','Phone','Email','LinkedIn','Location'] },
+  { title:'🤝 Relationship', fields:['Relationship Type','Specialty','Status','Linked Accounts'] },
+  { title:'💰 Deal Tracking', fields:['Deals Closed Together','Total Revenue Shared','Last Payment ($)','Last Payment Date'] },
+  { title:'📝 Notes & Follow-Up', fields:['Notes','Last Contact Date','Next Follow-Up'] }
+];
+
+function fetchPartners() {
+  fetch(CONFIG.APPS_SCRIPT_URL+'?action=getPartners').then(r=>r.json()).then(data=>{
+    if(Array.isArray(data)) {
+      allPartners=data;
+      renderPartnerCards(allPartners);
+    }
+  }).catch(err=>{ console.log('Partner fetch failed:', err); });
+}
+
+function refreshPartners() { if(CONFIG.LIVE_MODE) fetchPartners(); }
+
+function filterPartners() {
+  const q = document.getElementById('partnerSearch').value.toLowerCase();
+  if(!q) { renderPartnerCards(allPartners); return; }
+  const filtered = allPartners.filter(p => Object.values(p).some(v => v && String(v).toLowerCase().includes(q)));
+  renderPartnerCards(filtered);
+}
+
+function renderPartnerCards(partners) {
+  const container = document.getElementById('partnerCards');
+  document.getElementById('partnerCount').textContent = partners.length;
+
+  if(!partners.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);grid-column:1/-1;"><h3 style="color:var(--text-muted);">No partners yet</h3><p>Click "+ Add Partner" to add your first referral partner, consultant, or co-seller.</p></div>';
+    return;
+  }
+
+  container.innerHTML = partners.map((p, idx) => {
+    const realIdx = allPartners.indexOf(p);
+    const initials = (p['Name']||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const status = (p['Status']||'').toLowerCase();
+    const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
+    const deals = p['Deals Closed Together'] || '0';
+    const revenue = p['Total Revenue Shared'] ? '$' + Number(p['Total Revenue Shared']).toLocaleString() : '$0';
+    const lastContact = p['Last Contact Date'] || '';
+    const phone = p['Phone'] || '';
+    const email = p['Email'] || '';
+
+    return `<div class="partner-card" onclick="selectPartner(${realIdx})">
+      <div class="partner-card-header">
+        <div class="partner-avatar">${initials}</div>
+        <div>
+          <div class="partner-card-name">${p['Name']||'Unknown'}</div>
+          <div class="partner-card-company">${p['Company']||'<span class="partner-empty-field">No company listed</span>'}</div>
+        </div>
+      </div>
+      <div class="partner-card-tags">
+        ${p['Status']?'<span class="partner-tag '+statusClass+'">'+p['Status']+'</span>':''}
+        ${p['Specialty']?'<span class="partner-tag specialty">'+p['Specialty']+'</span>':''}
+        ${p['Relationship Type']?'<span class="partner-tag type">'+p['Relationship Type']+'</span>':''}
+      </div>
+      <div class="partner-card-meta">
+        ${phone?'<span>📞 '+phone+'</span>':''}
+        ${email?'<span>✉️ '+email+'</span>':''}
+        ${p['Location']?'<span>📍 '+p['Location']+'</span>':''}
+      </div>
+      <div class="partner-stat-row">
+        <div class="partner-stat"><div class="partner-stat-val">${deals}</div><div class="partner-stat-label">Deals Together</div></div>
+        <div class="partner-stat"><div class="partner-stat-val">${revenue}</div><div class="partner-stat-label">Revenue Shared</div></div>
+        <div class="partner-stat"><div class="partner-stat-val">${lastContact||'—'}</div><div class="partner-stat-label">Last Contact</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// SELECT & DETAIL VIEW
+function selectPartner(idx) {
+  selectedPartnerIdx = idx;
+  partnerEditMode = false;
+  partnerPendingEdits = {};
+  const p = allPartners[idx];
+  document.getElementById('partnerDetailName').textContent = p['Name'] || '';
+  document.getElementById('partnerDetailStatus').textContent = p['Status'] || 'Unknown';
+  const isActive = (p['Status']||'').toLowerCase() === 'active';
+  document.getElementById('partnerDetailStatus').style.background = isActive ? 'rgba(16,185,129,0.1)' : 'rgba(156,163,175,0.1)';
+  document.getElementById('partnerDetailStatus').style.color = isActive ? '#10b981' : '#9ca3af';
+  document.getElementById('partnerEditToggle').textContent = '✎ Edit';
+  document.getElementById('partnerEditToggle').style.color = 'var(--accent)';
+  document.getElementById('partnerSaveBar').classList.remove('visible');
+  renderPartnerDetailSections(p);
+  renderPartnerActivity(p);
+  const card = document.getElementById('partnerDetailCard');
+  card.classList.add('visible');
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderPartnerDetailSections(p) {
+  document.getElementById('partnerDetailSections').innerHTML = PARTNER_DETAIL_FIELDS.map(sec => {
+    const fh = sec.fields.map(f => {
+      const val = fmtVal(f, p[f]);
+      const empty = !val;
+      const wide = f==='Notes'||f==='Linked Accounts';
+      const ec = partnerEditMode ? ' editable' : '';
+      let display = val;
+      // Clickable phone
+      if(f==='Phone' && val) display = `<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      // Clickable email
+      if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
+      // Clickable LinkedIn
+      if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
+      // Currency formatting
+      if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
+      // Follow-Up glow
+      if(f==='Next Follow-Up' && val && !partnerEditMode) {
+        const today=new Date(); today.setHours(0,0,0,0);
+        const fuDate=new Date(val); fuDate.setHours(0,0,0,0);
+        const diffDays=Math.floor((fuDate-today)/(1000*60*60*24));
+        if(diffDays===0) display=`<span class="followup-due-today">${val}<span class="followup-due-today-label"> TODAY</span></span>`;
+        else if(diffDays<0) display=`<span class="followup-overdue">${val}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`;
+      }
+      const hint = PARTNER_FIELD_HINTS[f] || 'Click to edit';
+      const emptyText = partnerEditMode ? hint : `<span class="partner-empty-field">${hint}</span>`;
+      const oc = partnerEditMode ? ` onclick="startPartnerEdit(this,'${f.replace(/'/g,"\\\\'")}')"` : '';
+      return `<div class="detail-field${wide?' wide':''}"><div class="detail-field-label">${f}</div><div class="detail-field-value${empty?' empty':''}${ec}" data-field="${f}"${oc}>${empty?emptyText:display}</div></div>`;
+    }).join('');
+    return `<div class="detail-section"><div class="detail-section-header" onclick="toggleSection(this)">${sec.title}</div><div class="detail-section-body">${fh}</div></div>`;
+  }).join('');
+}
+
+function closePartnerDetail() {
+  document.getElementById('partnerDetailCard').classList.remove('visible');
+  selectedPartnerIdx = -1;
+}
+
+// EDIT MODE
+function togglePartnerEditMode() {
+  partnerEditMode = !partnerEditMode;
+  const btn = document.getElementById('partnerEditToggle');
+  btn.textContent = partnerEditMode ? '✎ Editing' : '✎ Edit';
+  btn.style.color = partnerEditMode ? 'var(--success)' : 'var(--accent)';
+  renderPartnerDetailSections(allPartners[selectedPartnerIdx]);
+}
+
+function startPartnerEdit(el, field) {
+  if(!partnerEditMode) return;
+  const current = allPartners[selectedPartnerIdx][field] || '';
+  const isLong = field === 'Notes' || field === 'Linked Accounts';
+  const isSelect = field === 'Status' || field === 'Relationship Type' || field === 'Specialty';
+
+  if(isSelect) {
+    let opts = [];
+    if(field === 'Status') opts = ['Active','Inactive'];
+    else if(field === 'Relationship Type') opts = ['Referral','Co-Sell','Consultant','Intel','Mixed'];
+    else if(field === 'Specialty') opts = ['IT / MSP','Networking','Security','Telecom','General Contractor','Sales / Business Dev','Everything','Other'];
+    el.innerHTML = `<select onchange="commitPartnerEdit(this,'${field}')" onblur="commitPartnerEdit(this,'${field}')" style="width:100%;font-size:12px;padding:6px;">${opts.map(o=>`<option${o===current?' selected':''}>${o}</option>`).join('')}</select>`;
+    el.querySelector('select').focus();
+  } else if(isLong) {
+    el.innerHTML = `<textarea onblur="commitPartnerEdit(this,'${field}')" style="width:100%;min-height:60px;font-size:12px;padding:6px;">${current}</textarea>`;
+    el.querySelector('textarea').focus();
+  } else {
+    const inputType = (field==='Last Payment Date'||field==='Last Contact Date'||field==='Next Follow-Up') ? 'date' : (field==='Email' ? 'email' : 'text');
+    el.innerHTML = `<input type="${inputType}" value="${current}" onblur="commitPartnerEdit(this,'${field}')" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:100%;font-size:12px;padding:6px;">`;
+    el.querySelector('input').focus();
+  }
+}
+
+function commitPartnerEdit(input, field) {
+  const val = input.value.trim();
+  const original = allPartners[selectedPartnerIdx][field] || '';
+  if(val !== original) {
+    partnerPendingEdits[field] = val;
+    document.getElementById('partnerSaveBar').classList.add('visible');
+    document.getElementById('partnerUnsavedCount').textContent = Object.keys(partnerPendingEdits).length + ' unsaved change' + (Object.keys(partnerPendingEdits).length>1?'s':'');
+  }
+  renderPartnerDetailSections(allPartners[selectedPartnerIdx]);
+}
+
+function cancelPartnerEdits() {
+  partnerPendingEdits = {};
+  document.getElementById('partnerSaveBar').classList.remove('visible');
+  renderPartnerDetailSections(allPartners[selectedPartnerIdx]);
+}
+
+function savePartnerEdits() {
+  const p = allPartners[selectedPartnerIdx];
+  const partnerId = p['Partner ID'];
+  if(!partnerId) { showToast('No Partner ID — cannot save','error'); return; }
+
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({ action:'updatePartner', partnerId: partnerId, updates: partnerPendingEdits })
+  }).then(r=>r.json()).then(data=>{
+    if(data.success) {
+      Object.assign(p, partnerPendingEdits);
+      partnerPendingEdits = {};
+      document.getElementById('partnerSaveBar').classList.remove('visible');
+      renderPartnerDetailSections(p);
+      renderPartnerCards(allPartners);
+      showToast('✓ Partner updated','success');
+      // Audit
+      const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Note', text:'✏️ Updated partner: '+Object.keys(partnerPendingEdits).join(', '), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+      activities.unshift(a);
+      if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    } else { showToast('Error: '+(data.error||'Unknown'),'error'); }
+  }).catch(e=>showToast('Save failed','error'));
+}
+
+// PARTNER ACTIONS — Call, Email, Log Note (all audited)
+function callPartner() {
+  const p = allPartners[selectedPartnerIdx];
+  if(p['Phone']) {
+    window.open('tel:'+p['Phone']);
+    showToast('Dialing '+p['Phone'],'success');
+    const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Call', text:'📞 Called partner '+p['Name']+' — '+p['Phone'], timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    renderPartnerActivity(p);
+  } else showToast('No phone number on file','error');
+}
+
+function emailPartner() {
+  const p = allPartners[selectedPartnerIdx];
+  if(p['Email']) {
+    window.open('mailto:'+p['Email']+'?subject=SwitchPoint — Let\'s Connect');
+    showToast('Opening email to '+p['Email'],'success');
+    const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Email', text:'✉️ Emailed partner '+p['Name']+' — '+p['Email'], timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    renderPartnerActivity(p);
+  } else showToast('No email on file','error');
+}
+
+function openPartnerNote() {
+  const p = allPartners[selectedPartnerIdx];
+  const text = prompt('Log a note about ' + (p['Name']||'this partner') + ':');
+  if(!text) return;
+  const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Note', text:'📝 '+text, timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+  activities.unshift(a);
+  if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+  renderPartnerActivity(p);
+  showToast('Note logged','success');
+}
+
+function renderPartnerActivity(p) {
+  const name = 'Partner: ' + (p['Name']||'');
+  const pActs = activities.filter(a => !a.deleted && a.prospect === name);
+  const log = document.getElementById('partnerActivityLog');
+  if(!pActs.length) { log.innerHTML = '<div class="activity-empty">No activities logged yet. Use the buttons above to call, email, or add notes.</div>'; return; }
+  log.innerHTML = pActs.slice(0,30).map(a => {
+    const d = new Date(a.timestamp);
+    const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    return `<div class="activity-item"><div class="activity-time">${ts}</div><div class="activity-text">${a.text}</div></div>`;
+  }).join('');
+}
+
+// ADD PARTNER
+function toggleAddPartner() {
+  const sec = document.getElementById('partnerAddSection');
+  sec.classList.toggle('visible');
+  document.getElementById('addPartnerToggle').textContent = sec.classList.contains('visible') ? '✕ Cancel' : '+ Add Partner';
+}
+
+function submitPartner() {
+  const name = document.getElementById('pa_name').value.trim();
+  if(!name) { showToast('Partner name is required','error'); return; }
+
+  const nextId = 'P-' + String(allPartners.length + 1).padStart(3,'0');
+  const partnerData = {
+    'Partner ID': nextId,
+    'Name': name,
+    'Company': document.getElementById('pa_company').value.trim(),
+    'Phone': document.getElementById('pa_phone').value.trim(),
+    'Email': document.getElementById('pa_email').value.trim(),
+    'LinkedIn': document.getElementById('pa_linkedin').value.trim(),
+    'Specialty': document.getElementById('pa_specialty').value,
+    'Location': document.getElementById('pa_location').value.trim(),
+    'Status': document.getElementById('pa_status').value,
+    'Relationship Type': document.getElementById('pa_relType').value,
+    'Notes': document.getElementById('pa_notes').value.trim(),
+    'Linked Accounts': '',
+    'Deals Closed Together': '0',
+    'Total Revenue Shared': '0',
+    'Last Payment ($)': '',
+    'Last Payment Date': '',
+    'Last Contact Date': new Date().toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'}),
+    'Next Follow-Up': ''
+  };
+
+  showToast('Adding partner...','success');
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({ action:'addPartner', data: partnerData })
+  }).then(r=>r.json()).then(data=>{
+    if(data.success || data.row) {
+      allPartners.push(partnerData);
+      renderPartnerCards(allPartners);
+      toggleAddPartner();
+      // Clear form
+      ['pa_name','pa_company','pa_phone','pa_email','pa_linkedin','pa_location','pa_notes'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('pa_specialty').selectedIndex=0;
+      document.getElementById('pa_relType').selectedIndex=0;
+      document.getElementById('pa_status').value='Active';
+      showToast('✓ Partner added: '+name,'success');
+      // Audit
+      const a = {id:Date.now(), prospect:'Partner: '+name, type:'Note', text:'🤝 New partner added: '+name+(partnerData.Company?' ('+partnerData.Company+')':''), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+      activities.unshift(a);
+      if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+    } else { showToast('Error: '+(data.error||'Unknown'),'error'); }
+  }).catch(e=>showToast('Add failed: '+e.message,'error'));
 }
 
 // =======================================================================
