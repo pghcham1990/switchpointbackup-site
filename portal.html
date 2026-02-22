@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwitchPoint Backup — Operations Portal v10</title>
+<title>SwitchPoint Backup — Operations Portal v11</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -396,6 +396,19 @@ body.wide-mode .panel{max-width:none;}
 .analytics-bar-track{flex:1;height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
 .analytics-bar-fill{height:100%;border-radius:4px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
 .analytics-bar-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:40px;text-align:right;flex-shrink:0;}
+
+/* ===== STAY AWAY WARNING (v11) ===== */
+.stayaway-warning{display:none;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.04));border:2px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;animation:shakeOnce 0.4s ease-out;}
+.stayaway-warning.visible{display:flex;align-items:center;gap:12px;}
+.stayaway-icon{font-size:24px;flex-shrink:0;}
+.stayaway-text{flex:1;}
+.stayaway-title{font-size:13px;font-weight:700;color:var(--danger);}
+.stayaway-sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.stayaway-dismiss{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(239,68,68,0.2);background:none;color:var(--danger);cursor:pointer;font-weight:600;flex-shrink:0;}
+@keyframes shakeOnce{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(2px);}}
+
+/* Pipeline StayAway badge */
+.sa-badge{display:inline-block;font-size:8px;font-weight:800;padding:2px 5px;border-radius:4px;background:rgba(239,68,68,0.12);color:var(--danger);text-transform:uppercase;letter-spacing:0.5px;margin-left:6px;vertical-align:middle;}
 
 /* ===== AUTO-FILL / MULTI-CONTACT (v10) ===== */
 .autofill-bar{background:linear-gradient(135deg,rgba(46,107,255,0.06),rgba(31,191,138,0.04));border:1px solid rgba(46,107,255,0.15);border-radius:var(--radius);padding:16px;margin-bottom:20px;}
@@ -1032,6 +1045,15 @@ body.wide-mode .panel{max-width:none;}
   </div>
 
   <form id="prospectForm" onsubmit="return handleProspectSubmit(event)">
+    <!-- STAY AWAY WARNING (v11) -->
+    <div class="stayaway-warning" id="stayAwayWarning">
+      <div class="stayaway-icon">⛔</div>
+      <div class="stayaway-text">
+        <div class="stayaway-title">STAY AWAY — FSN Account</div>
+        <div class="stayaway-sub" id="stayAwayMatch">This business matches a record in your Stay Away list.</div>
+      </div>
+      <button type="button" class="stayaway-dismiss" onclick="document.getElementById('stayAwayWarning').classList.remove('visible')">Dismiss</button>
+    </div>
     <div class="form-section"><div class="section-label">Business & Contact</div>
       <div class="form-grid three-col">
         <div class="form-group"><label>Business Name <span class="req">*</span></label><input id="pr_custName" required></div>
@@ -1732,8 +1754,10 @@ function renderProspectTable(prospects) {
     else if(score >= 15) urgencyHtml = '<span class="urgency-label urgency-cool">🔥</span>';
     else urgencyHtml = '<span class="urgency-label urgency-cold">—</span>';
 
+    const saBadge = checkStayAway(p['Customer']) ? '<span class="sa-badge">⛔ FSN</span>' : '';
+
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
-      <td><strong>${p['Customer']||''}</strong></td>
+      <td><strong>${p['Customer']||''}</strong>${saBadge}</td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
       <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phone+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
@@ -3416,6 +3440,87 @@ function copyReport() {
 }
 
 // =======================================================================
+// STAY AWAY LIST — FSN Account Conflict Detection (v11)
+// =======================================================================
+let stayAwayList = []; // loaded from StayAway sheet
+
+function loadStayAwayList() {
+  if(!CONFIG.LIVE_MODE) return;
+  fetch(CONFIG.APPS_SCRIPT_URL + '?action=getStayAway')
+    .then(r => r.json())
+    .then(data => {
+      if(Array.isArray(data)) {
+        stayAwayList = data.map(r => (r['Business Name'] || '').toUpperCase().trim()).filter(Boolean);
+        console.log('StayAway list loaded: ' + stayAwayList.length + ' businesses');
+      }
+    })
+    .catch(e => console.log('StayAway load failed:', e));
+}
+
+function checkStayAway(businessName) {
+  if(!businessName || stayAwayList.length === 0) return null;
+  const input = businessName.toUpperCase().trim();
+  if(!input) return null;
+
+  // Exact match
+  for(const name of stayAwayList) {
+    if(name === input) return name;
+  }
+
+  // Fuzzy: input contains a StayAway name or vice versa
+  for(const name of stayAwayList) {
+    // Skip very short names to avoid false positives
+    if(name.length < 5) continue;
+    // Check if either contains the other
+    if(input.includes(name) || name.includes(input)) return name;
+  }
+
+  // Word-based fuzzy: check if key words match (3+ letter words)
+  const inputWords = input.split(/[\s,.\-\/]+/).filter(w => w.length >= 3);
+  if(inputWords.length < 2) return null;
+
+  for(const name of stayAwayList) {
+    const nameWords = name.split(/[\s,.\-\/]+/).filter(w => w.length >= 3);
+    if(nameWords.length < 2) continue;
+    // Count matching words
+    const matches = inputWords.filter(w => nameWords.includes(w)).length;
+    // If 60%+ of the shorter name's words match, flag it
+    const threshold = Math.ceil(Math.min(inputWords.length, nameWords.length) * 0.6);
+    if(matches >= threshold && matches >= 2) return name;
+  }
+
+  return null;
+}
+
+function showStayAwayWarning(matchedName) {
+  const el = document.getElementById('stayAwayWarning');
+  document.getElementById('stayAwayMatch').textContent = 'Matched: "' + matchedName + '" in your Stay Away list.';
+  el.classList.add('visible');
+}
+
+// Attach real-time check to business name field
+document.addEventListener('DOMContentLoaded', () => {
+  loadStayAwayList();
+  const nameField = document.getElementById('pr_custName');
+  if(nameField) {
+    let saTimeout;
+    nameField.addEventListener('input', () => {
+      clearTimeout(saTimeout);
+      saTimeout = setTimeout(() => {
+        const match = checkStayAway(nameField.value);
+        if(match) showStayAwayWarning(match);
+        else document.getElementById('stayAwayWarning').classList.remove('visible');
+      }, 500);
+    });
+    // Also check on blur (after auto-fill populates)
+    nameField.addEventListener('change', () => {
+      const match = checkStayAway(nameField.value);
+      if(match) showStayAwayWarning(match);
+    });
+  }
+});
+
+// =======================================================================
 // AUTO-FILL FROM GOOGLE MAPS (v10)
 // =======================================================================
 let autoFillContacts = []; // contacts returned by Apollo
@@ -3484,6 +3589,10 @@ function runAutoFill() {
       const el = document.getElementById(id);
       if(el && el.value) autoFormatField(el);
     });
+
+    // Check StayAway list (v11)
+    const saMatch = checkStayAway(biz.name);
+    if(saMatch) showStayAwayWarning(saMatch);
   })
   .catch(e => {
     btn.disabled = false;
