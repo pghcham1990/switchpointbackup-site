@@ -5462,9 +5462,9 @@ function sendHeartbeat() {
 function fetchOnlineUsers() {
   if(!CONFIG.LIVE_MODE) return;
   fetch(CONFIG.APPS_SCRIPT_URL + '?action=getOnlineUsers').then(r=>r.json()).then(users=>{
-    if(!Array.isArray(users)) return;
+    if(!Array.isArray(users)) { console.log('Presence: unexpected response', users); return; }
     renderPresenceBar(users);
-  }).catch(e=>{});
+  }).catch(e=>{ console.log('Presence fetch error:', e); });
 }
 
 function renderPresenceBar(users) {
@@ -5472,13 +5472,15 @@ function renderPresenceBar(users) {
   const countEl = document.querySelector('.presence-count span');
   if(!container) return;
   
-  countEl.textContent = users.length;
-  
   const currentUser = sessionStorage.getItem('sp_user');
-  const currentRole = sessionStorage.getItem('sp_role');
+  const currentRole = sessionStorage.getItem('sp_role') || currentUserRole || '';
+  const isAdmin = (currentRole === 'Admin' || currentRole === 'Employee');
+  
+  countEl.textContent = users.length;
+  countEl.parentElement.style.display = isAdmin ? '' : 'none';
   
   // ── CUSTOMER / PARTNER VIEW: anonymous bubbles ──
-  if(currentRole !== 'Admin' && currentRole !== 'Employee') {
+  if(!isAdmin) {
     const adminsOnline = users.filter(u => u.role === 'Admin' || u.role === 'Employee').length;
     const othersOnline = users.filter(u => u.username.toLowerCase() !== (currentUser||'').toLowerCase()).length;
     let html = '';
@@ -5492,7 +5494,6 @@ function renderPresenceBar(users) {
     if(othersOnline > 0) {
       html += '<div class="presence-divider"></div><span style="font-size:11px;color:var(--text-muted);">'+othersOnline+' other'+(othersOnline!==1?'s':'')+' online</span>';
     }
-    countEl.parentElement.style.display = 'none';
     container.innerHTML = html;
     return;
   }
