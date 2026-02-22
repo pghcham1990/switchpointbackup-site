@@ -5550,26 +5550,25 @@ function renderBubble(user, roleClass, currentUser) {
 function navigateToUser(role, linkedRecord, displayName) {
   linkedRecord = decodeURIComponent(linkedRecord);
   displayName = decodeURIComponent(displayName);
-  const currentRole = sessionStorage.getItem('sp_role');
+  const currentRole = sessionStorage.getItem('sp_role') || currentUserRole || '';
   
   // Only admins can navigate to user records
   if(currentRole !== 'Admin' && currentRole !== 'Employee') return;
   
   if(role === 'Partner') {
-    // Navigate to Partners tab and find this partner
     switchTab('partners');
     setTimeout(()=>{
-      const searchInput = document.querySelector('#partnerSearch');
+      const searchInput = document.getElementById('partnerSearch');
       if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
     }, 500);
   } else if(role === 'Customer') {
-    // Navigate to Customers tab and find this customer
     switchTab('customers');
     setTimeout(()=>{
-      const searchInput = document.querySelector('#customerSearch');
+      const searchInput = document.getElementById('dbSearch');
       if(searchInput) { searchInput.value = linkedRecord || displayName; searchInput.dispatchEvent(new Event('input')); }
     }, 500);
   }
+  showToast('Navigating to ' + displayName, 'info');
 }
 
 function togglePresenceBar() {
