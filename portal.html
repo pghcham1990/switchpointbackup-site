@@ -5580,7 +5580,7 @@ function navigateToUser(role, linkedRecord, displayName) {
     switchTab('partners');
     attemptSearch('partnerSearch', linkedRecord || displayName, 0);
   } else if(role === 'Customer') {
-    switchTab('customers');
+    switchTab('database');
     attemptSearch('dbSearch', linkedRecord || displayName, 0);
   }
 }
