@@ -998,7 +998,7 @@ body.wide-mode .panel{max-width:none;}
     </div>
     <!-- ACTION BAR -->
     <div class="prospect-actions-bar">
-      <a class="action-btn call" id="prosCallLink" href="#" onclick="callProspect();return false;" style="text-decoration:none;">📞 Call <span id="prosCallNumber" style="font-family:var(--mono);font-size:10px;"></span></a>
+      <a class="action-btn call" id="prosCallLink" href="#" onclick="callProspect()" style="text-decoration:none;">📞 Call <span id="prosCallNumber" style="font-family:var(--mono);font-size:10px;"></span></a>
       <button class="action-btn email-act" onclick="emailProspect()">✉ Email</button>
       <button class="action-btn maps" onclick="openMaps()">📍 Google Maps</button>
       <button class="action-btn note" onclick="openNoteModal()">+ Log Activity</button>
@@ -2471,6 +2471,7 @@ function renderProspectTable(prospects) {
       }
     }
     const phone = p['Phone'] || '';
+    const phoneDial = phone.replace(/[^\d+]/g,'');
     const prosActs = activities.filter(a=>a.prospect===p['Customer'] && !a.deleted);
     const actCount = prosActs.length;
     const lastTouch = prosActs.length ? prosActs.reduce((latest,a) => new Date(a.timestamp)>new Date(latest.timestamp)?a:latest, prosActs[0]) : null;
@@ -2491,7 +2492,7 @@ function renderProspectTable(prospects) {
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
       <td><strong>${p['Customer']||''}</strong>${saBadge}</td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phone+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phoneDial+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
       <td>${urgencyHtml}</td>
       <td style="font-size:11px;">${p['Source']||'—'}</td>
@@ -2694,8 +2695,8 @@ function renderProsDetailSections(p) {
       const val=fmtVal(f,p[f]); const empty=!val;
       const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
-      // Clickable phone
-      if(f==='Phone' && val) display=`<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      // Clickable phone — strip formatting for tel: link so Google Voice triggers
+      if(f==='Phone' && val) display=`<a href="tel:${val.replace(/[^\d+]/g,'')}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
       // Clickable email
       if(f==='Email' && val) display=`<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       // Clickable URL
@@ -2723,7 +2724,7 @@ function renderProsDetailSections(p) {
               <span class="mc-name">${c.name||'—'}</span>
               <span class="mc-title">${c.title||''}</span>
               ${c.email ? '<span class="mc-email"><a href="mailto:'+c.email+'" style="color:var(--accent);text-decoration:none;">'+c.email+'</a></span>' : ''}
-              ${c.phone ? '<span style="font-family:var(--mono);font-size:10px;"><a href="tel:'+c.phone+'" style="color:var(--success);text-decoration:none;">'+c.phone+'</a></span>' : ''}
+              ${c.phone ? '<span style="font-family:var(--mono);font-size:10px;"><a href="tel:'+c.phone.replace(/[^\d+]/g,'')+'" style="color:var(--success);text-decoration:none;">'+c.phone+'</a></span>' : ''}
             </div>`).join('') + '</div>';
         }
       } catch(e) {}
@@ -3678,7 +3679,8 @@ function renderWeeklyActivity() {
   const totalPoints = weekActs.reduce((sum, a) => sum + (ACTIVITY_POINTS[a.type] || 1), 0);
   let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
   Object.entries(typeCounts).sort((a,b) => b[1]-a[1]).forEach(([type, count]) => {
-    html += `<span class="pill pill-blue" style="font-size:10px;">${type}: ${count}</span>`;
+    const label = type && type.trim() ? type : 'Other';
+    html += `<span class="pill pill-blue" style="font-size:10px;">${label}: ${count}</span>`;
   });
   html += '</div>';
   html += `<div style="font-family:var(--mono);font-size:11px;">Total: <strong>${weekActs.length}</strong> activities · <strong>${totalPoints}</strong> points this week</div>`;
@@ -5036,7 +5038,7 @@ function renderPartnerDetailSections(p) {
       const wide = f==='Notes';
       const ec = partnerEditMode ? ' editable' : '';
       let display = val;
-      if(f==='Phone' && val) display = `<a href="tel:${val}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      if(f==='Phone' && val) display = `<a href="tel:${val.replace(/[^\d+]/g,'')}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
       if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
       if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
@@ -5145,7 +5147,7 @@ function savePartnerEdits() {
 function callPartner() {
   const p = allPartners[selectedPartnerIdx];
   if(p['Phone']) {
-    window.open('tel:'+p['Phone']);
+    window.location.href='tel:'+p['Phone'].replace(/[^\d+]/g,'');
     showToast('Dialing '+p['Phone'],'success');
     const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Call', text:'📞 Called partner '+p['Name']+' — '+p['Phone'], timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
     activities.unshift(a);
