@@ -5605,9 +5605,9 @@ function attemptSearch(inputId, query, attempt) {
   
   // Auto-click the first result row after a short delay
   setTimeout(()=>{
-    const firstRow = document.querySelector('#tab-customers .table-row, #tab-partners .partner-card');
-    if(firstRow) firstRow.click();
-  }, 300);
+    const firstRow = document.querySelector('#tab-database .table-row, #tab-partners .partner-card');
+    if(firstRow) { firstRow.click(); console.log('Auto-opened record'); }
+  }, 500);
 }
 
 function togglePresenceBar() {
