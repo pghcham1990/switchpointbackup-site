@@ -5463,19 +5463,19 @@ function sendHeartbeat() {
       linkedRecord: sessionStorage.getItem('sp_linkedRecord') || ''
     })
   }).then(r=>r.json()).then(d=>{
-    console.log('Heartbeat sent:', user, role, d.success?'OK':'FAIL');
+    
   }).catch(e=>{
-    console.log('Heartbeat error:', e.message);
+    
   });
 }
 
 function fetchOnlineUsers() {
   if(!CONFIG.LIVE_MODE) return;
   fetch(CONFIG.APPS_SCRIPT_URL + '?action=getOnlineUsers').then(r=>r.json()).then(users=>{
-    if(!Array.isArray(users)) { console.log('Presence: unexpected response', users); return; }
-    console.log('Online users:', users.length, users.map(u=>u.username+' ('+u.role+')').join(', '));
+    if(!Array.isArray(users)) return;
+    
     renderPresenceBar(users);
-  }).catch(e=>{ console.log('Presence fetch error:', e); });
+  }).catch(e=>{  });
 }
 
 function renderPresenceBar(users) {
@@ -5562,7 +5562,7 @@ function renderBubble(user, roleClass, currentUser) {
 document.addEventListener('click', function(e) {
   const bubble = e.target.closest('.presence-bubble[data-nav-role]');
   if(!bubble) return;
-  console.log('Bubble clicked:', bubble.dataset.navRole, bubble.dataset.navLinked, bubble.dataset.navName);
+  
   navigateToUser(bubble.dataset.navRole, encodeURIComponent(bubble.dataset.navLinked), encodeURIComponent(bubble.dataset.navName));
 });
 
@@ -5612,7 +5612,7 @@ function attemptSearch(inputId, query, attempt) {
       );
       if(idx >= 0) { 
         selectCustomer(idx);
-        console.log('Auto-opened customer:', allCustomers[idx]['Customer Name']);
+        
       }
     } else if(inputId === 'partnerSearch') {
       const firstCard = document.querySelector('#tab-partners .partner-card');
