@@ -704,7 +704,7 @@ body.wide-mode .panel{max-width:none;}
 .presence-bubble.admin{background:linear-gradient(135deg,#2e6bff,#1d4ed8);}
 .presence-bubble.partner{background:linear-gradient(135deg,#f59e0b,#d97706);}
 .presence-bubble.customer{background:linear-gradient(135deg,#10b981,#059669);}
-.presence-bubble .presence-pulse{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid rgba(12,18,32,0.9);animation:pulse 2s infinite;}
+.presence-bubble .presence-pulse{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid rgba(12,18,32,0.9);animation:pulse 2s infinite;pointer-events:none;}
 .presence-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(12,18,32,0.95);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s ease;font-size:11px;color:#fff;}
 .presence-bubble:hover .presence-tooltip{opacity:1;}
 .presence-toggle{margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all 0.2s;}
@@ -5562,6 +5562,7 @@ function renderBubble(user, roleClass, currentUser) {
 document.addEventListener('click', function(e) {
   const bubble = e.target.closest('.presence-bubble[data-nav-role]');
   if(!bubble) return;
+  console.log('Bubble clicked:', bubble.dataset.navRole, bubble.dataset.navLinked, bubble.dataset.navName);
   navigateToUser(bubble.dataset.navRole, encodeURIComponent(bubble.dataset.navLinked), encodeURIComponent(bubble.dataset.navName));
 });
 
