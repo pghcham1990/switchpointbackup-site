@@ -5606,7 +5606,15 @@ function attemptSearch(inputId, query, attempt) {
   // Auto-click the first result row after a short delay
   setTimeout(()=>{
     const firstRow = document.querySelector('#tab-database .table-row, #tab-partners .partner-card');
-    if(firstRow) { firstRow.click(); console.log('Auto-opened record'); }
+    if(firstRow) { 
+      firstRow.click(); 
+      console.log('Auto-opened record');
+      // Scroll to the detail card after it renders
+      setTimeout(()=>{
+        const detail = document.querySelector('#tab-database .customer-detail, #tab-partners .partner-detail');
+        if(detail) detail.scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 400);
+    }
   }, 500);
 }
 
