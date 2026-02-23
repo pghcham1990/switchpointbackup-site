@@ -391,14 +391,45 @@ body.wide-mode .panel{max-width:none;}
 .kanban-col-value{font-family:var(--mono);font-size:9px;color:var(--accent);margin-top:2px;}
 .kanban-col-body{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:60px;}
 .kanban-col-body.drag-over{background:rgba(46,107,255,0.06);}
-.kanban-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:grab;transition:all 0.15s;box-shadow:0 2px 8px rgba(14,24,40,0.04);}
+.kanban-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:grab;transition:all 0.15s;box-shadow:0 2px 8px rgba(14,24,40,0.04);position:relative;}
 .kanban-card:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
 .kanban-card:active{cursor:grabbing;opacity:0.7;}
 .kanban-card.dragging{opacity:0.4;transform:scale(0.95);}
+.kanban-card.worked-today{border-left:3px solid var(--success);opacity:0.7;}
+.kanban-card.worked-today .kanban-card-worked{display:block;}
+.kanban-card.active-card{border:2px solid var(--accent);box-shadow:0 0 0 3px rgba(46,107,255,0.15);}
+.kanban-card-worked{display:none;position:absolute;top:6px;right:8px;font-size:10px;color:var(--success);font-weight:700;}
 .kanban-card-name{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .kanban-card-contact{font-size:10px;color:var(--text-dim);margin-bottom:4px;}
 .kanban-card-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .kanban-card-meta span{font-size:9px;font-family:var(--mono);}
+
+/* ===== CALL BLITZ MODE (v7d) ===== */
+.blitz-bar{display:none;background:linear-gradient(135deg,#0c1220,#1a2540);border-radius:12px;padding:14px 20px;margin-bottom:12px;align-items:center;gap:16px;flex-wrap:wrap;}
+.blitz-bar.active{display:flex;}
+.blitz-bar-title{color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.blitz-bar-title .blitz-icon{font-size:18px;}
+.blitz-bar-progress{flex:1;min-width:120px;}
+.blitz-bar-progress-track{height:6px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
+.blitz-bar-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 0.3s;}
+.blitz-bar-stats{color:rgba(255,255,255,0.8);font-size:11px;font-family:var(--mono);margin-top:4px;}
+.blitz-bar-actions{display:flex;gap:8px;}
+.blitz-btn{font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);transition:all 0.15s;}
+.blitz-btn-skip{background:rgba(255,255,255,0.12);color:#fff;}
+.blitz-btn-skip:hover{background:rgba(255,255,255,0.2);}
+.blitz-btn-next{background:linear-gradient(135deg,var(--success),#10b981);color:#fff;}
+.blitz-btn-next:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,0.3);}
+.blitz-btn-end{background:rgba(239,68,68,0.2);color:#ef4444;}
+.blitz-btn-end:hover{background:rgba(239,68,68,0.3);}
+.blitz-start-btn{font-size:11px;font-weight:700;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-family:var(--sans);background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;transition:all 0.15s;white-space:nowrap;}
+.blitz-start-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,0.3);}
+
+/* ===== PROSPECT NAV ARROWS (v7d) ===== */
+.pros-nav{display:flex;gap:6px;align-items:center;}
+.pros-nav-btn{font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-family:var(--sans);background:var(--white);color:var(--text);transition:all 0.15s;}
+.pros-nav-btn:hover{background:var(--surface-2);border-color:var(--accent);}
+.pros-nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.pros-nav-counter{font-size:10px;color:var(--text-dim);font-family:var(--mono);}
 
 /* ===== COMMAND PALETTE (v8) ===== */
 .cmd-overlay{position:fixed;inset:0;background:rgba(12,18,32,0.55);z-index:600;display:none;align-items:flex-start;justify-content:center;padding-top:20vh;backdrop-filter:blur(6px);}
@@ -621,6 +652,7 @@ body.wide-mode .panel{max-width:none;}
 
 @media(max-width:768px){
   .kanban-col{min-width:180px;}.analytics-grid{grid-template-columns:1fr;}
+  .blitz-bar{flex-direction:column;text-align:center;}
   .cmd-box{margin:0 16px;max-width:none;}
   .report-box{margin:16px;max-height:90vh;}
   .journey-node{min-width:48px;}
@@ -913,14 +945,28 @@ body.wide-mode .panel{max-width:none;}
 <div id="tab-pipeline" class="tab-content">
 <div class="panel">
   <div class="form-header"><h2>Prospect Pipeline</h2><p>Your active sales pipeline. Click any prospect to see full details, log activity, and take action.</p></div>
+  <!-- CALL BLITZ BAR (v7d) -->
+  <div class="blitz-bar" id="blitzBar">
+    <div class="blitz-bar-title"><span class="blitz-icon">🔥</span> CALL BLITZ</div>
+    <div class="blitz-bar-progress">
+      <div class="blitz-bar-progress-track"><div class="blitz-bar-progress-fill" id="blitzProgressFill" style="width:0%"></div></div>
+      <div class="blitz-bar-stats" id="blitzStats">0 / 0 worked</div>
+    </div>
+    <div class="blitz-bar-actions">
+      <button class="blitz-btn blitz-btn-skip" onclick="blitzSkip()">Skip ⏭</button>
+      <button class="blitz-btn blitz-btn-next" onclick="blitzNext()">Worked ✓ Next ▶</button>
+      <button class="blitz-btn blitz-btn-end" onclick="blitzEnd()">End Blitz</button>
+    </div>
+  </div>
   <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
     <div class="kanban-toggle">
-      <button class="kanban-toggle-btn active" onclick="setPipeView('table',this)">☰ Table</button>
-      <button class="kanban-toggle-btn" onclick="setPipeView('kanban',this)">▦ Kanban</button>
+      <button class="kanban-toggle-btn" onclick="setPipeView('table',this)">☰ Table</button>
+      <button class="kanban-toggle-btn active" onclick="setPipeView('kanban',this)">▦ Kanban</button>
     </div>
+    <button class="blitz-start-btn" id="blitzStartBtn" onclick="blitzStart()">🔥 Start Call Blitz</button>
     <div class="stage-filters" id="stageFilters" style="margin-bottom:0;"></div>
   </div>
-  <div id="pipeViewTable">
+  <div id="pipeViewTable" style="display:none;">
   <div class="db-search-bar">
     <input type="text" id="pipeSearch" placeholder="Search prospects..." oninput="filterProspects()">
     <div class="db-stat">Showing <strong id="pipeCount">0</strong> prospects</div>
@@ -932,7 +978,7 @@ body.wide-mode .panel{max-width:none;}
     </table>
   </div>
   </div>
-  <div id="pipeViewKanban" style="display:none;">
+  <div id="pipeViewKanban">
     <div class="kanban-board" id="kanbanBoard"></div>
   </div>
 
@@ -940,14 +986,19 @@ body.wide-mode .panel{max-width:none;}
   <div class="detail-card" id="prospectDetailCard">
     <div class="detail-card-header">
       <h3><span id="prosDetailName"></span><span class="pill pill-yellow" id="prosDetailStage" style="font-size:11px;"></span></h3>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="pros-nav" id="prosNav">
+          <button class="pros-nav-btn" id="prosNavPrev" onclick="navProspect(-1)" title="Previous (←)">◀ Prev</button>
+          <span class="pros-nav-counter" id="prosNavCounter"></span>
+          <button class="pros-nav-btn" id="prosNavNext" onclick="navProspect(1)" title="Next (→)">Next ▶</button>
+        </div>
         <button class="detail-close" id="prosEditToggle" onclick="toggleProsEditMode()" style="color:var(--accent);border-color:rgba(59,130,246,0.3);">✎ Edit</button>
         <button class="detail-close" onclick="closeProsDetail()">✕ Close</button>
       </div>
     </div>
     <!-- ACTION BAR -->
     <div class="prospect-actions-bar">
-      <button class="action-btn call" onclick="callProspect()">📞 Call</button>
+      <a class="action-btn call" id="prosCallLink" href="#" onclick="callProspect();return false;" style="text-decoration:none;">📞 Call <span id="prosCallNumber" style="font-family:var(--mono);font-size:10px;"></span></a>
       <button class="action-btn email-act" onclick="emailProspect()">✉ Email</button>
       <button class="action-btn maps" onclick="openMaps()">📍 Google Maps</button>
       <button class="action-btn note" onclick="openNoteModal()">+ Log Activity</button>
@@ -2299,7 +2350,7 @@ function fetchLiveData() {
 function fetchProspects() {
   document.getElementById('pipeTableBody').innerHTML='<tr><td colspan="9" class="loading-msg"><div class="spinner"></div><br>Fetching...</td></tr>';
   fetch(CONFIG.APPS_SCRIPT_URL+'?action=getProspects').then(r=>r.json()).then(data=>{
-    allProspects=data; renderStageFilters(); renderProspectTable(allProspects);
+    allProspects=data; renderStageFilters(); renderProspectTable(allProspects); if(currentPipeView==='kanban') renderKanban();
     renderDashboard();
   }).catch(err=>{ showToast('Prospect fetch failed','error'); });
 }
@@ -2601,6 +2652,13 @@ function selectProspect(idx) {
   document.getElementById('prosDetailStage').textContent=p['Stage']||'';
   document.getElementById('prosEditToggle').textContent='✎ Edit'; document.getElementById('prosEditToggle').style.color='var(--accent)';
   document.getElementById('prosSaveBar').classList.remove('visible');
+  // Update call link with phone number
+  const callLink = document.getElementById('prosCallLink');
+  const callNum = document.getElementById('prosCallNumber');
+  if(p['Phone']) { callLink.href='tel:'+p['Phone'].replace(/[^\d+]/g,''); callNum.textContent=p['Phone']; }
+  else { callLink.href='#'; callNum.textContent=''; }
+  // Update nav arrows
+  updateProsNav();
   renderProsDetailSections(p);
   renderProsActivity(p);
   renderJourneyTimeline(p);
@@ -2608,6 +2666,12 @@ function selectProspect(idx) {
   const card=document.getElementById('prospectDetailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
   // Apply saved section states to static sections (Location, Journey, Activity)
   applySectionStates(card);
+  // Highlight active card in kanban
+  if(currentPipeView==='kanban') {
+    document.querySelectorAll('.kanban-card').forEach(c=>c.classList.remove('active-card'));
+    const activeCard = document.querySelector('.kanban-card[data-idx="'+idx+'"]');
+    if(activeCard) activeCard.classList.add('active-card');
+  }
 }
 
 function getFilteredProspects() {
@@ -2791,12 +2855,14 @@ function closeProsDetail(){ document.getElementById('prospectDetailCard').classL
 function callProspect() {
   const p=allProspects[selectedProspectIdx];
   if(p['Phone']) {
-    window.open('tel:'+p['Phone']); showToast('Dialing '+p['Phone'],'success');
+    // Use location.href for reliable Google Voice triggering
+    window.location.href='tel:'+p['Phone'].replace(/[^\d+]/g,'');
+    showToast('Dialing '+p['Phone'],'success');
     // Hyper-track
     const a={id:Date.now(),prospect:p['Customer'],type:'Call',text:'📱 Dialed '+p['Phone'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
     activities.unshift(a);
     if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
-    renderProsActivity(p); renderProspectTable(getFilteredProspects());
+    renderProsActivity(p); renderProspectTable(getFilteredProspects()); if(currentPipeView==='kanban') renderKanban();
   }
   else showToast('No phone number on file','error');
 }
@@ -2933,6 +2999,8 @@ function saveNote() {
   renderGlobalActivity();
   renderProspectTable(getFilteredProspects());
   renderDashboard();
+  if(currentPipeView==='kanban') renderKanban();
+  if(blitzActive) updateBlitzProgress();
   showToast('✓ Activity logged: '+type,'success');
 }
 
@@ -3251,7 +3319,7 @@ function switchTab(id, btn) {
   if(tabEl) tabEl.classList.add('active');
   // Remove wide mode if leaving pipeline or if switching to table view
   if(id !== 'pipeline' || currentPipeView !== 'kanban') document.body.classList.remove('wide-mode');
-  else if(id === 'pipeline' && currentPipeView === 'kanban') document.body.classList.add('wide-mode');
+  else if(id === 'pipeline' && currentPipeView === 'kanban') { document.body.classList.add('wide-mode'); renderKanban(); }
   // Remember last tab
   try { localStorage.setItem('sp_lastTab', id); } catch(e) {}
 }
@@ -3772,7 +3840,7 @@ function saveQuickLog() {
 // =======================================================================
 // KANBAN BOARD (v8)
 // =======================================================================
-let currentPipeView = 'table';
+let currentPipeView = 'kanban';
 function setPipeView(view, btn) {
   currentPipeView = view;
   document.querySelectorAll('.kanban-toggle-btn').forEach(b => b.classList.remove('active'));
@@ -3789,6 +3857,7 @@ let draggedProspectIdx = null;
 
 function renderKanban() {
   const board = document.getElementById('kanbanBoard');
+  const today = new Date(); today.setHours(0,0,0,0);
   board.innerHTML = KANBAN_STAGES.map(stage => {
     const stageProspects = allProspects.filter(p => p['Stage'] === stage);
     const scored = stageProspects.map(p => ({ p, score: getUrgencyScore(p) }));
@@ -3805,7 +3874,6 @@ function renderKanban() {
           const fu = fmtVal('Follow-Up', p['Follow-Up']);
           let fuHtml = '';
           if(fu) {
-            const today = new Date(); today.setHours(0,0,0,0);
             const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
             const diff = Math.floor((fuDate - today) / 86400000);
             if(diff === 0) fuHtml = '<span style="color:var(--accent);font-weight:700;">TODAY</span>';
@@ -3816,8 +3884,16 @@ function renderKanban() {
           if(score >= 60) urgDots = '🔥🔥🔥';
           else if(score >= 35) urgDots = '🔥🔥';
           else if(score >= 15) urgDots = '🔥';
-          return `<div class="kanban-card" draggable="true" ondragstart="kanbanDragStart(event,${idx})" ondragend="kanbanDragEnd(event)" onclick="selectProspect(${idx});setPipeView('table',document.querySelector('.kanban-toggle-btn'))">
-            <div class="kanban-card-name">${p['Customer']||''}</div>
+          // Check if worked today
+          const workedToday = activities.some(a => a.prospect === p['Customer'] && !a.deleted && new Date(a.timestamp) >= today);
+          const workedClass = workedToday ? ' worked-today' : '';
+          const activeClass = idx === selectedProspectIdx ? ' active-card' : '';
+          // Phone link for quick dial
+          const phone = p['Phone'] ? p['Phone'].replace(/[^\d+]/g,'') : '';
+          const phoneHtml = phone ? '<a href="tel:'+phone+'" onclick="event.stopPropagation();" style="color:var(--success);font-size:9px;text-decoration:none;" title="Dial">📞</a>' : '';
+          return `<div class="kanban-card${workedClass}${activeClass}" data-idx="${idx}" draggable="true" ondragstart="kanbanDragStart(event,${idx})" ondragend="kanbanDragEnd(event)" onclick="selectProspect(${idx})">
+            <span class="kanban-card-worked">✓</span>
+            <div class="kanban-card-name">${p['Customer']||''} ${phoneHtml}</div>
             <div class="kanban-card-contact">${p['Contact']||''}</div>
             <div class="kanban-card-meta">
               <span style="color:var(--accent);">$${EST_PLAN_MRC[p['Est. Plan']]||149}/mo</span>
@@ -3852,6 +3928,171 @@ function kanbanDrop(e, newStage) {
   allProspects[draggedProspectIdx]['Stage'] = newStage;
   renderKanban(); renderStageFilters(); renderProspectTable(getFilteredProspects()); renderDashboard();
   showToast('✓ '+p['Customer']+': '+oldStage+' → '+newStage,'success');
+}
+
+// =======================================================================
+// PROSPECT NAVIGATION (v7d) — Prev/Next arrows + keyboard
+// =======================================================================
+let navProspectList = []; // Current navigable list based on view/filter
+
+function getNavList() {
+  // In blitz mode, use the blitz queue
+  if(blitzActive) return blitzQueue.map(i => i);
+  // In kanban with a stage filter, use that stage's prospects sorted by urgency
+  if(currentPipeView === 'kanban' && currentStageFilter !== 'all') {
+    const stageP = allProspects.filter(p => p['Stage'] === currentStageFilter);
+    const scored = stageP.map(p => ({ p, idx: allProspects.indexOf(p), score: getUrgencyScore(p) }));
+    scored.sort((a,b) => b.score - a.score);
+    return scored.map(s => s.idx);
+  }
+  // In kanban with "all", use New Lead column by default (most common workflow)
+  if(currentPipeView === 'kanban') {
+    const newLeads = allProspects.filter(p => p['Stage'] === 'New Lead');
+    const scored = newLeads.map(p => ({ p, idx: allProspects.indexOf(p), score: getUrgencyScore(p) }));
+    scored.sort((a,b) => b.score - a.score);
+    // If current prospect isn't a New Lead, fall back to all prospects
+    if(selectedProspectIdx >= 0 && allProspects[selectedProspectIdx]['Stage'] !== 'New Lead') {
+      const currentStage = allProspects[selectedProspectIdx]['Stage'];
+      const stageP = allProspects.filter(p => p['Stage'] === currentStage);
+      const scored2 = stageP.map(p => ({ p, idx: allProspects.indexOf(p), score: getUrgencyScore(p) }));
+      scored2.sort((a,b) => b.score - a.score);
+      return scored2.map(s => s.idx);
+    }
+    return scored.map(s => s.idx);
+  }
+  // In table view, use filtered prospects
+  const filtered = getFilteredProspects();
+  const scored = filtered.map(p => ({ p, idx: allProspects.indexOf(p), score: getUrgencyScore(p) }));
+  scored.sort((a,b) => b.score - a.score);
+  return scored.map(s => s.idx);
+}
+
+function updateProsNav() {
+  navProspectList = getNavList();
+  const posInList = navProspectList.indexOf(selectedProspectIdx);
+  const total = navProspectList.length;
+  const counter = document.getElementById('prosNavCounter');
+  const prevBtn = document.getElementById('prosNavPrev');
+  const nextBtn = document.getElementById('prosNavNext');
+  if(posInList >= 0) {
+    counter.textContent = (posInList + 1) + ' / ' + total;
+    prevBtn.disabled = posInList === 0;
+    nextBtn.disabled = posInList === total - 1;
+  } else {
+    counter.textContent = '';
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+  }
+}
+
+function navProspect(dir) {
+  navProspectList = getNavList();
+  const posInList = navProspectList.indexOf(selectedProspectIdx);
+  const newPos = posInList + dir;
+  if(newPos >= 0 && newPos < navProspectList.length) {
+    selectProspect(navProspectList[newPos]);
+  }
+}
+
+// Keyboard navigation: left/right arrows when detail card is open
+document.addEventListener('keydown', e => {
+  if(selectedProspectIdx < 0) return; // No prospect selected
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return; // Don't nav while typing
+  if(e.key === 'ArrowLeft') { e.preventDefault(); navProspect(-1); }
+  if(e.key === 'ArrowRight') { e.preventDefault(); navProspect(1); }
+});
+
+// =======================================================================
+// CALL BLITZ MODE (v7d) — Sequential call queue
+// =======================================================================
+let blitzActive = false;
+let blitzQueue = [];
+let blitzWorkedCount = 0;
+let blitzCurrentIdx = 0; // position within blitzQueue
+
+function blitzStart() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  // Build queue: New Lead prospects NOT worked today, sorted by urgency
+  const newLeads = allProspects.filter(p => p['Stage'] === 'New Lead');
+  const scored = newLeads.map(p => {
+    const idx = allProspects.indexOf(p);
+    const workedToday = activities.some(a => a.prospect === p['Customer'] && !a.deleted && new Date(a.timestamp) >= today);
+    return { idx, score: getUrgencyScore(p), worked: workedToday };
+  });
+  // Put unworked first, then worked
+  scored.sort((a,b) => {
+    if(a.worked !== b.worked) return a.worked ? 1 : -1;
+    return b.score - a.score;
+  });
+  blitzQueue = scored.map(s => s.idx);
+  blitzWorkedCount = scored.filter(s => s.worked).length;
+  blitzCurrentIdx = 0;
+
+  if(!blitzQueue.length) { showToast('No New Lead prospects to blitz!','error'); return; }
+
+  blitzActive = true;
+  document.getElementById('blitzBar').classList.add('active');
+  document.getElementById('blitzStartBtn').style.display = 'none';
+  updateBlitzProgress();
+  // Open first prospect
+  selectProspect(blitzQueue[blitzCurrentIdx]);
+  showToast('🔥 Call Blitz started! ' + blitzQueue.length + ' prospects in queue','success');
+}
+
+function updateBlitzProgress() {
+  const total = blitzQueue.length;
+  const today = new Date(); today.setHours(0,0,0,0);
+  // Recount worked today
+  blitzWorkedCount = blitzQueue.filter(idx => {
+    const p = allProspects[idx];
+    return activities.some(a => a.prospect === p['Customer'] && !a.deleted && new Date(a.timestamp) >= today);
+  }).length;
+  const pct = total ? Math.round((blitzWorkedCount / total) * 100) : 0;
+  document.getElementById('blitzProgressFill').style.width = pct + '%';
+  document.getElementById('blitzStats').textContent = blitzWorkedCount + ' / ' + total + ' worked (' + pct + '%)';
+}
+
+function blitzNext() {
+  // Mark current as worked (log quick note if no activity today)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const p = allProspects[blitzQueue[blitzCurrentIdx]];
+  const alreadyWorked = activities.some(a => a.prospect === p['Customer'] && !a.deleted && new Date(a.timestamp) >= today);
+  if(!alreadyWorked) {
+    // Auto-log a "Call Attempted" activity
+    const a = {id:Date.now(), prospect:p['Customer'], type:'Call', text:'📞 Call Blitz — attempted', timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
+    activities.unshift(a);
+    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+  }
+  // Advance to next
+  blitzCurrentIdx++;
+  if(blitzCurrentIdx >= blitzQueue.length) {
+    blitzEnd();
+    showToast('🏆 Call Blitz complete! You crushed ' + blitzWorkedCount + ' prospects!','success');
+    return;
+  }
+  updateBlitzProgress();
+  selectProspect(blitzQueue[blitzCurrentIdx]);
+  if(currentPipeView==='kanban') renderKanban();
+}
+
+function blitzSkip() {
+  blitzCurrentIdx++;
+  if(blitzCurrentIdx >= blitzQueue.length) {
+    blitzEnd();
+    showToast('Call Blitz ended — reached end of queue','success');
+    return;
+  }
+  selectProspect(blitzQueue[blitzCurrentIdx]);
+}
+
+function blitzEnd() {
+  blitzActive = false;
+  blitzQueue = [];
+  blitzCurrentIdx = 0;
+  document.getElementById('blitzBar').classList.remove('active');
+  document.getElementById('blitzStartBtn').style.display = '';
+  updateBlitzProgress();
+  if(currentPipeView==='kanban') renderKanban();
 }
 
 // =======================================================================
@@ -4370,7 +4611,7 @@ function generateWeeklyReport() {
     </div>
 
     <div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);font-size:10px;color:var(--text-dim);">
-      Generated by SwitchPoint Operations Portal v8 · ${today.toLocaleDateString()} ${today.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+      Generated by SwitchPoint Operations Portal v7d · ${today.toLocaleDateString()} ${today.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
     </div>
   `;
 }
