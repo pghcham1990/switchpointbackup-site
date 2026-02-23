@@ -5431,41 +5431,49 @@ function initPresence() {
   // Add bottom padding to body so content isn't hidden behind bar
   if(!presenceCollapsed) document.body.style.paddingBottom = '52px';
   
-  // Send first heartbeat, THEN fetch online users after it completes
-  sendHeartbeat().then(()=>{
-    fetchOnlineUsers();
-  }).catch(()=>{
-    fetchOnlineUsers();
-  });
+  // Send first heartbeat after a short delay to ensure role is set
+  setTimeout(sendHeartbeat, 2000);
+  // Fetch online users after heartbeat has time to land
+  setTimeout(fetchOnlineUsers, 8000);
   
-  // Heartbeat every 30 seconds, fetch shortly after
-  presenceInterval = setInterval(()=>{
+  // Persistent heartbeat every 30 seconds
+  setInterval(function() {
     sendHeartbeat();
-    setTimeout(fetchOnlineUsers, 3000);
+  }, 30000);
+  
+  // Persistent fetch every 30 seconds (offset from heartbeat)
+  setInterval(function() {
+    fetchOnlineUsers();
   }, 30000);
 }
 
 function sendHeartbeat() {
-  if(!CONFIG.LIVE_MODE) return Promise.resolve();
+  if(!CONFIG.LIVE_MODE) return;
   const user = sessionStorage.getItem('sp_user');
-  if(!user) return Promise.resolve();
-  return fetch(CONFIG.APPS_SCRIPT_URL, {
+  const role = sessionStorage.getItem('sp_role') || currentUserRole || '';
+  if(!user) return;
+  fetch(CONFIG.APPS_SCRIPT_URL, {
     method: 'POST',
     headers: {'Content-Type':'text/plain'},
     body: JSON.stringify({
       action: 'heartbeat',
       username: user,
-      role: sessionStorage.getItem('sp_role') || '',
+      role: role,
       displayName: sessionStorage.getItem('sp_displayName') || user,
       linkedRecord: sessionStorage.getItem('sp_linkedRecord') || ''
     })
-  }).catch(e=>{});
+  }).then(r=>r.json()).then(d=>{
+    console.log('Heartbeat sent:', user, role, d.success?'OK':'FAIL');
+  }).catch(e=>{
+    console.log('Heartbeat error:', e.message);
+  });
 }
 
 function fetchOnlineUsers() {
   if(!CONFIG.LIVE_MODE) return;
   fetch(CONFIG.APPS_SCRIPT_URL + '?action=getOnlineUsers').then(r=>r.json()).then(users=>{
     if(!Array.isArray(users)) { console.log('Presence: unexpected response', users); return; }
+    console.log('Online users:', users.length, users.map(u=>u.username+' ('+u.role+')').join(', '));
     renderPresenceBar(users);
   }).catch(e=>{ console.log('Presence fetch error:', e); });
 }
