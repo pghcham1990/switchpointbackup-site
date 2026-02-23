@@ -5546,9 +5546,9 @@ function renderBubble(user, roleClass, currentUser) {
   const isYou = user.username.toLowerCase() === (currentUser||'').toLowerCase();
   const name = user.displayName || user.username;
   const linked = user.linkedRecord || '';
-  const clickAction = isYou ? '' : 'onclick="navigateToUser(\''+user.role+'\',\''+encodeURIComponent(linked||name)+'\',\''+encodeURIComponent(name)+'\')"';
   const cursorStyle = isYou ? 'cursor:default;' : '';
-  return '<div class="presence-bubble '+roleClass+'" style="'+cursorStyle+'" '+clickAction+'>'
+  const dataAttrs = isYou ? '' : ' data-nav-role="'+user.role+'" data-nav-linked="'+(linked||name).replace(/"/g,'&quot;')+'" data-nav-name="'+name.replace(/"/g,'&quot;')+'"';
+  return '<div class="presence-bubble '+roleClass+'" style="'+cursorStyle+'"'+dataAttrs+'>'
     +'<div class="presence-tooltip">'
     +'<div style="font-weight:700;">'+name+(isYou?' <span style="opacity:0.5;">(you)</span>':'')+'</div>'
     +'<div style="font-size:9px;color:var(--text-dim);margin-top:2px;">'+user.role+(linked?' · '+linked:'')+'</div>'
@@ -5557,6 +5557,13 @@ function renderBubble(user, roleClass, currentUser) {
     +initials
     +'</div>';
 }
+
+// Delegated click handler for presence bubbles
+document.addEventListener('click', function(e) {
+  const bubble = e.target.closest('.presence-bubble[data-nav-role]');
+  if(!bubble) return;
+  navigateToUser(bubble.dataset.navRole, encodeURIComponent(bubble.dataset.navLinked), encodeURIComponent(bubble.dataset.navName));
+});
 
 function navigateToUser(role, linkedRecord, displayName) {
   linkedRecord = decodeURIComponent(linkedRecord);
