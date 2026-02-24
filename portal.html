@@ -703,6 +703,80 @@ body.wide-mode .panel{max-width:none;}
   .detail-section-body{grid-template-columns:1fr 1fr;}.db-search-bar{flex-wrap:wrap;}.login-card{margin:20px;padding:32px 24px;}
   .prospect-actions-bar{padding:12px 16px;}
 }
+/* ===== OPTION 1: DOOR KNOCKER COUNTER ===== */
+.door-knocker{background:linear-gradient(135deg,rgba(15,23,42,0.04),rgba(239,68,68,0.04));border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;}
+.door-knocker.door-pulse{animation:doorPulse 2s ease-in-out infinite;border-color:var(--danger);}
+@keyframes doorPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.15);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+.door-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.door-icon{font-size:20px;}
+.door-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-dim);}
+.door-count-row{display:flex;align-items:baseline;gap:6px;margin-bottom:10px;}
+.door-count{font-family:var(--mono);font-size:42px;font-weight:700;color:var(--text);line-height:1;}
+.door-count.door-zero{color:var(--danger);animation:doorPulse 2s ease-in-out infinite;}
+.door-goal{font-family:var(--mono);font-size:18px;color:var(--text-dim);font-weight:400;}
+.door-today-badge{margin-left:auto;font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--surface-2);}
+.door-progress-track{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.door-progress-fill{height:100%;border-radius:4px;transition:width 0.6s ease;}
+.door-status{font-size:11px;color:var(--text-muted);font-weight:500;}
+
+/* ===== OPTION 2: GATEKEEPER MODAL ===== */
+.gatekeeper-modal{position:fixed;inset:0;z-index:10000;background:rgba(12,18,32,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;}
+.gatekeeper-modal.visible{display:flex;}
+.gatekeeper-card{background:var(--surface);border-radius:var(--radius-lg);padding:40px;max-width:480px;width:90%;text-align:center;box-shadow:var(--shadow);border:2px solid var(--danger);}
+.gk-input{width:100%;margin:12px 0 8px;padding:12px 14px;font-size:14px;border:2px solid var(--border);border-radius:var(--radius);font-family:var(--sans);outline:none;transition:border 0.2s;}
+.gk-input:focus{border-color:var(--accent);}
+.gk-error{color:var(--danger);font-size:11px;min-height:16px;margin-bottom:8px;}
+.gk-btn{padding:12px 28px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;}
+.gk-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,107,255,0.3);}
+
+/* ===== OPTION 4: SHAME STREAK ===== */
+.shame-streak{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;border:1px solid var(--border);}
+.shame-icon{font-size:24px;line-height:1;}
+.shame-text{font-size:13px;color:var(--text);flex:1;}
+.shame-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.shame-mild{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2);}
+.shame-warning{background:rgba(249,115,22,0.08);border-color:rgba(249,115,22,0.25);}
+.shame-severe{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);}
+.shame-critical{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35);animation:shamePulse 3s ease-in-out infinite;}
+.shame-clear{background:var(--success-bg);border-color:rgba(31,191,138,0.2);}
+@keyframes shamePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.1);}50%{box-shadow:0 0 0 6px rgba(239,68,68,0);}}
+
+/* ===== OPTION 5: FEATURE LOCK ===== */
+.flock-banner{display:none;background:linear-gradient(135deg,#1a0a0a,#2a1010);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;}
+.flock-content{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.flock-icon{font-size:24px;}
+.flock-text{flex:1;min-width:200px;font-size:13px;color:#fca5a5;font-weight:500;}
+.flock-text strong{color:#fecaca;}
+.flock-progress{display:block;font-family:var(--mono);font-size:11px;margin-top:4px;color:#f87171;}
+.flock-items{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:8px;}
+.flock-item{font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
+.flock-item.unlocked{background:rgba(31,191,138,0.15);color:#6ee7b7;border-color:rgba(31,191,138,0.2);}
+.feature-locked{position:relative;pointer-events:none;opacity:0.3;filter:blur(2px);}
+.feature-locked::after{content:'🔒 Locked — knock doors to unlock';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--text-muted);pointer-events:none;}
+.locked-overlay{padding:20px;text-align:center;color:var(--text-dim);font-size:12px;font-weight:600;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(0,0,0,0.02) 10px,rgba(0,0,0,0.02) 20px);border-radius:8px;border:1px dashed var(--border);}
+
+/* ===== OPTION 6: ACCOUNTABILITY WALL TAB ===== */
+.wall-controls{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.wall-controls select{max-width:160px;}
+.wall-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:all 0.2s;}
+.wall-card:hover{box-shadow:var(--shadow-sm);}
+.wall-card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.wall-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.wall-name{font-size:16px;font-weight:700;flex:1;}
+.wall-streak-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--surface-2);color:var(--text-muted);}
+.wall-points{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);}
+.wall-metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:14px;}
+.wall-metric{text-align:center;padding:10px 6px;border-radius:10px;background:var(--surface-2);border:1px solid transparent;transition:all 0.15s;}
+.wall-metric-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);line-height:1.2;}
+.wall-metric-label{font-size:10px;color:var(--text-dim);margin-top:4px;}
+.wall-metric-good{background:var(--success-bg);border-color:rgba(31,191,138,0.15);}
+.wall-metric-good .wall-metric-val{color:var(--success);}
+.wall-metric-bad{background:var(--danger-bg);border-color:rgba(239,68,68,0.15);}
+.wall-metric-bad .wall-metric-val{color:var(--danger);}
+.wall-footer{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);font-weight:500;padding-top:12px;border-top:1px solid var(--border);}
+.wall-door-shame.shame-warning{color:var(--warning);font-weight:700;}
+.wall-door-shame.shame-critical{color:var(--danger);font-weight:700;}
+
 .login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
 .login-screen::before{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 900px 600px at 8% 15%,rgba(46,107,255,.10),transparent 55%),radial-gradient(ellipse 700px 500px at 92% 8%,rgba(31,191,138,.08),transparent 50%),radial-gradient(ellipse 600px 500px at 50% 60%,rgba(139,92,246,.05),transparent 50%);animation:meshDrift 20s ease-in-out infinite alternate;}
 .login-screen::after{content:'';position:absolute;top:50%;left:50%;width:600px;height:600px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(46,107,255,0.06) 0%,transparent 70%);pointer-events:none;}
@@ -761,6 +835,16 @@ body.wide-mode .panel{max-width:none;}
   </div>
 </div>
 
+<!-- OPTION 2: GATEKEEPER MODAL -->
+<div class="gatekeeper-modal" id="gatekeeperModal">
+  <div class="gatekeeper-card">
+    <div id="gkMessage"></div>
+    <input type="text" class="gk-input" id="gkCommitInput" placeholder="e.g. Bridgeville Family Dental" onkeydown="if(event.key==='Enter')clearGatekeeper()">
+    <div class="gk-error" id="gkError"></div>
+    <button class="gk-btn" onclick="clearGatekeeper()">I Commit — Let Me In</button>
+  </div>
+</div>
+
 <div class="app" id="appMain" style="display:none;">
 
 <header class="header">
@@ -785,6 +869,7 @@ body.wide-mode .panel{max-width:none;}
   <button class="tab-btn" onclick="switchTab('prospect',this)">+ Prospect<span class="tab-indicator ind-cyan">ADD</span></button>
   <button class="tab-btn" onclick="switchTab('partners',this)">Partners<span class="tab-indicator ind-teal">NETWORK</span></button>
   <button class="tab-btn" onclick="switchTab('demo',this)">Demo<span class="tab-indicator ind-orange">SHOW</span></button>
+  <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
 </div>
 
 <main class="main">
@@ -809,6 +894,15 @@ body.wide-mode .panel{max-width:none;}
       <div class="streak-score-label">Today's Score</div>
     </div>
   </div>
+
+  <!-- OPTION 5: FEATURE LOCK BANNER -->
+  <div class="flock-banner" id="featureLockBanner"></div>
+
+  <!-- OPTION 1: DOOR KNOCKER COUNTER -->
+  <div id="doorKnockerWidget"></div>
+
+  <!-- OPTION 4: SHAME STREAK -->
+  <div id="shameStreakWidget"></div>
 
   <!-- KPI CARDS -->
   <div class="dash-grid">
@@ -874,6 +968,7 @@ body.wide-mode .panel{max-width:none;}
   </div>
 
   <!-- ROW 3: ANALYTICS (v8) -->
+  <div id="analyticsSection">
   <div class="analytics-grid" id="dashAnalytics">
     <div class="analytics-card">
       <h4>📊 Win Rate by Source</h4>
@@ -891,11 +986,12 @@ body.wide-mode .panel{max-width:none;}
       <h4>🎯 Top Performing Actions</h4>
       <div id="analyticsTopActions"><span style="font-size:11px;color:var(--text-dim);">Which activity types appear most in won deals</span></div>
     </div>
-  </div>
+  </div><!-- /analytics-grid -->
+  </div><!-- /analyticsSection -->
 
   <!-- WEEKLY REPORT BUTTON -->
   <div style="margin-top:20px;text-align:center;">
-    <button class="btn btn-primary" onclick="generateWeeklyReport()" style="font-size:13px;padding:12px 28px;">📋 Generate Weekly Report</button>
+    <button class="btn btn-primary" id="weeklyReportBtn" onclick="generateWeeklyReport()" style="font-size:13px;padding:12px 28px;">📋 Generate Weekly Report</button>
   </div>
 
 </div>
@@ -1507,6 +1603,27 @@ body.wide-mode .panel{max-width:none;}
     <div id="achieveModalBody"></div>
   </div>
 </div>
+<!-- ======== ACCOUNTABILITY WALL TAB (Option 6) ======== -->
+<div id="tab-wall" class="tab-content">
+<div class="panel">
+  <div class="form-header">
+    <h2>Accountability Wall</h2>
+    <p>Real numbers. No hiding. Every rep's activity laid bare.</p>
+  </div>
+  <div class="wall-controls">
+    <select id="wallPeriod" onchange="renderWall()">
+      <option value="today">Today</option>
+      <option value="week" selected>This Week</option>
+      <option value="month">This Month</option>
+      <option value="all">All Time</option>
+    </select>
+  </div>
+  <div id="wallContent">
+    <div style="text-align:center;padding:40px;color:var(--text-dim);">Loading...</div>
+  </div>
+</div>
+</div>
+
 </main>
 </div><!-- /adminApp -->
 
@@ -1826,8 +1943,8 @@ function logout() {
 function applyRolePermissions() {
   const role = currentUserRole;
   const allTabs = document.querySelectorAll('.tab-btn');
-  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo'];
-  const employeeTabs = ['dashboard','pipeline','activity','prospect','demo'];
+  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall'];
+  const employeeTabs = ['dashboard','pipeline','activity','prospect','demo','wall'];
   const partnerTabs = ['partner-home'];
   const customerTabs = ['customer-home'];
 
@@ -6076,6 +6193,471 @@ function togglePresenceBar() {
 }
 
 // Presence is initialized from showApp() after successful auth
+
+// =======================================================================
+// OPTION 1: DOOR KNOCKER COUNTER (Dashboard Widget)
+// =======================================================================
+function renderDoorKnocker() {
+  const el = document.getElementById('doorKnockerWidget');
+  if(!el) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayOfWeek = today.getDay(); // 0=Sun
+  // Start of current week (Monday)
+  const monday = new Date(today);
+  monday.setDate(monday.getDate() - ((dayOfWeek + 6) % 7));
+  const DOOR_TYPES = ['Drop-In','In-Person Meeting'];
+  const WEEKLY_GOAL = 10;
+  const validActs = activities.filter(a => !a.deleted);
+  const weekDoors = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d >= monday && DOOR_TYPES.includes(a.type);
+  });
+  const count = weekDoors.length;
+  const pct = Math.min((count / WEEKLY_GOAL) * 100, 100);
+  const todayDoors = weekDoors.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d.getTime() === today.getTime();
+  }).length;
+
+  // Days elapsed this work week (Mon=1 through Fri=5)
+  const workDayNum = Math.min(Math.max(dayOfWeek === 0 ? 5 : dayOfWeek, 1), 5);
+  const expectedByNow = workDayNum * 2; // 2/day pace for 10/week
+  const onPace = count >= expectedByNow;
+
+  let barColor = 'linear-gradient(90deg,var(--danger),#f97316)';
+  let statusMsg = '';
+  let pulseClass = '';
+  if(count === 0 && workDayNum >= 2) {
+    statusMsg = `Zero doors this week. It's ${['','Monday','Tuesday','Wednesday','Thursday','Friday'][workDayNum]}.`;
+    pulseClass = ' door-pulse';
+  } else if(count === 0) {
+    statusMsg = 'Week just started. Go knock a door.';
+  } else if(count < expectedByNow) {
+    statusMsg = `Behind pace. Need ${expectedByNow - count} more to catch up.`;
+    barColor = 'linear-gradient(90deg,#f97316,var(--warning))';
+  } else if(count >= WEEKLY_GOAL) {
+    statusMsg = `🏆 Goal hit! ${count} doors this week. Keep going.`;
+    barColor = 'linear-gradient(90deg,var(--success),var(--accent2))';
+  } else {
+    statusMsg = `On pace. ${WEEKLY_GOAL - count} more to hit goal.`;
+    barColor = 'linear-gradient(90deg,var(--accent),var(--accent2))';
+  }
+
+  el.innerHTML = `
+    <div class="door-knocker${pulseClass}">
+      <div class="door-header">
+        <div class="door-icon">🚪</div>
+        <div class="door-title">DOORS KNOCKED THIS WEEK</div>
+      </div>
+      <div class="door-count-row">
+        <div class="door-count${count === 0 && workDayNum >= 2 ? ' door-zero' : ''}">${count}</div>
+        <div class="door-goal">/ ${WEEKLY_GOAL}</div>
+        <div class="door-today-badge">${todayDoors > 0 ? '✅ ' + todayDoors + ' today' : '⚠️ 0 today'}</div>
+      </div>
+      <div class="door-progress-track">
+        <div class="door-progress-fill" style="width:${pct}%;background:${barColor};"></div>
+      </div>
+      <div class="door-status">${statusMsg}</div>
+    </div>`;
+}
+
+// =======================================================================
+// OPTION 2: THE GATEKEEPER (Login Blocker)
+// =======================================================================
+let gatekeeperDismissed = false;
+
+function checkGatekeeper() {
+  if(currentUserRole !== 'Admin' && currentUserRole !== 'Employee') return;
+  if(gatekeeperDismissed) return;
+  if(sessionStorage.getItem('sp_gatekeeper_cleared') === 'true') { gatekeeperDismissed = true; return; }
+  // Wait for activities to load, then check
+  const checkInterval = setInterval(() => {
+    if(!activitiesLoaded) return;
+    clearInterval(checkInterval);
+    showGatekeeperIfNeeded();
+  }, 500);
+  // Timeout after 8 seconds
+  setTimeout(() => clearInterval(checkInterval), 8000);
+}
+
+function showGatekeeperIfNeeded() {
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1); yesterday.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const DOOR_TYPES = ['Drop-In','In-Person Meeting'];
+  const validActs = activities.filter(a => !a.deleted);
+
+  // Check yesterday for face-to-face
+  const yesterdayDoors = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d.getTime() === yesterday.getTime() && DOOR_TYPES.includes(a.type);
+  });
+
+  // How many times portal was opened (login activities)
+  const yesterdayLogins = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d.getTime() === yesterday.getTime() && a.text && a.text.includes('Login:');
+  }).length;
+
+  if(yesterdayDoors.length > 0) {
+    gatekeeperDismissed = true;
+    sessionStorage.setItem('sp_gatekeeper_cleared','true');
+    return;
+  }
+
+  // Skip on weekends (yesterday was Sat or Sun)
+  const yDay = yesterday.getDay();
+  if(yDay === 0 || yDay === 6) {
+    gatekeeperDismissed = true;
+    sessionStorage.setItem('sp_gatekeeper_cleared','true');
+    return;
+  }
+
+  // Show gatekeeper
+  const modal = document.getElementById('gatekeeperModal');
+  if(modal) {
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][yDay];
+    document.getElementById('gkMessage').innerHTML = `
+      <div style="font-size:48px;margin-bottom:16px;">🚫</div>
+      <h2 style="font-size:22px;font-weight:700;color:var(--danger);margin-bottom:8px;">0 Face-to-Face Conversations Yesterday</h2>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">
+        It was ${dayName}. You opened this portal${yesterdayLogins > 0 ? ' <strong>'+yesterdayLogins+' time'+(yesterdayLogins!==1?'s':'')+'</strong>' : ''} instead of walking through a door.<br>
+        <strong>The portal doesn't close deals. Doors do.</strong>
+      </p>
+      <p style="color:var(--text);font-size:14px;font-weight:600;margin-bottom:12px;">What's your plan today? Name a specific business you'll visit:</p>
+    `;
+    modal.classList.add('visible');
+  }
+}
+
+function clearGatekeeper() {
+  const input = document.getElementById('gkCommitInput');
+  if(!input || input.value.trim().length < 3) {
+    document.getElementById('gkError').textContent = 'Type a real business name. No shortcuts.';
+    return;
+  }
+  gatekeeperDismissed = true;
+  sessionStorage.setItem('sp_gatekeeper_cleared','true');
+  sessionStorage.setItem('sp_gatekeeper_commitment', input.value.trim());
+  document.getElementById('gatekeeperModal').classList.remove('visible');
+  showToast('Committed to visit: ' + input.value.trim() + ' — now go do it.', 'warning');
+}
+
+// =======================================================================
+// OPTION 3: 10AM AMBUSH (backend only — just the timed trigger function)
+// This is documented here; actual implementation goes in Code.gs
+// =======================================================================
+// See Code.gs additions: send10amAmbush() function
+// Trigger: Time-driven → Day timer → 10am-11am weekdays
+
+// =======================================================================
+// OPTION 4: SHAME STREAK (Inactivity Counter)
+// =======================================================================
+function renderShameStreak() {
+  const el = document.getElementById('shameStreakWidget');
+  if(!el) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const DOOR_TYPES = ['Drop-In','In-Person Meeting'];
+  const validActs = activities.filter(a => !a.deleted && DOOR_TYPES.includes(a.type));
+
+  if(validActs.length === 0) {
+    el.innerHTML = `<div class="shame-streak shame-critical">
+      <div class="shame-icon">💀</div>
+      <div class="shame-text"><strong>∞ days</strong> since last door knock</div>
+      <div class="shame-sub">You have never logged a face-to-face conversation.</div>
+    </div>`;
+    return;
+  }
+
+  // Find most recent door knock
+  const sorted = validActs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  const lastDoor = new Date(sorted[0].timestamp); lastDoor.setHours(0,0,0,0);
+  const daysSince = Math.floor((today - lastDoor) / 86400000);
+
+  if(daysSince === 0) {
+    el.innerHTML = `<div class="shame-streak shame-clear">
+      <div class="shame-icon">✅</div>
+      <div class="shame-text">Door knocked <strong>today</strong></div>
+      <div class="shame-sub">Shame streak cleared. Keep it up.</div>
+    </div>`;
+    return;
+  }
+
+  let level = 'shame-mild';
+  let icon = '😐';
+  let msg = '';
+  if(daysSince >= 14) {
+    level = 'shame-critical'; icon = '💀';
+    msg = `${daysSince} days without knocking a door. Your Instantly campaigns don't replace showing up.`;
+  } else if(daysSince >= 7) {
+    level = 'shame-severe'; icon = '🚨';
+    msg = `${daysSince} days. A full week without a face-to-face conversation. Who are you selling to?`;
+  } else if(daysSince >= 3) {
+    level = 'shame-warning'; icon = '⚠️';
+    msg = `${daysSince} days since last door knock. The gap is growing.`;
+  } else {
+    level = 'shame-mild'; icon = '🕐';
+    msg = `${daysSince} day${daysSince!==1?'s':''} since last door knock. Don't let it slip.`;
+  }
+
+  el.innerHTML = `<div class="shame-streak ${level}">
+    <div class="shame-icon">${icon}</div>
+    <div class="shame-text"><strong>${daysSince} day${daysSince!==1?'s':''}</strong> since last door knock</div>
+    <div class="shame-sub">${msg}</div>
+  </div>`;
+}
+
+// =======================================================================
+// OPTION 5: NUCLEAR OPTION (Feature Lock)
+// =======================================================================
+let featureLockActive = false;
+let featureLockDoors = 0;
+const FEATURE_LOCK_REQUIRED = 5;
+
+function checkFeatureLock() {
+  if(currentUserRole !== 'Admin' && currentUserRole !== 'Employee') return;
+  // Check last week's door count (Mon-Sun of previous week)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayOfWeek = today.getDay();
+  // Last Monday
+  const thisMonday = new Date(today);
+  thisMonday.setDate(thisMonday.getDate() - ((dayOfWeek + 6) % 7));
+  const lastMonday = new Date(thisMonday);
+  lastMonday.setDate(lastMonday.getDate() - 7);
+  const lastSunday = new Date(thisMonday);
+  lastSunday.setDate(lastSunday.getDate() - 1);
+  lastSunday.setHours(23,59,59,999);
+
+  const DOOR_TYPES = ['Drop-In','In-Person Meeting'];
+  const validActs = activities.filter(a => !a.deleted);
+
+  const lastWeekDoors = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d >= lastMonday && d <= lastSunday && DOOR_TYPES.includes(a.type);
+  }).length;
+
+  // Current week doors (for unlocking progress)
+  const thisWeekDoors = validActs.filter(a => {
+    const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+    return d >= thisMonday && DOOR_TYPES.includes(a.type);
+  }).length;
+
+  featureLockDoors = thisWeekDoors;
+
+  // If last week had fewer than FEATURE_LOCK_REQUIRED doors, lock features this week
+  // But unlock progressively as this week's doors accumulate
+  if(lastWeekDoors < FEATURE_LOCK_REQUIRED && thisWeekDoors < FEATURE_LOCK_REQUIRED) {
+    featureLockActive = true;
+    applyFeatureLock(true, thisWeekDoors);
+  } else {
+    featureLockActive = false;
+    applyFeatureLock(false, thisWeekDoors);
+  }
+}
+
+function applyFeatureLock(locked, currentDoors) {
+  const banner = document.getElementById('featureLockBanner');
+  if(!banner) return;
+
+  // Features unlock at: 1 door = achievements, 2 = analytics, 3 = weekly report, 4 = kanban, 5 = all clear
+  const achieveLocked = locked && currentDoors < 1;
+  const analyticsLocked = locked && currentDoors < 2;
+  const reportLocked = locked && currentDoors < 3;
+  const kanbanLocked = locked && currentDoors < 4;
+
+  if(locked) {
+    const remaining = FEATURE_LOCK_REQUIRED - currentDoors;
+    banner.style.display = 'block';
+    banner.innerHTML = `
+      <div class="flock-content">
+        <div class="flock-icon">🔒</div>
+        <div class="flock-text">
+          <strong>Features locked.</strong> Last week: fewer than ${FEATURE_LOCK_REQUIRED} door conversations.
+          <span class="flock-progress">${currentDoors} / ${FEATURE_LOCK_REQUIRED} doors this week to unlock all features.</span>
+        </div>
+        <div class="flock-items">
+          <span class="flock-item ${!achieveLocked ? 'unlocked' : ''}">Achievements ${achieveLocked ? '🔒' : '✅'}</span>
+          <span class="flock-item ${!analyticsLocked ? 'unlocked' : ''}">Analytics ${analyticsLocked ? '🔒' : '✅'}</span>
+          <span class="flock-item ${!reportLocked ? 'unlocked' : ''}">Weekly Report ${reportLocked ? '🔒' : '✅'}</span>
+          <span class="flock-item ${!kanbanLocked ? 'unlocked' : ''}">Kanban View ${kanbanLocked ? '🔒' : '✅'}</span>
+        </div>
+      </div>`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Apply visual locks
+  const achieveSection = document.getElementById('dashMilestones');
+  if(achieveSection) {
+    if(achieveLocked) achieveSection.innerHTML = '<div class="locked-overlay">🔒 Log 1 door conversation to unlock achievements</div>';
+  }
+  const analyticsSection = document.getElementById('analyticsSection');
+  if(analyticsSection) {
+    if(analyticsLocked) analyticsSection.classList.add('feature-locked');
+    else analyticsSection.classList.remove('feature-locked');
+  }
+  const reportBtn = document.getElementById('weeklyReportBtn');
+  if(reportBtn) {
+    if(reportLocked) { reportBtn.disabled = true; reportBtn.title = 'Locked — log 3 doors this week'; reportBtn.style.opacity = '0.4'; }
+    else { reportBtn.disabled = false; reportBtn.title = ''; reportBtn.style.opacity = '1'; }
+  }
+  // Kanban lock — if locked, force table view
+  if(kanbanLocked && currentPipeView === 'kanban') {
+    const tableBtn = document.querySelector('.kanban-toggle-btn');
+    if(tableBtn) setPipeView('table', tableBtn);
+  }
+}
+
+// =======================================================================
+// OPTION 6: ACCOUNTABILITY WALL TAB
+// =======================================================================
+function renderWall() {
+  const el = document.getElementById('wallContent');
+  if(!el) return;
+  const validActs = activities.filter(a => !a.deleted);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayOfWeek = today.getDay();
+  const thisMonday = new Date(today);
+  thisMonday.setDate(thisMonday.getDate() - ((dayOfWeek + 6) % 7));
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  // Group by user
+  const users = {};
+  validActs.forEach(a => {
+    const u = a.user || 'unknown';
+    if(!users[u]) users[u] = [];
+    users[u].push(a);
+  });
+
+  // Period filters
+  const period = document.getElementById('wallPeriod') ? document.getElementById('wallPeriod').value : 'week';
+  let periodStart;
+  if(period === 'today') periodStart = today;
+  else if(period === 'week') periodStart = thisMonday;
+  else if(period === 'month') periodStart = thisMonth;
+  else periodStart = new Date(0);
+
+  let html = '';
+
+  Object.entries(users).forEach(([username, acts]) => {
+    const periodActs = acts.filter(a => {
+      const d = new Date(a.timestamp); d.setHours(0,0,0,0);
+      return d >= periodStart;
+    });
+
+    const calls = periodActs.filter(a => a.type === 'Call' || a.type === 'Follow-Up Call').length;
+    const dropIns = periodActs.filter(a => a.type === 'Drop-In' || a.type === 'In-Person Meeting').length;
+    const emails = periodActs.filter(a => a.type === 'Email' || a.type === 'Email Received').length;
+    const proposals = periodActs.filter(a => a.type === 'Proposal Sent').length;
+    const demos = periodActs.filter(a => a.type === 'Demo').length;
+    const voicemails = periodActs.filter(a => a.type === 'Voicemail').length;
+    const texts = periodActs.filter(a => a.type === 'Text').length;
+    const notes = periodActs.filter(a => a.type === 'Note').length;
+    const total = periodActs.length;
+    const points = periodActs.reduce((sum, a) => sum + (ACTIVITY_POINTS[a.type] || 1), 0);
+
+    // Unique prospects touched
+    const prospectsTouched = [...new Set(periodActs.map(a => a.prospect).filter(p => p && p !== 'System'))].length;
+
+    // Streak (consecutive days with any activity)
+    let streak = 0;
+    let checkDate = new Date(today);
+    const userDayActs = acts; // all time for streak
+    if(!periodActs.some(a => { const d = new Date(a.timestamp); d.setHours(0,0,0,0); return d.getTime() === today.getTime(); })) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+    for(let i = 0; i < 365; i++) {
+      const dayStr = checkDate.toISOString().split('T')[0];
+      const hasAct = userDayActs.some(a => new Date(a.timestamp).toISOString().split('T')[0] === dayStr);
+      if(hasAct) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+      else break;
+    }
+
+    // Door shame streak
+    const DOOR_TYPES = ['Drop-In','In-Person Meeting'];
+    const doorActs = acts.filter(a => DOOR_TYPES.includes(a.type));
+    let doorShame = '∞';
+    if(doorActs.length > 0) {
+      const lastDoor = new Date(doorActs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))[0].timestamp);
+      lastDoor.setHours(0,0,0,0);
+      doorShame = Math.floor((today - lastDoor) / 86400000);
+      if(doorShame === 0) doorShame = '✅ today';
+    }
+
+    const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+
+    html += `
+    <div class="wall-card">
+      <div class="wall-card-header">
+        <div class="wall-avatar">${displayName.charAt(0).toUpperCase()}</div>
+        <div class="wall-name">${displayName}</div>
+        <div class="wall-streak-badge">${streak > 0 ? '🔥 ' + streak + '-day streak' : '⏸️ No streak'}</div>
+        <div class="wall-points">${points} pts</div>
+      </div>
+      <div class="wall-metrics">
+        <div class="wall-metric${dropIns > 0 ? ' wall-metric-good' : calls === 0 && dropIns === 0 ? ' wall-metric-bad' : ''}">
+          <div class="wall-metric-val">${dropIns}</div>
+          <div class="wall-metric-label">🚗 Drop-Ins</div>
+        </div>
+        <div class="wall-metric${calls > 0 ? ' wall-metric-good' : ''}">
+          <div class="wall-metric-val">${calls}</div>
+          <div class="wall-metric-label">📞 Calls</div>
+        </div>
+        <div class="wall-metric">
+          <div class="wall-metric-val">${emails}</div>
+          <div class="wall-metric-label">✉️ Emails</div>
+        </div>
+        <div class="wall-metric${proposals > 0 ? ' wall-metric-good' : ''}">
+          <div class="wall-metric-val">${proposals}</div>
+          <div class="wall-metric-label">📄 Proposals</div>
+        </div>
+        <div class="wall-metric${demos > 0 ? ' wall-metric-good' : ''}">
+          <div class="wall-metric-val">${demos}</div>
+          <div class="wall-metric-label">🎯 Demos</div>
+        </div>
+        <div class="wall-metric">
+          <div class="wall-metric-val">${voicemails}</div>
+          <div class="wall-metric-label">📱 VMs</div>
+        </div>
+        <div class="wall-metric">
+          <div class="wall-metric-val">${texts}</div>
+          <div class="wall-metric-label">💬 Texts</div>
+        </div>
+        <div class="wall-metric">
+          <div class="wall-metric-val">${notes}</div>
+          <div class="wall-metric-label">📝 Notes</div>
+        </div>
+      </div>
+      <div class="wall-footer">
+        <span>📊 ${total} total activities</span>
+        <span>🎯 ${prospectsTouched} prospects touched</span>
+        <span class="wall-door-shame${doorShame === '✅ today' ? '' : typeof doorShame === 'number' && doorShame >= 7 ? ' shame-critical' : typeof doorShame === 'number' && doorShame >= 3 ? ' shame-warning' : ''}">🚪 Last door: ${doorShame === '✅ today' ? doorShame : doorShame + ' days ago'}</span>
+      </div>
+    </div>`;
+  });
+
+  if(!html) html = '<div style="text-align:center;padding:40px;color:var(--text-dim);">No activity data yet. Log some activities to see the wall.</div>';
+
+  el.innerHTML = html;
+}
+
+// =======================================================================
+// HOOK ALL WARFARE SYSTEMS INTO EXISTING RENDER PIPELINE
+// =======================================================================
+const _origRenderDashboard = renderDashboard;
+renderDashboard = function() {
+  _origRenderDashboard();
+  renderDoorKnocker();
+  renderShameStreak();
+  checkFeatureLock();
+};
+
+// Fire gatekeeper after login/data load
+const _origShowApp = showApp;
+showApp = function() {
+  _origShowApp();
+  setTimeout(checkGatekeeper, 2000);
+};
+
 </script>
 </body>
 </html>
