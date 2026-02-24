@@ -2703,7 +2703,7 @@ function renderProsDetailSections(p) {
       const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
       // Clickable phone — opens Google Voice dialer
-      if(f==='Phone' && val) display=`<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;border-bottom:1.5px dashed rgba(16,185,129,0.4);padding-bottom:1px;transition:all .2s ease;" onmouseover="this.style.borderBottomColor='rgba(16,185,129,0.9)';this.style.color='#059669'" onmouseout="this.style.borderBottomColor='rgba(16,185,129,0.4)';this.style.color='var(--success)'">${val}</a>`;
+      if(f==='Phone' && val) display=`<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val}</a>`;
       // Clickable email
       if(f==='Email' && val) display=`<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       // Clickable URL
@@ -3898,8 +3898,8 @@ function renderKanban() {
           const workedClass = workedToday ? ' worked-today' : '';
           const activeClass = idx === selectedProspectIdx ? ' active-card' : '';
           // Phone link for quick dial
-          const phone = p['Phone'] ? p['Phone'].replace(/[^\d+]/g,'') : '';
-          const phoneHtml = phone ? '<a href="'+gvCallUrl(phone)+'" target="_blank" onclick="event.stopPropagation();" style="color:var(--success);font-size:9px;text-decoration:none;" title="Dial via Google Voice">📞</a>' : '';
+          const phone = p['Phone'] || '';
+          const phoneHtml = phone ? '<span onclick="event.stopPropagation();" style="font-size:1px;color:transparent;user-select:none;">'+phone+'</span>' : '';
           return `<div class="kanban-card${workedClass}${activeClass}" data-idx="${idx}" draggable="true" ondragstart="kanbanDragStart(event,${idx})" ondragend="kanbanDragEnd(event)" onclick="selectProspect(${idx})">
             <span class="kanban-card-worked">✓</span>
             <div class="kanban-card-name">${p['Customer']||''} ${phoneHtml}</div>
@@ -5045,7 +5045,7 @@ function renderPartnerDetailSections(p) {
       const wide = f==='Notes';
       const ec = partnerEditMode ? ' editable' : '';
       let display = val;
-      if(f==='Phone' && val) display = `<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;border-bottom:1.5px dashed rgba(16,185,129,0.4);padding-bottom:1px;transition:all .2s ease;" onmouseover="this.style.borderBottomColor='rgba(16,185,129,0.9)';this.style.color='#059669'" onmouseout="this.style.borderBottomColor='rgba(16,185,129,0.4)';this.style.color='var(--success)'">${val}</a>`;
+      if(f==='Phone' && val) display = `<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val}</a>`;
       if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
       if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
