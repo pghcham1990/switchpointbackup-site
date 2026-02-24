@@ -810,6 +810,20 @@ body.wide-mode .panel{max-width:none;}
 .exp-table tr.exp-deleted{opacity:0.3;text-decoration:line-through;}
 .exp-table .exp-receipt-yes{color:var(--success);}
 .exp-table .exp-receipt-no{color:var(--danger);}
+.exp-table tbody tr{cursor:pointer;transition:background 0.1s;}
+.exp-table tbody tr.exp-active{background:rgba(46,107,255,0.06);}
+.exp-detail-row td{padding:0 !important;border-bottom:2px solid var(--accent) !important;background:var(--surface-2) !important;cursor:default !important;}
+.exp-detail-row:hover{background:var(--surface-2) !important;}
+.exp-detail-inner{padding:14px 18px;font-size:13px;line-height:1.7;}
+.exp-detail-notes{color:var(--text);white-space:pre-wrap;word-break:break-word;margin-bottom:10px;}
+.exp-detail-notes strong{color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;}
+.exp-detail-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin-bottom:10px;}
+.exp-detail-meta span{background:var(--surface);padding:3px 8px;border-radius:6px;border:1px solid var(--border);}
+.exp-detail-actions{display:flex;gap:8px;}
+.exp-notes-tooltip{position:fixed;z-index:500;max-width:350px;padding:10px 14px;background:#1e293b;color:#f1f5f9;font-size:12px;line-height:1.6;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25);pointer-events:none;word-break:break-word;white-space:pre-wrap;opacity:0;transition:opacity 0.15s;}
+.exp-notes-tooltip.visible{opacity:1;}
+.exp-form-editing{border-color:var(--accent);box-shadow:0 0 0 2px rgba(46,107,255,0.15);}
+.exp-form-editing .exp-form-header{background:linear-gradient(135deg,rgba(46,107,255,0.08),rgba(31,191,138,0.05));}
 .exp-tax-notes{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;font-size:12px;line-height:1.7;color:var(--text-muted);}
 .exp-tax-notes h4{font-size:13px;color:var(--text);margin:0 0 8px;}
 .exp-tax-notes p{margin:6px 0;}
@@ -2231,8 +2245,9 @@ body.wide-mode .panel{max-width:none;}
         </div>
       </div>
       <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="cancelExpenseEdit()" style="font-size:11px;padding:7px 14px;" id="expCancelBtn" hidden>Cancel Edit</button>
         <button class="btn btn-secondary" onclick="clearExpenseForm()" style="font-size:11px;padding:7px 14px;">Clear</button>
-        <button class="btn btn-success" onclick="saveExpense()" style="font-size:11px;padding:7px 14px;">💰 Save Expense</button>
+        <button class="btn btn-success" onclick="saveExpense()" style="font-size:11px;padding:7px 14px;" id="expSaveBtn">💰 Save Expense</button>
       </div>
     </div>
   </div>
@@ -2273,6 +2288,9 @@ body.wide-mode .panel{max-width:none;}
     </select>
     <button class="btn btn-primary" onclick="exportExpensesCSV()" style="font-size:11px;padding:7px 14px;margin-left:auto;">📥 Export CSV</button>
   </div>
+
+  <!-- NOTES TOOLTIP (hover) -->
+  <div class="exp-notes-tooltip" id="expNotesTooltip"></div>
 
   <!-- EXPENSE TABLE -->
   <div class="exp-table-wrap">
@@ -6882,6 +6900,8 @@ function togglePresenceBar() {
 // =======================================================================
 let allExpenses = [];
 let expensesLoaded = false;
+let editingExpenseId = null;
+let expandedExpenseId = null;
 
 function loadExpenses() {
   if(!CONFIG.LIVE_MODE) { expensesLoaded = true; return; }
@@ -6911,11 +6931,43 @@ function saveExpense() {
     return;
   }
 
-  // Auto-set 50% for meals
   if(category === 'Meals' && deductible !== '50%') {
     document.getElementById('expDeductible').value = '50%';
   }
 
+  if(editingExpenseId) {
+    // UPDATE existing expense
+    const idx = allExpenses.findIndex(e => e.ID === editingExpenseId);
+    if(idx >= 0) {
+      allExpenses[idx].Date = date;
+      allExpenses[idx].Amount = parseFloat(amount).toFixed(2);
+      allExpenses[idx].Vendor = vendor;
+      allExpenses[idx].Category = category;
+      allExpenses[idx].Payment = payment;
+      allExpenses[idx].PaidTo = paidTo;
+      allExpenses[idx].Notes = notes;
+      allExpenses[idx].Receipt = receipt;
+      allExpenses[idx].Deductible = deductible;
+      allExpenses[idx].Reimbursable = reimburse;
+
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'updateExpense', id:editingExpenseId, updates:{
+            Date:date, Amount:parseFloat(amount).toFixed(2), Vendor:vendor, Category:category,
+            Payment:payment, PaidTo:paidTo, Notes:notes, Receipt:receipt, Deductible:deductible, Reimbursable:reimburse
+          }})
+        }).catch(e => console.log('Expense update error:', e));
+      }
+      showToast('Expense updated: $' + parseFloat(amount).toFixed(2) + ' — ' + vendor, 'success');
+    }
+    cancelExpenseEdit();
+    renderExpenses();
+    return;
+  }
+
+  // CREATE new expense
   const expense = {
     ID: String(Date.now()),
     Date: date,
@@ -6933,13 +6985,11 @@ function saveExpense() {
     Deleted: ''
   };
 
-  // Add locally
   allExpenses.push(expense);
   renderExpenses();
   clearExpenseForm();
   showToast('Expense saved: $' + expense.Amount + ' — ' + vendor, 'success');
 
-  // Save to backend
   if(CONFIG.LIVE_MODE) {
     fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
@@ -6949,9 +6999,60 @@ function saveExpense() {
   }
 }
 
-function deleteExpense(id) {
+function editExpense(id, ev) {
+  if(ev) ev.stopPropagation();
+  const e = allExpenses.find(x => x.ID === id);
+  if(!e) return;
+
+  editingExpenseId = id;
+  expandedExpenseId = null;
+
+  // Populate form
+  document.getElementById('expDate').value = e.Date || '';
+  document.getElementById('expAmount').value = e.Amount || '';
+  document.getElementById('expVendor').value = e.Vendor || '';
+  document.getElementById('expCategory').value = e.Category || '';
+  document.getElementById('expPayment').value = e.Payment || '';
+  document.getElementById('expPaidTo').value = e.PaidTo || '';
+  document.getElementById('expNotes').value = e.Notes || '';
+  document.getElementById('expReceipt').value = e.Receipt || 'Yes';
+  document.getElementById('expDeductible').value = e.Deductible || '100%';
+  document.getElementById('expReimburse').value = e.Reimbursable || 'No';
+
+  // Show edit mode
+  const form = document.getElementById('expenseForm');
+  form.classList.add('exp-form-editing');
+  const body = document.getElementById('expFormBody');
+  body.classList.remove('collapsed');
+  document.getElementById('expSaveBtn').innerHTML = '✏️ Update Expense';
+  document.getElementById('expCancelBtn').hidden = false;
+
+  // Scroll to form
+  form.scrollIntoView({behavior:'smooth', block:'start'});
+  renderExpenses();
+}
+
+function cancelExpenseEdit() {
+  editingExpenseId = null;
+  document.getElementById('expenseForm').classList.remove('exp-form-editing');
+  document.getElementById('expSaveBtn').innerHTML = '💰 Save Expense';
+  document.getElementById('expCancelBtn').hidden = true;
+  clearExpenseForm();
+  renderExpenses();
+}
+
+function toggleExpenseDetail(id) {
+  if(editingExpenseId) return; // don't toggle while editing
+  expandedExpenseId = expandedExpenseId === id ? null : id;
+  renderExpenses();
+}
+
+function deleteExpense(id, ev) {
+  if(ev) ev.stopPropagation();
   if(!confirm('Delete this expense?')) return;
   allExpenses = allExpenses.filter(e => e.ID !== id);
+  if(editingExpenseId === id) cancelExpenseEdit();
+  if(expandedExpenseId === id) expandedExpenseId = null;
   renderExpenses();
   if(CONFIG.LIVE_MODE) {
     fetch(CONFIG.APPS_SCRIPT_URL, {
@@ -6976,12 +7077,32 @@ function clearExpenseForm() {
   document.getElementById('expReimburse').value = 'No';
 }
 
+// Hover tooltip for notes
+function showExpTooltip(ev, text) {
+  const tip = document.getElementById('expNotesTooltip');
+  if(!tip || !text) return;
+  tip.textContent = text;
+  tip.style.left = ev.clientX + 'px';
+  tip.style.top = (ev.clientY + 16) + 'px';
+  tip.classList.add('visible');
+}
+function moveExpTooltip(ev) {
+  const tip = document.getElementById('expNotesTooltip');
+  if(!tip) return;
+  const maxX = window.innerWidth - 370;
+  tip.style.left = Math.min(ev.clientX, maxX) + 'px';
+  tip.style.top = (ev.clientY + 16) + 'px';
+}
+function hideExpTooltip() {
+  const tip = document.getElementById('expNotesTooltip');
+  if(tip) tip.classList.remove('visible');
+}
+
 function renderExpenses() {
   const tbody = document.getElementById('expenseTableBody');
   const summary = document.getElementById('expSummary');
   if(!tbody) return;
 
-  // Filters
   const filterMonth = document.getElementById('expFilterMonth') ? document.getElementById('expFilterMonth').value : 'all';
   const filterYear = document.getElementById('expFilterYear') ? document.getElementById('expFilterYear').value : '2026';
   const filterCat = document.getElementById('expFilterCat') ? document.getElementById('expFilterCat').value : 'all';
@@ -6998,10 +7119,9 @@ function renderExpenses() {
     return true;
   });
 
-  // Sort by date descending
   filtered.sort((a,b) => (b.Date||'').localeCompare(a.Date||''));
 
-  // Populate category filter dynamically
+  // Populate category filter
   const catFilter = document.getElementById('expFilterCat');
   if(catFilter) {
     const cats = [...new Set(allExpenses.map(e=>e.Category).filter(c=>c))].sort();
@@ -7015,7 +7135,7 @@ function renderExpenses() {
     const amt = parseFloat(e.Amount||0);
     if(e.Deductible === '100%') return s + amt;
     if(e.Deductible === '50%') return s + amt * 0.5;
-    if(e.Deductible === 'Partial') return s + amt * 0.5; // estimate
+    if(e.Deductible === 'Partial') return s + amt * 0.5;
     return s;
   }, 0);
   const cashExpenses = filtered.filter(e => e.Payment === 'Cash').reduce((s,e) => s + parseFloat(e.Amount||0), 0);
@@ -7035,20 +7155,27 @@ function renderExpenses() {
     ${noReceipt > 0 ? `<div class="exp-summary-card" style="border-color:rgba(239,68,68,0.2);"><div class="exp-summary-val" style="color:var(--danger);">${noReceipt}</div><div class="exp-summary-label">⚠️ Missing Receipts</div></div>` : ''}
   `;
 
-  // Table
   if(filtered.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-dim);">No expenses found for this period.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = filtered.map(e => {
-    const catColors = {
-      'Equipment':'#8b5cf6','Software':'#6366f1','Supplies':'#0ea5e9','Phone & Internet':'#06b6d4',
-      'Advertising':'#f97316','Vehicle':'#eab308','Meals':'#ef4444','Partner Payment':'#f97316',
-      'Contract Labor':'#ec4899','Professional Services':'#8b5cf6','Travel':'#14b8a6'
-    };
-    const catColor = catColors[e.Category] || 'var(--text-dim)';
-    return `<tr>
+  const catColors = {
+    'Equipment':'#8b5cf6','Software':'#6366f1','Supplies':'#0ea5e9','Phone & Internet':'#06b6d4',
+    'Advertising':'#f97316','Vehicle':'#eab308','Meals':'#ef4444','Partner Payment':'#f97316',
+    'Contract Labor':'#ec4899','Professional Services':'#8b5cf6','Travel':'#14b8a6',
+    'Taxes & Licenses':'#64748b','Insurance':'#0891b2','Bank Fees':'#78716c',
+    'Office Expense':'#6366f1','Education':'#a855f7','Gifts':'#ec4899'
+  };
+
+  let html = '';
+  filtered.forEach(e => {
+    const catColor = catColors[e.Category] || '#64748b';
+    const isExpanded = expandedExpenseId === e.ID;
+    const isEditing = editingExpenseId === e.ID;
+    const safeNotes = (e.Notes||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+    html += `<tr class="${isExpanded ? 'exp-active' : ''} ${isEditing ? 'exp-active' : ''}" onclick="toggleExpenseDetail('${e.ID}')">
       <td style="white-space:nowrap;font-family:var(--mono);font-size:11px;">${e.Date||''}</td>
       <td style="font-weight:600;">${e.Vendor||''}</td>
       <td><span class="exp-cat-badge" style="background:${catColor}15;color:${catColor};border:1px solid ${catColor}30;">${e.Category||''}</span></td>
@@ -7056,10 +7183,31 @@ function renderExpenses() {
       <td class="exp-pay-badge">${e.Payment||''}</td>
       <td style="font-size:11px;">${e.Deductible||''}</td>
       <td class="${e.Receipt==='No'?'exp-receipt-no':'exp-receipt-yes'}" style="font-size:11px;">${e.Receipt==='Yes'?'✅':e.Receipt==='Digital'?'📧':'❌'}</td>
-      <td class="exp-notes-cell" title="${(e.Notes||'').replace(/"/g,'&quot;')}">${e.Notes||''}</td>
-      <td><button class="exp-del-btn" onclick="deleteExpense('${e.ID}')" title="Delete">🗑️</button></td>
+      <td class="exp-notes-cell" onmouseenter="showExpTooltip(event,'${safeNotes}')" onmousemove="moveExpTooltip(event)" onmouseleave="hideExpTooltip()">${e.Notes||''}</td>
+      <td onclick="event.stopPropagation()"><button class="exp-del-btn" onclick="deleteExpense('${e.ID}',event)" title="Delete">🗑️</button></td>
     </tr>`;
-  }).join('');
+
+    if(isExpanded) {
+      html += `<tr class="exp-detail-row" onclick="event.stopPropagation()"><td colspan="9">
+        <div class="exp-detail-inner">
+          <div class="exp-detail-notes"><strong>📝 Notes / Business Purpose</strong>${e.Notes||'No notes'}</div>
+          <div class="exp-detail-meta">
+            ${e.PaidTo ? '<span>👤 Paid To: <strong>'+e.PaidTo+'</strong></span>' : ''}
+            <span>🧾 Receipt: ${e.Receipt||'?'}</span>
+            <span>📊 Deductible: ${e.Deductible||'?'}</span>
+            <span>💳 ${e.Payment||'?'}</span>
+            ${e.Reimbursable && e.Reimbursable !== 'No' ? '<span>🔄 '+e.Reimbursable+'</span>' : ''}
+          </div>
+          <div class="exp-detail-actions">
+            <button class="btn btn-primary" onclick="editExpense('${e.ID}',event)" style="font-size:11px;padding:6px 14px;">✏️ Edit</button>
+            <button class="btn btn-secondary" onclick="deleteExpense('${e.ID}',event)" style="font-size:11px;padding:6px 14px;">🗑️ Delete</button>
+          </div>
+        </div>
+      </td></tr>`;
+    }
+  });
+
+  tbody.innerHTML = html;
 }
 
 function exportExpensesCSV() {
