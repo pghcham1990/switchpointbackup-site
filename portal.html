@@ -820,7 +820,7 @@ body.wide-mode .panel{max-width:none;}
 .exp-detail-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin-bottom:10px;}
 .exp-detail-meta span{background:var(--surface);padding:3px 8px;border-radius:6px;border:1px solid var(--border);}
 .exp-detail-actions{display:flex;gap:8px;}
-.exp-notes-tooltip{position:fixed;z-index:500;max-width:350px;padding:10px 14px;background:#1e293b;color:#f1f5f9;font-size:12px;line-height:1.6;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25);pointer-events:none;word-break:break-word;white-space:pre-wrap;opacity:0;transition:opacity 0.15s;}
+.exp-notes-tooltip{position:fixed;z-index:9999;min-width:200px;max-width:300px;max-height:180px;overflow-y:auto;padding:10px 14px;background:#1e293b;color:#f1f5f9;font-size:12px;line-height:1.5;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.25);pointer-events:none;word-break:break-word;white-space:normal;opacity:0;transition:opacity 0.15s;}
 .exp-notes-tooltip.visible{opacity:1;}
 .exp-form-editing{border-color:var(--accent);box-shadow:0 0 0 2px rgba(46,107,255,0.15);}
 .exp-form-editing .exp-form-header{background:linear-gradient(135deg,rgba(46,107,255,0.08),rgba(31,191,138,0.05));}
@@ -7077,25 +7077,36 @@ function clearExpenseForm() {
   document.getElementById('expReimburse').value = 'No';
 }
 
-// Hover tooltip for notes
+// Hover tooltip for notes — positioned LEFT of cursor to avoid edge overflow
 function showExpTooltip(ev, text) {
   const tip = document.getElementById('expNotesTooltip');
   if(!tip || !text) return;
   tip.textContent = text;
-  tip.style.left = ev.clientX + 'px';
-  tip.style.top = (ev.clientY + 16) + 'px';
-  tip.classList.add('visible');
+  const tipW = 310, tipH = 190, pad = 12;
+  let x = ev.clientX - tipW - pad;
+  let y = ev.clientY + pad;
+  if(x < 8) x = 8;
+  if(y + tipH > window.innerHeight) y = window.innerHeight - tipH - 8;
+  if(y < 8) y = 8;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+  tip.style.opacity = '1';
 }
 function moveExpTooltip(ev) {
   const tip = document.getElementById('expNotesTooltip');
   if(!tip) return;
-  const maxX = window.innerWidth - 370;
-  tip.style.left = Math.min(ev.clientX, maxX) + 'px';
-  tip.style.top = (ev.clientY + 16) + 'px';
+  const tipW = 310, tipH = 190, pad = 12;
+  let x = ev.clientX - tipW - pad;
+  let y = ev.clientY + pad;
+  if(x < 8) x = 8;
+  if(y + tipH > window.innerHeight) y = window.innerHeight - tipH - 8;
+  if(y < 8) y = 8;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
 }
 function hideExpTooltip() {
   const tip = document.getElementById('expNotesTooltip');
-  if(tip) tip.classList.remove('visible');
+  if(tip) tip.style.opacity = '0';
 }
 
 function renderExpenses() {
