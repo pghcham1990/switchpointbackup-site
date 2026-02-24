@@ -3898,8 +3898,7 @@ function renderKanban() {
           const workedClass = workedToday ? ' worked-today' : '';
           const activeClass = idx === selectedProspectIdx ? ' active-card' : '';
           // Phone link for quick dial
-          const phone = p['Phone'] || '';
-          const phoneHtml = phone ? '<span onclick="event.stopPropagation();" style="font-size:1px;color:transparent;user-select:none;">'+phone+'</span>' : '';
+          const phoneHtml = '';
           return `<div class="kanban-card${workedClass}${activeClass}" data-idx="${idx}" draggable="true" ondragstart="kanbanDragStart(event,${idx})" ondragend="kanbanDragEnd(event)" onclick="selectProspect(${idx})">
             <span class="kanban-card-worked">✓</span>
             <div class="kanban-card-name">${p['Customer']||''} ${phoneHtml}</div>
