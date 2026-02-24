@@ -1797,7 +1797,7 @@ body.wide-mode .panel{max-width:none;}
           <div class="bb-card-tag">GET CURIOUS — ask what it is</div>
           <p>"Oh nice — what are you using?"</p>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+        <div class="bb-sub-option" onclick="bbToggle(this)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"Second Comcast / cable line"</span>
@@ -1810,7 +1810,7 @@ body.wide-mode .panel{max-width:none;}
             </div>
           </div>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+        <div class="bb-sub-option" onclick="bbToggle(this)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"Our IT guy set something up"</span>
@@ -1824,7 +1824,7 @@ body.wide-mode .panel{max-width:none;}
             </div>
           </div>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+        <div class="bb-sub-option" onclick="bbToggle(this)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"We have a hotspot"</span>
@@ -6659,10 +6659,17 @@ function bbShowScene(sceneId, btn) {
 }
 
 function bbToggle(el) {
-  // Close siblings at the same level
+  event.stopPropagation();
+  // Close siblings at the same level only
   const parent = el.parentElement;
-  const siblings = parent.querySelectorAll(':scope > .bb-option.open, :scope > .bb-sub-option.open');
-  siblings.forEach(s => { if(s !== el) s.classList.remove('open'); });
+  const isSubOption = el.classList.contains('bb-sub-option');
+  const siblingSelector = isSubOption ? ':scope > .bb-sub-option.open' : ':scope > .bb-option.open';
+  // Only close siblings if inside the option body (sub-options) or inside the scene (top-level)
+  if(isSubOption) {
+    parent.querySelectorAll(':scope > .bb-sub-option.open').forEach(s => { if(s !== el) s.classList.remove('open'); });
+  } else {
+    parent.querySelectorAll(':scope > .bb-option.open').forEach(s => { if(s !== el) s.classList.remove('open'); });
+  }
   el.classList.toggle('open');
 }
 
