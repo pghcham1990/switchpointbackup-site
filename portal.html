@@ -777,6 +777,51 @@ body.wide-mode .panel{max-width:none;}
 .wall-door-shame.shame-warning{color:var(--warning);font-weight:700;}
 .wall-door-shame.shame-critical{color:var(--danger);font-weight:700;}
 
+/* ===== BATTLEBOARD TAB (v18) ===== */
+.bb-scene-btn{font-size:11px;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;font-family:var(--sans);}
+.bb-scene-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+.bb-scene-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(46,107,255,0.3);}
+.bb-scene{display:none;}.bb-scene.active{display:block;}
+.bb-phase-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.bb-branch-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:20px 0 12px;text-align:center;}
+.bb-card{border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;line-height:1.65;font-size:14px;}
+.bb-card p{margin:8px 0;}
+.bb-card p:first-of-type{margin-top:0;}
+.bb-card-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;opacity:0.8;}
+.bb-card-note{font-size:11px;font-weight:600;color:var(--accent);margin-top:10px;padding-top:8px;border-top:1px solid rgba(46,107,255,0.15);}
+.bb-card-script{background:linear-gradient(135deg,rgba(46,107,255,0.06),rgba(31,191,138,0.04));border:1px solid rgba(46,107,255,0.15);font-size:15px;}
+.bb-card-script .bb-card-tag{color:var(--accent);}
+.bb-card-gold{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);}
+.bb-card-gold .bb-card-tag{color:var(--warning);}
+.bb-card-blue{background:var(--surface-2);border:1px solid var(--border);}
+.bb-card-blue .bb-card-tag{color:var(--accent);}
+.bb-card-red{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);}
+.bb-card-red .bb-card-tag{color:var(--danger);}
+.bb-card-dark{background:linear-gradient(135deg,rgba(15,23,42,0.05),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.12);}
+.bb-card-dark .bb-card-tag{color:var(--purple);}
+.bb-option{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:all 0.15s;overflow:hidden;}
+.bb-option:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(46,107,255,0.08);}
+.bb-option.open{border-color:var(--accent);box-shadow:0 4px 16px rgba(46,107,255,0.1);}
+.bb-option-header{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:14px;font-weight:600;-webkit-tap-highlight-color:transparent;}
+.bb-option-icon{font-size:16px;flex-shrink:0;}
+.bb-chevron{margin-left:auto;font-size:18px;color:var(--text-dim);transition:transform 0.2s;flex-shrink:0;}
+.bb-option.open>.bb-option-header>.bb-chevron{transform:rotate(90deg);color:var(--accent);}
+.bb-option-body{display:none;padding:0 16px 16px;}
+.bb-option.open>.bb-option-body{display:block;}
+.bb-sub-option{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;overflow:hidden;transition:all 0.15s;}
+.bb-sub-option:hover{border-color:var(--accent);}
+.bb-sub-option .bb-option-header{padding:10px 14px;font-size:13px;}
+.bb-sub-option .bb-option-body{padding:0 14px 14px;}
+.bb-psychology{font-size:12px;color:var(--purple);background:rgba(99,102,241,0.06);padding:10px 12px;border-radius:8px;margin-top:10px;border:1px solid rgba(99,102,241,0.1);line-height:1.6;}
+.bb-example{font-size:12px;color:var(--text-muted);background:rgba(255,255,255,0.5);padding:8px 12px;border-radius:8px;margin-top:8px;border:1px solid var(--border);}
+.bb-goto{font-size:12px;font-weight:700;color:var(--accent);margin-top:10px;}
+@media(max-width:768px){
+  .bb-card{font-size:14px;padding:14px 16px;}
+  .bb-card-script{font-size:15px;}
+  .bb-option-header{padding:16px;font-size:14px;}
+  .bb-option-header span:not(.bb-option-icon):not(.bb-chevron){flex:1;line-height:1.3;}
+}
+
 .login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
 .login-screen::before{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 900px 600px at 8% 15%,rgba(46,107,255,.10),transparent 55%),radial-gradient(ellipse 700px 500px at 92% 8%,rgba(31,191,138,.08),transparent 50%),radial-gradient(ellipse 600px 500px at 50% 60%,rgba(139,92,246,.05),transparent 50%);animation:meshDrift 20s ease-in-out infinite alternate;}
 .login-screen::after{content:'';position:absolute;top:50%;left:50%;width:600px;height:600px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(46,107,255,0.06) 0%,transparent 70%);pointer-events:none;}
@@ -870,6 +915,7 @@ body.wide-mode .panel{max-width:none;}
   <button class="tab-btn" onclick="switchTab('partners',this)">Partners<span class="tab-indicator ind-teal">NETWORK</span></button>
   <button class="tab-btn" onclick="switchTab('demo',this)">Demo<span class="tab-indicator ind-orange">SHOW</span></button>
   <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
+  <button class="tab-btn" onclick="switchTab('battleboard',this)">Battleboard<span class="tab-indicator" style="background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);">⚔️</span></button>
 </div>
 
 <main class="main">
@@ -1624,6 +1670,413 @@ body.wide-mode .panel{max-width:none;}
 </div>
 </div>
 
+<!-- ======== BATTLEBOARD TAB (v18) ======== -->
+<div id="tab-battleboard" class="tab-content">
+<div class="panel" style="padding:0;overflow:hidden;">
+
+  <!-- HERO HEADER -->
+  <div style="background:linear-gradient(135deg,#0c1220,#1a2540);padding:28px 28px 20px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <span style="font-size:28px;">⚔️</span>
+      <div>
+        <h2 style="color:#fff;font-size:20px;font-weight:700;margin:0;">Battleboard</h2>
+        <p style="color:rgba(255,255,255,0.5);font-size:11px;margin:0;">Tap any objection. Follow the path. Close the deal.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
+      <button class="bb-scene-btn active" onclick="bbShowScene('opener',this)">🚪 Opener</button>
+      <button class="bb-scene-btn" onclick="bbShowScene('objections',this)">🛡️ Objections</button>
+      <button class="bb-scene-btn" onclick="bbShowScene('closing',this)">🎯 Closing</button>
+      <button class="bb-scene-btn" onclick="bbShowScene('psychology',this)">🧠 Psychology</button>
+    </div>
+  </div>
+
+  <div style="padding:20px 28px 36px;" id="bbContent">
+
+  <!-- ============ SCENE: OPENER ============ -->
+  <div class="bb-scene active" id="bb-opener">
+    <div class="bb-phase-label">PHASE 1 — THE APPROACH</div>
+
+    <div class="bb-card bb-card-script">
+      <div class="bb-card-tag">YOUR OPENER — memorize this</div>
+      <p>"Hi, I help businesses like yours stay online when your internet goes down. If your internet dropped right now, could you still run credit cards and pull up patient records?"</p>
+      <div class="bb-card-note">⏱ Then SHUT UP. Let them answer. The pause is where the sale starts.</div>
+    </div>
+
+    <div class="bb-branch-label">THEY RESPOND WITH...</div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟢</span>
+        <span>"Yeah we've had issues with that..."</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-gold">
+          <div class="bb-card-tag">🔥 HOT LEAD — they're selling themselves</div>
+          <p><strong>Let them talk.</strong> Nod. Say "wow" and "how long were you down?" Ask: "What did that cost you that day?" Let them quantify their own pain.</p>
+          <p>Then: "That's exactly what we prevent. We install a small backup device — when your internet drops, it switches you to LTE automatically in about 10 seconds. Your staff doesn't touch anything."</p>
+          <p class="bb-goto">→ Go to <strong>Closing</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟡</span>
+        <span>"Not really / we've been fine"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">PLANT THE SEED</div>
+          <p>"That's great — honestly most of my customers said the same thing right up until it happened. Comcast doesn't warn you. I'll leave you my card. When it does go down and they tell you 4-6 hours, give me a call. I can usually have you protected within a week."</p>
+          <p><strong>Leave the card. Move on.</strong> Don't oversell. The outage will do your selling for you.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟡</span>
+        <span>"Who are you with?" / "What company?"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">IDENTITY FRAME</div>
+          <p>"SwitchPoint Backup — we're a local managed service. I'm Scott, I'm based in Bridgeville. We install and monitor backup internet devices for businesses in the area. Think of it like a generator for your internet — you don't replace the electric company, but you want the lights on when the power goes out."</p>
+          <p><strong>Key:</strong> "Local" and "I'm Scott" builds trust. You're not Comcast. You're a person.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🔴</span>
+        <span>"Not interested" / "We're good"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-red">
+          <div class="bb-card-tag">DON'T PUSH — PLANT & LEAVE</div>
+          <p>"Totally understand. Here's my card in case anything changes — when the internet goes down and Comcast says 4-6 hours, we're the guys who keep you running. Have a great day."</p>
+          <p><strong>Smile. Leave. 90 seconds total.</strong> You just planted a time bomb. The next outage, they'll look at your card.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE: OBJECTIONS ============ -->
+  <div class="bb-scene" id="bb-objections">
+    <div class="bb-phase-label">PHASE 2 — OBJECTION HANDLING</div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"We already have Comcast / internet"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">REFRAME — you're not replacing, you're backing up</div>
+          <p>"Oh I'm not replacing Comcast — I love Comcast. They're your power company. <strong>I'm the generator.</strong> When they go down — and they will — I keep you running until they come back. Your staff doesn't even notice."</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> The generator analogy instantly reframes from competitor to insurance. Everyone understands generators. Nobody argues with having a generator.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"We already have a backup"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">GET CURIOUS — ask what it is</div>
+          <p>"Oh nice — what are you using?"</p>
+        </div>
+        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+          <div class="bb-option-header">
+            <span class="bb-option-icon">↳</span>
+            <span>"Second Comcast / cable line"</span>
+            <span class="bb-chevron">›</span>
+          </div>
+          <div class="bb-option-body">
+            <div class="bb-card bb-card-gold">
+              <p>"Both lines come in on the same cable from the same pole. If a truck hits that pole or Comcast has an area outage, <strong>both go down at the same time.</strong> We use LTE — completely different network, different infrastructure. Doesn't matter what happens to the cable."</p>
+              <p class="bb-psychology">🧠 <strong>Why this works:</strong> Single point of failure is a concept they immediately understand. You just made their "backup" feel like a liability.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+          <div class="bb-option-header">
+            <span class="bb-option-icon">↳</span>
+            <span>"Our IT guy set something up"</span>
+            <span class="bb-chevron">›</span>
+          </div>
+          <div class="bb-option-body">
+            <div class="bb-card bb-card-gold">
+              <p>"Does it switch over automatically, or does someone have to do it manually? And who's monitoring it to make sure the backup is actually working right now?"</p>
+              <p>Usually nobody is. "That's the other half of what we do — I monitor your connection 24/7. If anything hiccups, I know before you do."</p>
+              <p class="bb-psychology">🧠 <strong>Why this works:</strong> Two killer questions that expose the gap. Manual = downtime. No monitoring = false sense of security. You just created doubt without attacking their IT guy.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bb-sub-option" onclick="bbToggle(this);event.stopPropagation();">
+          <div class="bb-option-header">
+            <span class="bb-option-icon">↳</span>
+            <span>"We have a hotspot"</span>
+            <span class="bb-chevron">›</span>
+          </div>
+          <div class="bb-option-body">
+            <div class="bb-card bb-card-gold">
+              <p>"So when the internet goes down, someone has to dig out the hotspot, turn it on, figure out the password, reconnect every device... and your staff is standing around for 20 minutes. Our device is <strong>already connected, already configured, and switches in 10 seconds</strong> with nobody touching anything."</p>
+              <p class="bb-psychology">🧠 <strong>Why this works:</strong> Paint the chaos picture. They've lived it. Make them feel the frustration of the manual process, then contrast with automatic.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"How much does it cost?"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-gold">
+          <div class="bb-card-tag">💰 BUYING SIGNAL — they're interested</div>
+          <p>"$99 a month. That includes the device, the LTE service, installation, and 24/7 monitoring. No contract beyond month-to-month."</p>
+          <p>If they flinch: "Think about what one hour of downtime costs you. If you've got four chairs running and nobody can check in patients or run cards — that's $1,000+ you'll never get back. $99 is insurance for that."</p>
+          <p>If they don't flinch: <strong>They're ready. Go to Closing.</strong></p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> Loss framing. Don't justify $99/month. Make them calculate what downtime costs. $99 becomes invisible against a $1,000 loss.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"I need to talk to my partner / boss / IT"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">DON'T FIGHT IT — arm them to sell for you</div>
+          <p>"Absolutely — can I leave you a one-pager that explains it? That way when you talk to them, you have the details in front of you. What's the best email to send it to?"</p>
+          <p><strong>Get the email.</strong> Now you have a warm lead with permission to follow up. Send the proposal same day.</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> "Let me leave you something" is non-threatening. Getting the email converts a maybe into a pipeline prospect with a follow-up date.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"We can't afford it right now"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">REFRAME — it's cheaper than not having it</div>
+          <p>"I get it. Here's the thing though — you can't afford $99 a month, but can you afford to lose an afternoon of revenue? Last month a dental office in Washington had their internet down for 6 hours. They sent patients home. That's $5,000+ they'll never recover."</p>
+          <p>"$99 isn't an expense — it's insurance. It's less than what you'd spend replacing one patient visit you lost to an outage."</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> Reframing cost as savings. The $99 isn't going OUT — it's preventing a much larger number from disappearing. Prospect theory: people fear losses 2x more than they value equivalent gains.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"Our internet never goes down"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">CERTAINTY ATTACK</div>
+          <p>"That's awesome — you're lucky. Can I ask, do you have insurance on the building?"</p>
+          <p>They say yes.</p>
+          <p>"Ever had a fire?"</p>
+          <p>They say no.</p>
+          <p>"That's exactly what this is. You don't buy insurance because something bad happened — you buy it because something bad <em>could</em> happen. And when it does, you're glad you have it."</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> The insurance analogy is inarguable. Nobody cancels fire insurance because they haven't had a fire. You just made their logic work against their objection.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"Send me some info / email me"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-red">
+          <div class="bb-card-tag">⚠️ BRUSH-OFF — but still get the email</div>
+          <p>"Sure — what's the best email? I'll send over a quick one-pager."</p>
+          <p><strong>Get the email. Send same day. Follow up in 3 days.</strong></p>
+          <p>This is often a polite no. That's fine. But 20% of "send me info" people convert after they actually read it and then experience an outage. Plant the seed.</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> Don't fight the brush-off. Comply and extract the email. You've turned a cold no into a warm lead in your CRM with a follow-up date. That's a win.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"What happens if LTE goes down too?"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">SMART QUESTION — respect it</div>
+          <p>"Great question. The Peplink device supports multiple LTE carriers — if one tower is down, it can fail to another. But honestly, the odds of your cable AND the LTE network going down at the exact same time are almost zero. Different infrastructure, different companies, different technology. It's like your electricity and your gas going out simultaneously."</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> This person is technical and already thinking about buying. Don't be defensive. Praise the question, give the honest answer, then reduce the perceived risk.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🛡️</span>
+        <span>"Is there a contract?"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-gold">
+          <div class="bb-card-tag">💰 ANOTHER BUYING SIGNAL</div>
+          <p>"Month to month. No long-term contract. If you don't love it, you call me and we pick up the equipment. But honestly, nobody's ever cancelled — once it saves you from one outage, you'll never go back."</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> Risk removal. Month-to-month eliminates the commitment fear. "Nobody's ever cancelled" is social proof. They're asking logistical questions because they're mentally buying.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE: CLOSING ============ -->
+  <div class="bb-scene" id="bb-closing">
+    <div class="bb-phase-label">PHASE 3 — CLOSING</div>
+
+    <div class="bb-card bb-card-script">
+      <div class="bb-card-tag">THE ASSUMPTIVE CLOSE</div>
+      <p>"So here's what we'd do — I come out, install the device next to your router, takes about 10 minutes. I test everything, make sure it fails over properly. Then I monitor it from my end 24/7. You'll never think about it again until the day your internet goes down and your staff doesn't even notice. <strong>What day works better for a quick install — this week or next?</strong>"</p>
+      <div class="bb-card-note">Don't ask "would you like to move forward?" — ask WHEN. Assume the yes.</div>
+    </div>
+
+    <div class="bb-branch-label">THEY SAY...</div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟢</span>
+        <span>"Sure, let's do it" / picks a day</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-gold">
+          <div class="bb-card-tag">🎉 YOU JUST CLOSED YOUR FIRST CUSTOMER</div>
+          <p><strong>Get these right now:</strong></p>
+          <p>1. Their name and email (for the service agreement)<br>
+          2. Best phone number<br>
+          3. Confirm the address<br>
+          4. Preferred install date/time</p>
+          <p>"I'll email you a simple service agreement today. Once you sign it, I'll schedule the install. The whole thing takes about 10 minutes and your team won't have any downtime."</p>
+          <p><strong>Send the agreement SAME DAY. Do not wait.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟡</span>
+        <span>"Let me think about it"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-blue">
+          <div class="bb-card-tag">LOCK THE FOLLOW-UP</div>
+          <p>"Absolutely — it's a smart decision to think it over. Can I follow up with you next week? What's the best day — Tuesday or Thursday?"</p>
+          <p><strong>Get a specific day.</strong> Not "I'll call you sometime." A day. Put it in your CRM the second you walk out.</p>
+          <p class="bb-psychology">🧠 <strong>Why this works:</strong> The either/or question ("Tuesday or Thursday?") is a classic — both options are a yes. You've turned "let me think about it" into a scheduled follow-up.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-option" onclick="bbToggle(this)">
+      <div class="bb-option-header">
+        <span class="bb-option-icon">🟡</span>
+        <span>"What's the next step?"</span>
+        <span class="bb-chevron">›</span>
+      </div>
+      <div class="bb-option-body">
+        <div class="bb-card bb-card-gold">
+          <div class="bb-card-tag">💰 THEY'RE IN — just tell them what to do</div>
+          <p>"Simple — I'll email you a one-page service agreement today. You sign it electronically, takes 2 minutes. Then I schedule the install. I come out, put the device next to your router, configure everything, test the failover, and you're protected. Whole thing takes less time than a lunch break."</p>
+          <p><strong>Make it sound effortless. Because it is.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCENE: PSYCHOLOGY ============ -->
+  <div class="bb-scene" id="bb-psychology">
+    <div class="bb-phase-label">SALES PSYCHOLOGY — your weapons</div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 LOSS AVERSION</div>
+      <p>People fear losing $100 <strong>twice as much</strong> as they enjoy gaining $100. Never sell what they'll gain — sell what they'll lose without it.</p>
+      <p class="bb-example"><strong>Use:</strong> "What does one hour of downtime cost you?" — make them calculate the loss, not the price.</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 THE GENERATOR ANALOGY</div>
+      <p>Your most powerful reframe. Instantly shifts from "competitor" to "insurance." Nobody argues with having a generator. Nobody cancels fire insurance because they haven't had a fire.</p>
+      <p class="bb-example"><strong>Use:</strong> Any time they say "we already have internet." You're not replacing it — you're the backup.</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 SOCIAL PROOF</div>
+      <p>People follow what others do. Reference other businesses casually — "a dental office in Washington" or "a few practices in the area." Even without names, it signals you're not their first.</p>
+      <p class="bb-example"><strong>Use:</strong> "Most of my customers said the same thing right up until it happened."</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 ASSUMPTIVE CLOSE</div>
+      <p>Never ask "would you like to do this?" Ask WHEN. "This week or next?" assumes the yes and makes the decision about timing, not commitment.</p>
+      <p class="bb-example"><strong>Use:</strong> "What day works better for a quick install?"</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 EITHER/OR TECHNIQUE</div>
+      <p>Give two options that both equal yes. "Tuesday or Thursday?" Not "should I call you?" Both answers move forward.</p>
+      <p class="bb-example"><strong>Use:</strong> Follow-ups, install scheduling, any decision point.</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 PAIN AMPLIFICATION</div>
+      <p>When they mention a past outage, don't rush to your solution. Ask follow-up questions. "How long were you down? What happened to your patients? Could you process cards?" Let the pain build. THEY sell themselves.</p>
+      <p class="bb-example"><strong>Use:</strong> Any time they mention past internet issues. Dig deeper before pitching.</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 RISK REMOVAL</div>
+      <p>"Month to month, no contract, cancel any time." Eliminates the commitment fear. Once the device saves them once, they'll never cancel. You know this — let the product prove itself.</p>
+      <p class="bb-example"><strong>Use:</strong> Price/contract objections. Remove every barrier to yes.</p>
+    </div>
+
+    <div class="bb-card bb-card-dark">
+      <div class="bb-card-tag">🧠 THE 90-SECOND RULE</div>
+      <p>If the conversation isn't going anywhere, leave in 90 seconds. Leave a card. Don't beg. Desperation kills deals. A confident exit with a card plants a seed that grows every time their internet flickers.</p>
+      <p class="bb-example"><strong>Use:</strong> Any "not interested" — smile, card, gone. Next door.</p>
+    </div>
+  </div>
+
+  </div><!-- /bbContent -->
+</div>
+</div>
+
 </main>
 </div><!-- /adminApp -->
 
@@ -1943,8 +2396,8 @@ function logout() {
 function applyRolePermissions() {
   const role = currentUserRole;
   const allTabs = document.querySelectorAll('.tab-btn');
-  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall'];
-  const employeeTabs = ['dashboard','pipeline','activity','prospect','demo','wall'];
+  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall','battleboard'];
+  const employeeTabs = ['dashboard','pipeline','activity','prospect','demo','wall','battleboard'];
   const partnerTabs = ['partner-home'];
   const customerTabs = ['customer-home'];
 
@@ -6193,6 +6646,25 @@ function togglePresenceBar() {
 }
 
 // Presence is initialized from showApp() after successful auth
+
+// =======================================================================
+// BATTLEBOARD — Scene switching & option toggling (v18)
+// =======================================================================
+function bbShowScene(sceneId, btn) {
+  document.querySelectorAll('.bb-scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.bb-scene-btn').forEach(b => b.classList.remove('active'));
+  const scene = document.getElementById('bb-' + sceneId);
+  if(scene) scene.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function bbToggle(el) {
+  // Close siblings at the same level
+  const parent = el.parentElement;
+  const siblings = parent.querySelectorAll(':scope > .bb-option.open, :scope > .bb-sub-option.open');
+  siblings.forEach(s => { if(s !== el) s.classList.remove('open'); });
+  el.classList.toggle('open');
+}
 
 // =======================================================================
 // OPTION 1: DOOR KNOCKER COUNTER (Dashboard Widget)
