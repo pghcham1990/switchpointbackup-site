@@ -998,7 +998,7 @@ body.wide-mode .panel{max-width:none;}
     </div>
     <!-- ACTION BAR -->
     <div class="prospect-actions-bar">
-      <a class="action-btn call" id="prosCallLink" href="#" onclick="callProspect()" style="text-decoration:none;">📞 Call <span id="prosCallNumber" style="font-family:var(--mono);font-size:10px;"></span></a>
+      <a class="action-btn call" id="prosCallLink" href="#" onclick="trackCall()" style="text-decoration:none;">📞 Call <span id="prosCallNumber" style="font-family:var(--mono);font-size:10px;"></span></a>
       <button class="action-btn email-act" onclick="emailProspect()">✉ Email</button>
       <button class="action-btn maps" onclick="openMaps()">📍 Google Maps</button>
       <button class="action-btn note" onclick="openNoteModal()">+ Log Activity</button>
@@ -2854,18 +2854,18 @@ function closeProsDetail(){ document.getElementById('prospectDetailCard').classL
 // PROSPECT ACTIONS
 // =======================================================================
 function callProspect() {
+  // Legacy compat — just calls trackCall
+  trackCall();
+}
+function trackCall() {
   const p=allProspects[selectedProspectIdx];
-  if(p['Phone']) {
-    // Use location.href for reliable Google Voice triggering
-    window.location.href='tel:'+p['Phone'].replace(/[^\d+]/g,'');
-    showToast('Dialing '+p['Phone'],'success');
-    // Hyper-track
-    const a={id:Date.now(),prospect:p['Customer'],type:'Call',text:'📱 Dialed '+p['Phone'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
-    activities.unshift(a);
-    if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
-    renderProsActivity(p); renderProspectTable(getFilteredProspects()); if(currentPipeView==='kanban') renderKanban();
-  }
-  else showToast('No phone number on file','error');
+  if(!p || !p['Phone']) return;
+  showToast('Dialing '+p['Phone'],'success');
+  // Hyper-track the call
+  const a={id:Date.now(),prospect:p['Customer'],type:'Call',text:'📱 Dialed '+p['Phone'],timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:false};
+  activities.unshift(a);
+  if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(a.id),prospect:a.prospect,type:a.type,text:a.text,followUp:'',timestamp:a.timestamp,user:a.user,deleted:''}})}).catch(e=>{});
+  renderProsActivity(p); renderProspectTable(getFilteredProspects()); if(currentPipeView==='kanban') renderKanban();
 }
 
 function emailProspect() {
@@ -5147,7 +5147,6 @@ function savePartnerEdits() {
 function callPartner() {
   const p = allPartners[selectedPartnerIdx];
   if(p['Phone']) {
-    window.location.href='tel:'+p['Phone'].replace(/[^\d+]/g,'');
     showToast('Dialing '+p['Phone'],'success');
     const a = {id:Date.now(), prospect:'Partner: '+p['Name'], type:'Call', text:'📞 Called partner '+p['Name']+' — '+p['Phone'], timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
     activities.unshift(a);
