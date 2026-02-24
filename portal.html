@@ -1718,6 +1718,13 @@ const PORTAL_USERS = [
   { username: 'scott', password: 'SwitchPoint2026!', role: 'Admin', displayName: 'Scott Rocca' },
 ];
 
+// Google Voice dialer helper — converts any phone string to a GV call URL
+function gvCallUrl(raw) {
+  var d = String(raw).replace(/[^\d]/g, '');
+  if (d.length === 10) d = '1' + d;
+  return 'https://voice.google.com/calls?a=nc,%2B' + d;
+}
+
 let currentUserRole = '';
 let currentUserLinkedRecord = '';
 let currentUserDisplayName = '';
@@ -2492,7 +2499,7 @@ function renderProspectTable(prospects) {
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
       <td><strong>${p['Customer']||''}</strong>${saBadge}</td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="tel:'+phoneDial+'" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="'+gvCallUrl(phoneDial)+'" target="_blank" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
       <td>${urgencyHtml}</td>
       <td style="font-size:11px;">${p['Source']||'—'}</td>
@@ -2656,7 +2663,7 @@ function selectProspect(idx) {
   // Update call link with phone number
   const callLink = document.getElementById('prosCallLink');
   const callNum = document.getElementById('prosCallNumber');
-  if(p['Phone']) { callLink.href='tel:'+p['Phone'].replace(/[^\d+]/g,''); callNum.textContent=p['Phone']; }
+  if(p['Phone']) { callLink.href=gvCallUrl(p['Phone']); callLink.target='_blank'; callNum.textContent=p['Phone']; }
   else { callLink.href='#'; callNum.textContent=''; }
   // Update nav arrows
   updateProsNav();
@@ -2695,8 +2702,8 @@ function renderProsDetailSections(p) {
       const val=fmtVal(f,p[f]); const empty=!val;
       const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
-      // Clickable phone — strip formatting for tel: link so Google Voice triggers
-      if(f==='Phone' && val) display=`<a href="tel:${val.replace(/[^\d+]/g,'')}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      // Clickable phone — opens Google Voice dialer
+      if(f==='Phone' && val) display=`<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
       // Clickable email
       if(f==='Email' && val) display=`<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       // Clickable URL
@@ -2724,7 +2731,7 @@ function renderProsDetailSections(p) {
               <span class="mc-name">${c.name||'—'}</span>
               <span class="mc-title">${c.title||''}</span>
               ${c.email ? '<span class="mc-email"><a href="mailto:'+c.email+'" style="color:var(--accent);text-decoration:none;">'+c.email+'</a></span>' : ''}
-              ${c.phone ? '<span style="font-family:var(--mono);font-size:10px;"><a href="tel:'+c.phone.replace(/[^\d+]/g,'')+'" style="color:var(--success);text-decoration:none;">'+c.phone+'</a></span>' : ''}
+              ${c.phone ? '<span style="font-family:var(--mono);font-size:10px;"><a href="'+gvCallUrl(c.phone)+'" target="_blank" style="color:var(--success);text-decoration:none;">'+c.phone+'</a></span>' : ''}
             </div>`).join('') + '</div>';
         }
       } catch(e) {}
@@ -3892,7 +3899,7 @@ function renderKanban() {
           const activeClass = idx === selectedProspectIdx ? ' active-card' : '';
           // Phone link for quick dial
           const phone = p['Phone'] ? p['Phone'].replace(/[^\d+]/g,'') : '';
-          const phoneHtml = phone ? '<a href="tel:'+phone+'" onclick="event.stopPropagation();" style="color:var(--success);font-size:9px;text-decoration:none;" title="Dial">📞</a>' : '';
+          const phoneHtml = phone ? '<a href="'+gvCallUrl(phone)+'" target="_blank" onclick="event.stopPropagation();" style="color:var(--success);font-size:9px;text-decoration:none;" title="Dial via Google Voice">📞</a>' : '';
           return `<div class="kanban-card${workedClass}${activeClass}" data-idx="${idx}" draggable="true" ondragstart="kanbanDragStart(event,${idx})" ondragend="kanbanDragEnd(event)" onclick="selectProspect(${idx})">
             <span class="kanban-card-worked">✓</span>
             <div class="kanban-card-name">${p['Customer']||''} ${phoneHtml}</div>
@@ -5038,7 +5045,7 @@ function renderPartnerDetailSections(p) {
       const wide = f==='Notes';
       const ec = partnerEditMode ? ' editable' : '';
       let display = val;
-      if(f==='Phone' && val) display = `<a href="tel:${val.replace(/[^\d+]/g,'')}" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      if(f==='Phone' && val) display = `<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
       if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
       if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
