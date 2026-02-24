@@ -805,9 +805,9 @@ body.wide-mode .panel{max-width:none;}
 .bb-option-header{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:14px;font-weight:600;-webkit-tap-highlight-color:transparent;}
 .bb-option-icon{font-size:16px;flex-shrink:0;}
 .bb-chevron{margin-left:auto;font-size:18px;color:var(--text-dim);transition:transform 0.2s;flex-shrink:0;}
-.bb-option.open>.bb-option-header>.bb-chevron{transform:rotate(90deg);color:var(--accent);}
+.bb-option.open>.bb-option-header>.bb-chevron,.bb-sub-option.open>.bb-option-header>.bb-chevron{transform:rotate(90deg);color:var(--accent);}
 .bb-option-body{display:none;padding:0 16px 16px;}
-.bb-option.open>.bb-option-body{display:block;}
+.bb-option.open>.bb-option-body,.bb-sub-option.open>.bb-option-body{display:block;}
 .bb-sub-option{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;margin-top:8px;cursor:pointer;overflow:hidden;transition:all 0.15s;}
 .bb-sub-option:hover{border-color:var(--accent);}
 .bb-sub-option .bb-option-header{padding:10px 14px;font-size:13px;}
@@ -1705,7 +1705,7 @@ body.wide-mode .panel{max-width:none;}
 
     <div class="bb-branch-label">THEY RESPOND WITH...</div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟢</span>
         <span>"Yeah we've had issues with that..."</span>
@@ -1721,7 +1721,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟡</span>
         <span>"Not really / we've been fine"</span>
@@ -1736,7 +1736,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟡</span>
         <span>"Who are you with?" / "What company?"</span>
@@ -1751,7 +1751,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🔴</span>
         <span>"Not interested" / "We're good"</span>
@@ -1771,7 +1771,7 @@ body.wide-mode .panel{max-width:none;}
   <div class="bb-scene" id="bb-objections">
     <div class="bb-phase-label">PHASE 2 — OBJECTION HANDLING</div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"We already have Comcast / internet"</span>
@@ -1786,7 +1786,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"We already have a backup"</span>
@@ -1797,7 +1797,7 @@ body.wide-mode .panel{max-width:none;}
           <div class="bb-card-tag">GET CURIOUS — ask what it is</div>
           <p>"Oh nice — what are you using?"</p>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this)">
+        <div class="bb-sub-option" onclick="bbToggle(this,event)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"Second Comcast / cable line"</span>
@@ -1810,7 +1810,7 @@ body.wide-mode .panel{max-width:none;}
             </div>
           </div>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this)">
+        <div class="bb-sub-option" onclick="bbToggle(this,event)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"Our IT guy set something up"</span>
@@ -1824,7 +1824,7 @@ body.wide-mode .panel{max-width:none;}
             </div>
           </div>
         </div>
-        <div class="bb-sub-option" onclick="bbToggle(this)">
+        <div class="bb-sub-option" onclick="bbToggle(this,event)">
           <div class="bb-option-header">
             <span class="bb-option-icon">↳</span>
             <span>"We have a hotspot"</span>
@@ -1840,7 +1840,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"How much does it cost?"</span>
@@ -1857,7 +1857,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"I need to talk to my partner / boss / IT"</span>
@@ -1873,7 +1873,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"We can't afford it right now"</span>
@@ -1889,7 +1889,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"Our internet never goes down"</span>
@@ -1908,7 +1908,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"Send me some info / email me"</span>
@@ -1925,7 +1925,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"What happens if LTE goes down too?"</span>
@@ -1940,7 +1940,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🛡️</span>
         <span>"Is there a contract?"</span>
@@ -1968,7 +1968,7 @@ body.wide-mode .panel{max-width:none;}
 
     <div class="bb-branch-label">THEY SAY...</div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟢</span>
         <span>"Sure, let's do it" / picks a day</span>
@@ -1988,7 +1988,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟡</span>
         <span>"Let me think about it"</span>
@@ -2004,7 +2004,7 @@ body.wide-mode .panel{max-width:none;}
       </div>
     </div>
 
-    <div class="bb-option" onclick="bbToggle(this)">
+    <div class="bb-option" onclick="bbToggle(this,event)">
       <div class="bb-option-header">
         <span class="bb-option-icon">🟡</span>
         <span>"What's the next step?"</span>
@@ -6658,13 +6658,11 @@ function bbShowScene(sceneId, btn) {
   if(btn) btn.classList.add('active');
 }
 
-function bbToggle(el) {
-  event.stopPropagation();
+function bbToggle(el, ev) {
+  if(ev) ev.stopPropagation();
   // Close siblings at the same level only
-  const parent = el.parentElement;
   const isSubOption = el.classList.contains('bb-sub-option');
-  const siblingSelector = isSubOption ? ':scope > .bb-sub-option.open' : ':scope > .bb-option.open';
-  // Only close siblings if inside the option body (sub-options) or inside the scene (top-level)
+  const parent = el.parentElement;
   if(isSubOption) {
     parent.querySelectorAll(':scope > .bb-sub-option.open').forEach(s => { if(s !== el) s.classList.remove('open'); });
   } else {
