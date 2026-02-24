@@ -2703,7 +2703,7 @@ function renderProsDetailSections(p) {
       const wide=f==='Notes'||f==='NOTES'||f==='Address'; const ec=prosEditMode?' editable':'';
       let display = val;
       // Clickable phone — opens Google Voice dialer
-      if(f==='Phone' && val) display=`<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      if(f==='Phone' && val) display=`<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;border-bottom:1.5px dashed rgba(16,185,129,0.4);padding-bottom:1px;transition:all .2s ease;" onmouseover="this.style.borderBottomColor='rgba(16,185,129,0.9)';this.style.color='#059669'" onmouseout="this.style.borderBottomColor='rgba(16,185,129,0.4)';this.style.color='var(--success)'">${val}</a>`;
       // Clickable email
       if(f==='Email' && val) display=`<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       // Clickable URL
@@ -5045,7 +5045,7 @@ function renderPartnerDetailSections(p) {
       const wide = f==='Notes';
       const ec = partnerEditMode ? ' editable' : '';
       let display = val;
-      if(f==='Phone' && val) display = `<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;">${val} 📞</a>`;
+      if(f==='Phone' && val) display = `<a href="${gvCallUrl(val)}" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;border-bottom:1.5px dashed rgba(16,185,129,0.4);padding-bottom:1px;transition:all .2s ease;" onmouseover="this.style.borderBottomColor='rgba(16,185,129,0.9)';this.style.color='#059669'" onmouseout="this.style.borderBottomColor='rgba(16,185,129,0.4)';this.style.color='var(--success)'">${val}</a>`;
       if(f==='Email' && val) display = `<a href="mailto:${val}" style="color:var(--accent);text-decoration:none;">${val}</a>`;
       if(f==='LinkedIn' && val) { const href = val.startsWith('http') ? val : 'https://'+val; display = `<a href="${href}" target="_blank" style="color:var(--accent);text-decoration:none;">${val}</a>`; }
       if((f==='Total Revenue Shared'||f==='Last Payment ($)') && val) display = '$' + Number(val).toLocaleString();
