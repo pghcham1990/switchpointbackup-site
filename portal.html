@@ -777,6 +777,44 @@ body.wide-mode .panel{max-width:none;}
 .wall-door-shame.shame-warning{color:var(--warning);font-weight:700;}
 .wall-door-shame.shame-critical{color:var(--danger);font-weight:700;}
 
+/* ===== EXPENSES TAB (v18) ===== */
+.exp-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;}
+.exp-form-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;font-weight:700;font-size:14px;background:var(--surface-2);-webkit-tap-highlight-color:transparent;}
+#expFormBody{padding:16px 18px;}
+#expFormBody.collapsed{display:none;}
+.exp-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:768px){.exp-form-grid{grid-template-columns:1fr;}}
+.exp-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
+.exp-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;}
+.exp-summary-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);}
+.exp-summary-label{font-size:10px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;}
+.exp-summary-card.exp-total{border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.04);}
+.exp-summary-card.exp-total .exp-summary-val{color:var(--success);}
+.exp-summary-card.exp-deductible{border-color:rgba(46,107,255,0.2);background:rgba(46,107,255,0.03);}
+.exp-summary-card.exp-deductible .exp-summary-val{color:var(--accent);}
+.exp-summary-card.exp-cash{border-color:rgba(249,115,22,0.2);background:rgba(249,115,22,0.03);}
+.exp-summary-card.exp-cash .exp-summary-val{color:#f97316;}
+.exp-filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.exp-filters select{font-size:11px;max-width:180px;}
+.exp-table-wrap{overflow-x:auto;margin-bottom:16px;}
+.exp-table{width:100%;border-collapse:collapse;font-size:12px;}
+.exp-table th{text-align:left;padding:8px 10px;background:var(--surface-2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;}
+.exp-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+.exp-table tr:hover{background:var(--surface-2);}
+.exp-table .exp-amount{font-family:var(--mono);font-weight:600;text-align:right;white-space:nowrap;}
+.exp-table .exp-cat-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--surface-3);color:var(--text-muted);white-space:nowrap;}
+.exp-table .exp-pay-badge{font-size:10px;color:var(--text-dim);white-space:nowrap;}
+.exp-table .exp-notes-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);}
+.exp-table .exp-del-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;opacity:0.4;transition:opacity 0.15s;}
+.exp-table .exp-del-btn:hover{opacity:1;}
+.exp-table tr.exp-deleted{opacity:0.3;text-decoration:line-through;}
+.exp-table .exp-receipt-yes{color:var(--success);}
+.exp-table .exp-receipt-no{color:var(--danger);}
+.exp-tax-notes{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;font-size:12px;line-height:1.7;color:var(--text-muted);}
+.exp-tax-notes h4{font-size:13px;color:var(--text);margin:0 0 8px;}
+.exp-tax-notes p{margin:6px 0;}
+.exp-partner-warn{background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:8px;padding:10px 14px;font-size:11px;color:#f97316;margin-top:4px;}
+
 /* ===== BATTLEBOARD TAB (v18) ===== */
 .bb-scene-btn{font-size:11px;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;font-family:var(--sans);}
 .bb-scene-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
@@ -916,6 +954,7 @@ body.wide-mode .panel{max-width:none;}
   <button class="tab-btn" onclick="switchTab('demo',this)">Demo<span class="tab-indicator ind-orange">SHOW</span></button>
   <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
   <button class="tab-btn" onclick="switchTab('battleboard',this)">Battleboard<span class="tab-indicator" style="background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);">⚔️</span></button>
+  <button class="tab-btn" onclick="switchTab('expenses',this);renderExpenses();">Expenses<span class="tab-indicator" style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">💰</span></button>
 </div>
 
 <main class="main">
@@ -2077,6 +2116,196 @@ body.wide-mode .panel{max-width:none;}
 </div>
 </div>
 
+<!-- ======== EXPENSES TAB (v18) — Admin Only ======== -->
+<div id="tab-expenses" class="tab-content">
+<div class="panel">
+  <div class="form-header">
+    <h2>💰 Business Expenses — SwitchPoint Backup LLC</h2>
+    <p>Track expenses for Schedule C tax filing. PA single-member LLC (pass-through to 1040).</p>
+  </div>
+
+  <!-- EXPENSE ENTRY FORM -->
+  <div class="exp-form" id="expenseForm">
+    <div class="exp-form-header" onclick="document.getElementById('expFormBody').classList.toggle('collapsed')">
+      <span>➕ Log New Expense</span>
+      <span class="bb-chevron" style="font-size:14px;">›</span>
+    </div>
+    <div id="expFormBody">
+      <div class="exp-form-grid">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="expDate" required>
+        </div>
+        <div class="form-group">
+          <label>Amount ($) *</label>
+          <input type="number" id="expAmount" step="0.01" min="0" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label>Vendor / Paid To *</label>
+          <input type="text" id="expVendor" placeholder="e.g. Amazon, Peplink, T-Mobile">
+        </div>
+        <div class="form-group">
+          <label>Category (Schedule C) *</label>
+          <select id="expCategory">
+            <option value="">— Select —</option>
+            <optgroup label="Common">
+              <option value="Supplies">Supplies & Materials</option>
+              <option value="Equipment">Equipment (Section 179)</option>
+              <option value="Software">Software & Subscriptions</option>
+              <option value="Phone & Internet">Phone & Internet</option>
+              <option value="Advertising">Advertising & Marketing</option>
+              <option value="Vehicle">Vehicle / Mileage</option>
+            </optgroup>
+            <optgroup label="Services & Professional">
+              <option value="Contract Labor">Contract Labor / Subcontractors</option>
+              <option value="Professional Services">Professional Services (Legal, Accounting)</option>
+              <option value="Insurance">Insurance</option>
+            </optgroup>
+            <optgroup label="Operations">
+              <option value="Office Expense">Office Expense</option>
+              <option value="Rent / Lease">Rent / Lease</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Shipping">Shipping & Postage</option>
+              <option value="Travel">Travel</option>
+              <option value="Meals">Meals (50% deductible)</option>
+            </optgroup>
+            <optgroup label="People">
+              <option value="Partner Payment">Partner Payment (Referral Bonus)</option>
+              <option value="Wages">Wages & Salaries</option>
+              <option value="Commission">Commission</option>
+            </optgroup>
+            <optgroup label="Financial">
+              <option value="Bank Fees">Bank Fees</option>
+              <option value="Interest">Loan Interest</option>
+              <option value="Taxes & Licenses">Taxes & Licenses</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option value="Education">Education & Training</option>
+              <option value="Gifts">Business Gifts (max $25/person)</option>
+              <option value="Other">Other Expense</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Payment Method *</label>
+          <select id="expPayment">
+            <option value="">— Select —</option>
+            <option value="Business Checking (Northwest)">Business Checking (Northwest)</option>
+            <option value="Personal Credit Card">Personal Credit Card</option>
+            <option value="Personal Debit/Bank">Personal Debit / Bank</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Paid To (Person)</label>
+          <input type="text" id="expPaidTo" placeholder="If partner cash bonus — name here">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Description / Business Purpose *</label>
+          <textarea id="expNotes" placeholder="What was this for? Business purpose for IRS..." style="min-height:50px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Receipt?</label>
+          <select id="expReceipt">
+            <option value="Yes">✅ Yes — have receipt</option>
+            <option value="No">❌ No receipt</option>
+            <option value="Digital">📧 Digital / email receipt</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tax Deductible</label>
+          <select id="expDeductible">
+            <option value="100%">100% Deductible</option>
+            <option value="50%">50% Deductible (Meals)</option>
+            <option value="Partial">Partial (Business % only)</option>
+            <option value="Not Deductible">Not Deductible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Reimbursable?</label>
+          <select id="expReimburse">
+            <option value="No">No</option>
+            <option value="Yes - Pending">Yes — Pending reimbursement</option>
+            <option value="Yes - Reimbursed">Yes — Already reimbursed</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="clearExpenseForm()" style="font-size:11px;padding:7px 14px;">Clear</button>
+        <button class="btn btn-success" onclick="saveExpense()" style="font-size:11px;padding:7px 14px;">💰 Save Expense</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="exp-summary" id="expSummary"></div>
+
+  <!-- FILTER BAR -->
+  <div class="exp-filters">
+    <select id="expFilterMonth" onchange="renderExpenses()">
+      <option value="all">All Months</option>
+      <option value="01">January</option>
+      <option value="02">February</option>
+      <option value="03">March</option>
+      <option value="04">April</option>
+      <option value="05">May</option>
+      <option value="06">June</option>
+      <option value="07">July</option>
+      <option value="08">August</option>
+      <option value="09">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+    </select>
+    <select id="expFilterYear" onchange="renderExpenses()">
+      <option value="2026">2026</option>
+      <option value="2025">2025</option>
+    </select>
+    <select id="expFilterCat" onchange="renderExpenses()">
+      <option value="all">All Categories</option>
+    </select>
+    <select id="expFilterPayment" onchange="renderExpenses()">
+      <option value="all">All Payment Methods</option>
+      <option value="Business Checking (Northwest)">Business Checking</option>
+      <option value="Personal Credit Card">Personal Credit Card</option>
+      <option value="Personal Debit/Bank">Personal Debit/Bank</option>
+      <option value="Cash">Cash</option>
+    </select>
+    <button class="btn btn-primary" onclick="exportExpensesCSV()" style="font-size:11px;padding:7px 14px;margin-left:auto;">📥 Export CSV</button>
+  </div>
+
+  <!-- EXPENSE TABLE -->
+  <div class="exp-table-wrap">
+    <table class="exp-table" id="expenseTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Vendor</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Deductible</th>
+          <th>Receipt</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="expenseTableBody">
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-dim);">Loading expenses...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAX NOTES -->
+  <div class="exp-tax-notes">
+    <h4>📋 PA LLC Tax Notes (Single-Member, Pass-Through)</h4>
+    <p>SwitchPoint Backup LLC is a single-member PA LLC taxed as a sole proprietorship. All income/expenses flow to your personal 1040 via <strong>Schedule C</strong>. PA flat income tax rate is <strong>3.07%</strong>. Federal self-employment tax is <strong>15.3%</strong> (first $168,600 for 2026). QBI deduction is <strong>23%</strong> for 2026 under OBBBA. Partner cash bonuses under $600/year per person do NOT require a 1099 — but they ARE still deductible business expenses. Keep records.</p>
+    <p><strong>⚠️ Meals are only 50% deductible.</strong> Gifts capped at $25/person/year. Vehicle: track mileage at $0.725/mile for 2026 OR actual expenses. Section 179 lets you deduct equipment immediately (up to $2.5M). 100% bonus depreciation restored for 2026.</p>
+    <p style="color:var(--text-dim);font-size:10px;margin-top:8px;">This is not tax advice. Consult your accountant. This tool is a record-keeping aid for organizing expenses by Schedule C category.</p>
+  </div>
+</div>
+</div>
+
 </main>
 </div><!-- /adminApp -->
 
@@ -2396,7 +2625,7 @@ function logout() {
 function applyRolePermissions() {
   const role = currentUserRole;
   const allTabs = document.querySelectorAll('.tab-btn');
-  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall','battleboard'];
+  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall','battleboard','expenses'];
   const employeeTabs = ['dashboard','pipeline','activity','prospect','demo','wall','battleboard'];
   const partnerTabs = ['partner-home'];
   const customerTabs = ['customer-home'];
@@ -2903,6 +3132,7 @@ function initDatabase() {
     fetchProspects();
     fetchActivities();
     fetchPartners();
+    if(currentUserRole === 'Admin') loadExpenses();
   } else {
     document.getElementById('connDot').className='connection-dot dot-offline';
     document.getElementById('connLabel').textContent='Offline Mode';
@@ -6646,6 +6876,256 @@ function togglePresenceBar() {
 }
 
 // Presence is initialized from showApp() after successful auth
+
+// =======================================================================
+// EXPENSES TRACKER — Tax-ready expense management (v18)
+// =======================================================================
+let allExpenses = [];
+let expensesLoaded = false;
+
+function loadExpenses() {
+  if(!CONFIG.LIVE_MODE) { expensesLoaded = true; return; }
+  fetch(CONFIG.APPS_SCRIPT_URL+'?action=getExpenses').then(r=>r.json()).then(data=>{
+    if(Array.isArray(data)) {
+      allExpenses = data.filter(e => e.Deleted !== 'true' && e.Deleted !== true);
+      expensesLoaded = true;
+      renderExpenses();
+    }
+  }).catch(e=>{ console.log('Expenses load error:', e); expensesLoaded = true; });
+}
+
+function saveExpense() {
+  const date = document.getElementById('expDate').value;
+  const amount = document.getElementById('expAmount').value;
+  const vendor = document.getElementById('expVendor').value.trim();
+  const category = document.getElementById('expCategory').value;
+  const payment = document.getElementById('expPayment').value;
+  const paidTo = document.getElementById('expPaidTo').value.trim();
+  const notes = document.getElementById('expNotes').value.trim();
+  const receipt = document.getElementById('expReceipt').value;
+  const deductible = document.getElementById('expDeductible').value;
+  const reimburse = document.getElementById('expReimburse').value;
+
+  if(!date || !amount || !vendor || !category || !payment || !notes) {
+    showToast('Fill in all required fields (date, amount, vendor, category, payment, notes)', 'error');
+    return;
+  }
+
+  // Auto-set 50% for meals
+  if(category === 'Meals' && deductible !== '50%') {
+    document.getElementById('expDeductible').value = '50%';
+  }
+
+  const expense = {
+    ID: String(Date.now()),
+    Date: date,
+    Amount: parseFloat(amount).toFixed(2),
+    Vendor: vendor,
+    Category: category,
+    Payment: payment,
+    PaidTo: paidTo,
+    Notes: notes,
+    Receipt: receipt,
+    Deductible: deductible,
+    Reimbursable: reimburse,
+    User: sessionStorage.getItem('sp_user') || 'scott',
+    Timestamp: new Date().toISOString(),
+    Deleted: ''
+  };
+
+  // Add locally
+  allExpenses.push(expense);
+  renderExpenses();
+  clearExpenseForm();
+  showToast('Expense saved: $' + expense.Amount + ' — ' + vendor, 'success');
+
+  // Save to backend
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'addExpense', data:expense})
+    }).catch(e => console.log('Expense save error:', e));
+  }
+}
+
+function deleteExpense(id) {
+  if(!confirm('Delete this expense?')) return;
+  allExpenses = allExpenses.filter(e => e.ID !== id);
+  renderExpenses();
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'deleteExpense', id:id})
+    }).catch(e => console.log('Expense delete error:', e));
+  }
+  showToast('Expense deleted', 'warning');
+}
+
+function clearExpenseForm() {
+  document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expVendor').value = '';
+  document.getElementById('expCategory').value = '';
+  document.getElementById('expPayment').value = '';
+  document.getElementById('expPaidTo').value = '';
+  document.getElementById('expNotes').value = '';
+  document.getElementById('expReceipt').value = 'Yes';
+  document.getElementById('expDeductible').value = '100%';
+  document.getElementById('expReimburse').value = 'No';
+}
+
+function renderExpenses() {
+  const tbody = document.getElementById('expenseTableBody');
+  const summary = document.getElementById('expSummary');
+  if(!tbody) return;
+
+  // Filters
+  const filterMonth = document.getElementById('expFilterMonth') ? document.getElementById('expFilterMonth').value : 'all';
+  const filterYear = document.getElementById('expFilterYear') ? document.getElementById('expFilterYear').value : '2026';
+  const filterCat = document.getElementById('expFilterCat') ? document.getElementById('expFilterCat').value : 'all';
+  const filterPay = document.getElementById('expFilterPayment') ? document.getElementById('expFilterPayment').value : 'all';
+
+  let filtered = allExpenses.filter(e => {
+    const d = e.Date || '';
+    const year = d.substring(0,4);
+    const month = d.substring(5,7);
+    if(filterYear && year !== filterYear) return false;
+    if(filterMonth !== 'all' && month !== filterMonth) return false;
+    if(filterCat !== 'all' && e.Category !== filterCat) return false;
+    if(filterPay !== 'all' && e.Payment !== filterPay) return false;
+    return true;
+  });
+
+  // Sort by date descending
+  filtered.sort((a,b) => (b.Date||'').localeCompare(a.Date||''));
+
+  // Populate category filter dynamically
+  const catFilter = document.getElementById('expFilterCat');
+  if(catFilter) {
+    const cats = [...new Set(allExpenses.map(e=>e.Category).filter(c=>c))].sort();
+    const currentVal = catFilter.value;
+    catFilter.innerHTML = '<option value="all">All Categories</option>' + cats.map(c => `<option value="${c}"${c===currentVal?' selected':''}>${c}</option>`).join('');
+  }
+
+  // Summary
+  const totalAmount = filtered.reduce((s,e) => s + parseFloat(e.Amount||0), 0);
+  const deductibleAmount = filtered.reduce((s,e) => {
+    const amt = parseFloat(e.Amount||0);
+    if(e.Deductible === '100%') return s + amt;
+    if(e.Deductible === '50%') return s + amt * 0.5;
+    if(e.Deductible === 'Partial') return s + amt * 0.5; // estimate
+    return s;
+  }, 0);
+  const cashExpenses = filtered.filter(e => e.Payment === 'Cash').reduce((s,e) => s + parseFloat(e.Amount||0), 0);
+  const personalExpenses = filtered.filter(e => e.Payment === 'Personal Credit Card' || e.Payment === 'Personal Debit/Bank').reduce((s,e) => s + parseFloat(e.Amount||0), 0);
+  const businessExpenses = filtered.filter(e => e.Payment === 'Business Checking (Northwest)').reduce((s,e) => s + parseFloat(e.Amount||0), 0);
+  const partnerPayments = filtered.filter(e => e.Category === 'Partner Payment').reduce((s,e) => s + parseFloat(e.Amount||0), 0);
+  const noReceipt = filtered.filter(e => e.Receipt === 'No').length;
+
+  summary.innerHTML = `
+    <div class="exp-summary-card exp-total"><div class="exp-summary-val">$${totalAmount.toFixed(2)}</div><div class="exp-summary-label">Total Spent</div></div>
+    <div class="exp-summary-card exp-deductible"><div class="exp-summary-val">$${deductibleAmount.toFixed(2)}</div><div class="exp-summary-label">Deductible</div></div>
+    <div class="exp-summary-card"><div class="exp-summary-val">$${businessExpenses.toFixed(2)}</div><div class="exp-summary-label">Business Checking</div></div>
+    <div class="exp-summary-card"><div class="exp-summary-val">$${personalExpenses.toFixed(2)}</div><div class="exp-summary-label">Personal (Reimburse)</div></div>
+    <div class="exp-summary-card exp-cash"><div class="exp-summary-val">$${cashExpenses.toFixed(2)}</div><div class="exp-summary-label">Cash</div></div>
+    <div class="exp-summary-card"><div class="exp-summary-val">${filtered.length}</div><div class="exp-summary-label">Transactions</div></div>
+    ${partnerPayments > 0 ? `<div class="exp-summary-card exp-cash"><div class="exp-summary-val">$${partnerPayments.toFixed(2)}</div><div class="exp-summary-label">Partner Payments</div></div>` : ''}
+    ${noReceipt > 0 ? `<div class="exp-summary-card" style="border-color:rgba(239,68,68,0.2);"><div class="exp-summary-val" style="color:var(--danger);">${noReceipt}</div><div class="exp-summary-label">⚠️ Missing Receipts</div></div>` : ''}
+  `;
+
+  // Table
+  if(filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-dim);">No expenses found for this period.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(e => {
+    const catColors = {
+      'Equipment':'#8b5cf6','Software':'#6366f1','Supplies':'#0ea5e9','Phone & Internet':'#06b6d4',
+      'Advertising':'#f97316','Vehicle':'#eab308','Meals':'#ef4444','Partner Payment':'#f97316',
+      'Contract Labor':'#ec4899','Professional Services':'#8b5cf6','Travel':'#14b8a6'
+    };
+    const catColor = catColors[e.Category] || 'var(--text-dim)';
+    return `<tr>
+      <td style="white-space:nowrap;font-family:var(--mono);font-size:11px;">${e.Date||''}</td>
+      <td style="font-weight:600;">${e.Vendor||''}</td>
+      <td><span class="exp-cat-badge" style="background:${catColor}15;color:${catColor};border:1px solid ${catColor}30;">${e.Category||''}</span></td>
+      <td class="exp-amount">$${parseFloat(e.Amount||0).toFixed(2)}</td>
+      <td class="exp-pay-badge">${e.Payment||''}</td>
+      <td style="font-size:11px;">${e.Deductible||''}</td>
+      <td class="${e.Receipt==='No'?'exp-receipt-no':'exp-receipt-yes'}" style="font-size:11px;">${e.Receipt==='Yes'?'✅':e.Receipt==='Digital'?'📧':'❌'}</td>
+      <td class="exp-notes-cell" title="${(e.Notes||'').replace(/"/g,'&quot;')}">${e.Notes||''}</td>
+      <td><button class="exp-del-btn" onclick="deleteExpense('${e.ID}')" title="Delete">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportExpensesCSV() {
+  const filterMonth = document.getElementById('expFilterMonth').value;
+  const filterYear = document.getElementById('expFilterYear').value;
+  const filterCat = document.getElementById('expFilterCat').value;
+  const filterPay = document.getElementById('expFilterPayment').value;
+
+  let filtered = allExpenses.filter(e => {
+    const d = e.Date||'';
+    const year = d.substring(0,4);
+    const month = d.substring(5,7);
+    if(filterYear && year !== filterYear) return false;
+    if(filterMonth !== 'all' && month !== filterMonth) return false;
+    if(filterCat !== 'all' && e.Category !== filterCat) return false;
+    if(filterPay !== 'all' && e.Payment !== filterPay) return false;
+    return true;
+  }).sort((a,b) => (a.Date||'').localeCompare(b.Date||''));
+
+  if(filtered.length === 0) { showToast('No expenses to export', 'error'); return; }
+
+  const headers = ['Date','Vendor','Category','Amount','Payment Method','Paid To','Description','Receipt','Deductible %','Reimbursable','Deductible Amount'];
+  const rows = filtered.map(e => {
+    const amt = parseFloat(e.Amount||0);
+    let dedAmt = 0;
+    if(e.Deductible === '100%') dedAmt = amt;
+    else if(e.Deductible === '50%') dedAmt = amt * 0.5;
+    else if(e.Deductible === 'Partial') dedAmt = amt * 0.5;
+    return [e.Date, e.Vendor, e.Category, amt.toFixed(2), e.Payment, e.PaidTo||'', '"'+(e.Notes||'').replace(/"/g,'""')+'"', e.Receipt, e.Deductible, e.Reimbursable||'No', dedAmt.toFixed(2)];
+  });
+
+  // Category subtotals
+  const catTotals = {};
+  filtered.forEach(e => {
+    const cat = e.Category || 'Other';
+    if(!catTotals[cat]) catTotals[cat] = 0;
+    catTotals[cat] += parseFloat(e.Amount||0);
+  });
+
+  let csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
+  csv += '\n\n--- CATEGORY TOTALS (Schedule C) ---\nCategory,Total';
+  Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).forEach(([cat,total]) => {
+    csv += '\n' + cat + ',' + total.toFixed(2);
+  });
+  csv += '\n\nGRAND TOTAL,' + filtered.reduce((s,e)=>s+parseFloat(e.Amount||0),0).toFixed(2);
+  csv += '\nTOTAL DEDUCTIBLE,' + filtered.reduce((s,e)=>{
+    const a=parseFloat(e.Amount||0);
+    if(e.Deductible==='100%')return s+a;if(e.Deductible==='50%')return s+a*0.5;if(e.Deductible==='Partial')return s+a*0.5;return s;
+  },0).toFixed(2);
+
+  const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const filename = 'SwitchPoint_Expenses_' + filterYear + (filterMonth!=='all' ? '_'+monthNames[parseInt(filterMonth)] : '') + '.csv';
+
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Exported ' + filtered.length + ' expenses to ' + filename, 'success');
+}
+
+// Set default date on form
+document.addEventListener('DOMContentLoaded', () => {
+  const expDate = document.getElementById('expDate');
+  if(expDate) expDate.value = new Date().toISOString().split('T')[0];
+});
 
 // =======================================================================
 // BATTLEBOARD — Scene switching & option toggling (v18)
