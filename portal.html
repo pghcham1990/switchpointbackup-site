@@ -1254,7 +1254,7 @@ body.wide-mode .panel{max-width:none;}
 
 <!-- ======== ACTIVITY FEED TAB ======== -->
 <div id="tab-activity" class="tab-content">
-<div class="panel" style="display:flex;flex-direction:column;height:calc(100vh - 130px);overflow:hidden;">
+<div class="panel" id="activityPanel" style="display:flex;flex-direction:column;overflow:hidden;">
   <div class="form-header" style="flex-shrink:0;"><h2>Recent Activity</h2><p>Your complete activity log across all prospects. Most recent first.</p></div>
   <div style="display:flex;gap:10px;align-items:center;margin-bottom:4px;flex-shrink:0;">
     <input type="text" id="activitySearch" placeholder="Search activities..." oninput="renderGlobalActivity()" style="flex:1;max-width:320px;">
@@ -4135,6 +4135,12 @@ function renderProsActivity(p) {
 }
 
 function renderGlobalActivity() {
+  // Dynamically size the activity panel to fill remaining viewport
+  const panel = document.getElementById('activityPanel');
+  if (panel) {
+    const rect = panel.getBoundingClientRect();
+    panel.style.height = (window.innerHeight - rect.top - 16) + 'px';
+  }
   const log=document.getElementById('globalActivityLog');
   if(!activities.length){ log.innerHTML='<div class="activity-empty">Activities will appear here as you log them in prospect detail cards.</div>'; return; }
 
@@ -6535,6 +6541,14 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStayAwayList();
   loadQuickLinks();
   restoreLastTab();
+  // Resize activity panel on window resize
+  window.addEventListener('resize', () => {
+    const panel = document.getElementById('activityPanel');
+    if (panel && panel.offsetParent) {
+      const rect = panel.getBoundingClientRect();
+      panel.style.height = (window.innerHeight - rect.top - 16) + 'px';
+    }
+  });
   const nameField = document.getElementById('pr_custName');
   if(nameField) {
     let saTimeout;
