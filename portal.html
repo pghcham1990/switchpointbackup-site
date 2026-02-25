@@ -185,13 +185,13 @@ textarea{resize:vertical;min-height:64px;}
 .action-btn.sequence.sent:hover{background:var(--success-bg);}
 
 /* Activity filter pills */
-.activity-filters{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0;}
-.activity-filter-pill{font-family:var(--sans);font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,0.88);color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
+.activity-filters{display:flex;gap:5px;flex-wrap:wrap;padding:8px 0;}
+.activity-filter-pill{font-family:var(--sans);font-size:10px;font-weight:600;padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.88);color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
 .activity-filter-pill:hover{background:var(--white);color:var(--text);box-shadow:var(--shadow-sm);}
 .activity-filter-pill.active{background:var(--accent);color:var(--white);border-color:var(--accent);box-shadow:0 4px 12px rgba(46,107,255,0.25);}
-.activity-filter-pill .af-count{font-size:10px;opacity:0.7;margin-left:4px;}
+.activity-filter-pill .af-count{font-size:9px;opacity:0.7;margin-left:3px;}
 /* Activity item delete */
-.act-delete{opacity:0;font-size:11px;color:var(--text-dim);cursor:pointer;padding:4px 8px;border-radius:6px;transition:all 0.2s;border:none;background:none;margin-left:auto;flex-shrink:0;}
+.act-delete{opacity:0;font-size:10px;color:var(--text-dim);cursor:pointer;padding:3px 6px;border-radius:4px;transition:all 0.2s;border:none;background:none;margin-left:auto;flex-shrink:0;}
 .activity-item:hover .act-delete{opacity:0.5;}
 .act-delete:hover{opacity:1 !important;color:var(--danger);background:var(--danger-bg);}
 /* Deleted activity strikethrough */
@@ -221,10 +221,11 @@ textarea{resize:vertical;min-height:64px;}
 .followup-overdue-label{color:var(--danger);}
 
 /* ACTIVITY LOG */
-.activity-log{max-height:400px;overflow-y:auto;padding:16px;}
-.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(18,28,45,0.06);}
+.activity-log{max-height:calc(100vh - 280px);overflow-y:auto;padding:8px 0;}
+.activity-item{display:flex;gap:10px;padding:7px 10px;border-bottom:1px solid rgba(18,28,45,0.04);border-radius:6px;margin-bottom:1px;transition:background 0.12s;}
+.activity-item:hover{background:rgba(46,107,255,0.02);}
 .activity-item:last-child{border-bottom:none;}
-.activity-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.activity-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
 .activity-icon.act-call{background:var(--success-bg);border:1px solid rgba(34,197,94,0.2);}
 .activity-icon.act-email{background:var(--accent-glow);border:1px solid rgba(59,130,246,0.2);}
 .activity-icon.act-dropin{background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);}
@@ -235,10 +236,11 @@ textarea{resize:vertical;min-height:64px;}
 .not-interested-btn:hover{background:rgba(239,68,68,0.08);color:#ef4444;border-color:rgba(239,68,68,0.25);transform:translateY(-1px);}
 .ni-resurface-badge{display:inline-block;padding:2px 7px;border-radius:6px;background:rgba(251,191,36,0.10);color:#d97706;font-size:9px;font-weight:700;margin-left:6px;animation:glowOverdue 3s ease-in-out infinite;}
 .activity-body{flex:1;min-width:0;}
-.activity-body .act-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);}
-.activity-body .act-text{font-size:13px;color:var(--text);margin-top:2px;}
-.activity-body .act-time{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:var(--mono);}
+.activity-body .act-type{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);line-height:1;}
+.activity-body .act-text{font-size:12px;color:var(--text);margin-top:2px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;}
+.activity-body .act-time{font-size:9px;color:var(--text-dim);margin-top:2px;font-family:var(--mono);line-height:1;}
 .activity-empty{text-align:center;padding:32px;color:var(--text-dim);font-size:13px;}
+.activity-date-group{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;padding:12px 10px 4px;position:sticky;top:0;background:var(--white);z-index:1;border-bottom:1px solid rgba(18,28,45,0.06);}
 
 /* NOTE MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(12,18,32,0.5);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
@@ -1258,7 +1260,7 @@ body.wide-mode .panel{max-width:none;}
     <input type="text" id="activitySearch" placeholder="Search activities..." oninput="renderGlobalActivity()" style="flex:1;max-width:320px;">
   </div>
   <div class="activity-filters" id="activityFilters"></div>
-  <div class="activity-log" id="globalActivityLog" style="max-height:600px;">
+  <div class="activity-log" id="globalActivityLog" style="max-height:calc(100vh - 280px);">
     <div class="activity-empty">Activities will appear here as you log them in prospect detail cards.</div>
   </div>
 </div>
@@ -4177,7 +4179,30 @@ function renderGlobalActivity() {
     log.innerHTML = '<div class="activity-empty">No activities match your filters.</div>';
     return;
   }
-  log.innerHTML=filtered.slice(0,100).map(a=>renderActivityItem(a, true)).join('');
+  // Group by date with sticky headers
+  const items = filtered.slice(0,150);
+  let html = '';
+  let lastDate = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+  items.forEach(a => {
+    const d = new Date(a.timestamp);
+    const dateKey = d.toLocaleDateString();
+    if (dateKey !== lastDate) {
+      d.setHours(0,0,0,0);
+      let label = dateKey;
+      if (d.getTime() === today.getTime()) label = 'Today';
+      else if (d.getTime() === yesterday.getTime()) label = 'Yesterday';
+      else label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      html += `<div class="activity-date-group">${label}</div>`;
+      lastDate = dateKey;
+    }
+    html += renderActivityItem(a, true);
+  });
+  if (filtered.length > 150) {
+    html += '<div style="text-align:center;padding:12px;font-size:11px;color:var(--text-dim);">Showing 150 of ' + filtered.length + ' activities. Use filters to narrow results.</div>';
+  }
+  log.innerHTML = html;
 }
 
 function setActivityFilter(type) {
@@ -4203,8 +4228,8 @@ function renderActivityItem(a, showProspect) {
   else if(a.type==='Proposal Sent') ic='act-email';
   else if(a.type==='Stage Change') ic='act-stage';
   const time = new Date(a.timestamp);
-  const timeStr = time.toLocaleDateString()+' '+time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const prosLabel = showProspect ? `<strong style="color:var(--accent);">${a.prospect}</strong> — ` : '';
+  const timeStr = time.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+  const prosLabel = showProspect && a.prospect ? `<a href="#" onclick="event.preventDefault();event.stopPropagation();switchTab('pipeline',document.querySelectorAll('.tab-btn')[2]);setTimeout(()=>{const idx=allProspects.findIndex(p=>p['Customer']==='${(a.prospect||'').replace(/'/g,"\\'")}');if(idx>=0)selectProspect(idx);},200);" style="color:var(--accent);font-weight:600;text-decoration:none;">${a.prospect}</a> — ` : '';
   const deletedClass = a.deleted ? ' deleted' : '';
   const deleteBtn = a.deleted
     ? '<span class="act-delete-label">[DELETED]</span>'
@@ -4215,19 +4240,23 @@ function renderActivityItem(a, showProspect) {
     const fuDate = new Date(a.followUp); fuDate.setHours(0,0,0,0);
     const diffDays = Math.floor((fuDate - today) / (1000*60*60*24));
     if (diffDays === 0) {
-      followUpTag = ' — <span class="followup-due-today">Follow-up: '+a.followUp+'<span class="followup-due-today-label"> TODAY</span></span>';
+      followUpTag = ' <span class="followup-due-today" style="font-size:9px;padding:1px 6px;">'+a.followUp+' <span class="followup-due-today-label">TODAY</span></span>';
     } else if (diffDays < 0) {
-      followUpTag = ' — <span class="followup-overdue">Follow-up: '+a.followUp+'<span class="followup-overdue-label"> '+Math.abs(diffDays)+'d LATE</span></span>';
+      followUpTag = ' <span class="followup-overdue" style="font-size:9px;padding:1px 6px;">'+a.followUp+' <span class="followup-overdue-label">'+Math.abs(diffDays)+'d LATE</span></span>';
     } else {
-      followUpTag = ' — Follow-up: '+a.followUp;
+      followUpTag = ' <span style="font-size:9px;color:var(--text-dim);">↳ '+a.followUp+'</span>';
     }
   }
-  return `<div class="activity-item${deletedClass}" style="display:flex;align-items:flex-start;">
+  return `<div class="activity-item${deletedClass}">
     <div class="activity-icon ${ic}">${cfg.emoji}</div>
-    <div class="activity-body" style="flex:1;">
-      <div class="act-type">${a.type}${followUpTag}</div>
-      <div class="act-text">${prosLabel}${a.text}</div>
-      <div class="act-time">${timeStr} by ${a.user}</div>
+    <div class="activity-body">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span class="act-type">${a.type}</span>
+        <span style="font-size:9px;color:var(--text-dim);font-family:var(--mono);">${timeStr}</span>
+        <span style="font-size:9px;color:var(--text-dim);">by ${a.user}</span>
+        ${followUpTag}
+      </div>
+      <div class="act-text">${prosLabel}${a.text||'—'}</div>
     </div>
     ${deleteBtn}
   </div>`;
