@@ -326,6 +326,10 @@ textarea{resize:vertical;min-height:64px;}
 .speed-dial-link:hover{background:rgba(46,107,255,0.08);color:var(--accent);}
 .speed-dial-link .sd-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .speed-dial-link .sd-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sd-layout-toggle{display:flex;gap:2px;padding:6px 12px;margin:4px 0;}
+.sd-layout-btn{flex:1;font-size:10px;font-weight:700;padding:6px 0;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px;}
+.sd-layout-btn:hover{background:rgba(46,107,255,0.06);color:var(--accent);}
+.sd-layout-btn.active{background:var(--accent);color:var(--white);border-color:var(--accent);box-shadow:0 2px 8px rgba(46,107,255,0.3);}
 
 /* ===== PARTNERS TAB (v11.2) ===== */
 .partner-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:16px;}
@@ -387,6 +391,28 @@ textarea{resize:vertical;min-height:64px;}
 body.wide-mode .tab-nav{max-width:none;}
 body.wide-mode .main{max-width:none;}
 body.wide-mode .panel{max-width:none;}
+/* Ultrawide layout — auto-engaged at 1500px+ viewport */
+body.layout-wide .tab-nav{max-width:1600px;}
+body.layout-wide .main{max-width:1600px;}
+body.layout-wide .panel{max-width:1600px;}
+body.layout-wide .dash-grid{grid-template-columns:repeat(4,1fr);}
+body.layout-wide .dash-row2{grid-template-columns:1fr 1fr;}
+body.layout-wide .analytics-grid{grid-template-columns:1fr 1fr;}
+body.layout-wide .db-table-wrap{max-height:420px;}
+body.layout-wide .kanban-col{min-width:220px;max-height:700px;}
+/* Ultra layout — full bleed */
+body.layout-ultra .tab-nav{max-width:none;}
+body.layout-ultra .main{max-width:none;}
+body.layout-ultra .panel{max-width:none;}
+body.layout-ultra .dash-grid{grid-template-columns:repeat(4,1fr);}
+body.layout-ultra .dash-row2{grid-template-columns:1fr 1fr;}
+body.layout-ultra .analytics-grid{grid-template-columns:1fr 1fr 1fr 1fr;}
+body.layout-ultra .db-table-wrap{max-height:500px;}
+body.layout-ultra .kanban-col{min-width:240px;max-height:calc(100vh - 280px);}
+body.layout-ultra .partner-cards{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));}
+body.layout-ultra .detail-section-body{grid-template-columns:1fr 1fr 1fr 1fr;}
+body.layout-ultra .db-table{table-layout:auto;}
+body.layout-ultra .form-grid{grid-template-columns:1fr 1fr 1fr;}
 .kanban-toggle{display:flex;gap:2px;background:var(--surface-3);border-radius:8px;padding:2px;}
 .kanban-toggle-btn{font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text-dim);transition:all 0.15s;font-family:var(--sans);}
 .kanban-toggle-btn.active{background:var(--white);color:var(--text);box-shadow:var(--shadow-sm);}
@@ -1180,7 +1206,7 @@ body.wide-mode .panel{max-width:none;}
     <button class="btn btn-secondary" onclick="refreshProspects()">↻ Refresh</button>
   </div>
   <div class="db-table-wrap" style="max-height:360px;">
-    <table class="db-table"><thead><tr><th>Business</th><th>Contact</th><th>Phone</th><th>Stage</th><th>🔥</th><th>Source</th><th>Follow-Up</th><th>Est. Plan</th><th>Acts</th><th>Last Touch</th></tr></thead>
+    <table class="db-table" style="table-layout:fixed;width:100%;"><thead><tr><th style="width:22%;">Business</th><th style="width:10%;">Contact</th><th style="width:10%;">Phone</th><th style="width:8%;">Stage</th><th style="width:4%;">🔥</th><th style="width:8%;">Source</th><th style="width:10%;">Follow-Up</th><th style="width:8%;">Est. Plan</th><th style="width:5%;">Acts</th><th style="width:9%;">Last Touch</th></tr></thead>
       <tbody id="pipeTableBody"><tr><td colspan="10" class="loading-msg"><div class="spinner"></div><br>Loading prospects...</td></tr></tbody>
     </table>
   </div>
@@ -6466,6 +6492,15 @@ function renderQuickLinks(data) {
   let html = '';
   let currentSection = '';
 
+  // Layout toggle at top
+  const currentLayout = localStorage.getItem('sp_layout') || 'auto';
+  html += '<div class="speed-dial-section">Layout</div>';
+  html += '<div class="sd-layout-toggle">';
+  html += `<button class="sd-layout-btn${currentLayout==='compact'?' active':''}" onclick="event.stopPropagation();setLayout('compact')" title="1200px max-width">Compact</button>`;
+  html += `<button class="sd-layout-btn${currentLayout==='auto'?' active':''}" onclick="event.stopPropagation();setLayout('auto')" title="Auto-detect based on screen size">Auto</button>`;
+  html += `<button class="sd-layout-btn${currentLayout==='ultra'?' active':''}" onclick="event.stopPropagation();setLayout('ultra')" title="Full width — use all screen space">Ultra</button>`;
+  html += '</div>';
+
   data.forEach(row => {
     const section = (row['Section'] || '').trim();
     const name = (row['Name'] || '').trim();
@@ -6496,6 +6531,32 @@ function hexToRgba(hex, alpha) {
   const g = parseInt(hex.substring(2,4), 16) || 0;
   const b = parseInt(hex.substring(4,6), 16) || 0;
   return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function setLayout(mode) {
+  localStorage.setItem('sp_layout', mode);
+  applyLayout();
+  // Update toggle buttons
+  document.querySelectorAll('.sd-layout-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.sd-layout-btn[onclick*="'${mode}'"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+  showToast('Layout: ' + mode.charAt(0).toUpperCase() + mode.slice(1), 'info');
+}
+
+function applyLayout() {
+  const mode = localStorage.getItem('sp_layout') || 'auto';
+  document.body.classList.remove('layout-wide', 'layout-ultra', 'wide-mode');
+  if (mode === 'compact') {
+    // Default 1200px — do nothing, CSS defaults apply
+  } else if (mode === 'ultra') {
+    document.body.classList.add('layout-ultra');
+  } else {
+    // Auto: detect screen width and apply appropriate layout
+    const vw = window.innerWidth;
+    if (vw >= 1800) document.body.classList.add('layout-ultra');
+    else if (vw >= 1400) document.body.classList.add('layout-wide');
+    // Under 1400 stays at default 1200px compact
+  }
 }
 
 function trackQuickLink(name, url) {
@@ -6542,13 +6603,17 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStayAwayList();
   loadQuickLinks();
   restoreLastTab();
-  // Resize activity panel on window resize
+  applyLayout();
+  // Resize: re-calc activity panel height + re-apply layout
   window.addEventListener('resize', () => {
     const panel = document.getElementById('activityPanel');
     if (panel && panel.offsetParent) {
       const rect = panel.getBoundingClientRect();
       panel.style.height = (window.innerHeight - rect.top - 16) + 'px';
     }
+    // Re-apply auto layout on resize
+    const mode = localStorage.getItem('sp_layout') || 'auto';
+    if (mode === 'auto') applyLayout();
   });
   const nameField = document.getElementById('pr_custName');
   if(nameField) {
