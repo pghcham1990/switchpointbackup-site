@@ -230,6 +230,10 @@ textarea{resize:vertical;min-height:64px;}
 .activity-icon.act-dropin{background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);}
 .activity-icon.act-note{background:var(--purple-bg);border:1px solid rgba(167,139,250,0.2);}
 .activity-icon.act-stage{background:var(--cyan-bg);border:1px solid rgba(6,182,212,0.2);}
+.pill-slate{background:rgba(100,116,139,0.10);color:#64748b;border:1px solid rgba(100,116,139,0.18);}
+.not-interested-btn{background:rgba(100,116,139,0.08);color:#64748b;border:1px solid rgba(100,116,139,0.2);font-weight:600;cursor:pointer;transition:all 0.15s;}
+.not-interested-btn:hover{background:rgba(239,68,68,0.08);color:#ef4444;border-color:rgba(239,68,68,0.25);transform:translateY(-1px);}
+.ni-resurface-badge{display:inline-block;padding:2px 7px;border-radius:6px;background:rgba(251,191,36,0.10);color:#d97706;font-size:9px;font-weight:700;margin-left:6px;animation:glowOverdue 3s ease-in-out infinite;}
 .activity-body{flex:1;min-width:0;}
 .activity-body .act-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);}
 .activity-body .act-text{font-size:13px;color:var(--text);margin-top:2px;}
@@ -1053,6 +1057,12 @@ body.wide-mode .panel{max-width:none;}
           <tbody id="dashHotProspects"><tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;">Loading...</td></tr></tbody>
         </table>
       </div>
+      <!-- RESURFACE SECTION -->
+      <div id="dashResurfaceSection" style="display:none;margin-top:16px;">
+        <h3 style="font-size:13px;color:#d97706;">🔔 Resurfacing Prospects</h3>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Not Interested prospects due for a second attempt</div>
+        <div id="dashResurfaceList"></div>
+      </div>
     </div>
     <div class="dash-section">
       <h3>🏆 Milestones & Achievements</h3>
@@ -1198,6 +1208,7 @@ body.wide-mode .panel{max-width:none;}
       <button class="action-btn maps" onclick="openMaps()">📍 Google Maps</button>
       <button class="action-btn note" onclick="openNoteModal()">+ Log Activity</button>
       <button class="action-btn" onclick="changeStage()">⟳ Change Stage</button>
+      <button class="action-btn not-interested-btn" id="niActionBtn" onclick="markNotInterested()">🚫 Not Interested</button>
       <button class="action-btn sequence" onclick="addToSequence()">⚡ Sequence</button>
     </div>
     <div class="detail-body">
@@ -1437,7 +1448,7 @@ body.wide-mode .panel{max-width:none;}
         <div class="form-group"><label>Product</label><input id="pr_product" value="LTE Failover"></div>
         <div class="form-group"><label>URL</label><input id="pr_url"></div>
         <div class="form-group"><label>Source</label><select id="pr_source"><option value="">—</option><option>Cold Email</option><option>Cold Call</option><option>Walk-In / Drop Off</option><option>Partner Referral</option><option>Website Inquiry</option><option>Outage Trigger</option><option>Google Maps</option><option>Networking</option><option>Other</option></select></div>
-        <div class="form-group"><label>Stage</label><select id="pr_stage"><option value="New Lead" selected>New Lead</option><option>Contacted</option><option>Demo Scheduled</option><option>Proposal Sent</option><option>Negotiation</option><option>Closed Won</option><option>Closed Lost</option></select></div>
+        <div class="form-group"><label>Stage</label><select id="pr_stage"><option value="New Lead" selected>New Lead</option><option>Contacted</option><option>Demo Scheduled</option><option>Proposal Sent</option><option>Negotiation</option><option>Closed Won</option><option>Closed Lost</option><option>Not Interested</option></select></div>
         <div class="form-group"><label>Date Added</label><input type="date" id="pr_dateAdded"></div>
         <div class="form-group"><label>Follow-Up</label><input type="date" id="pr_followUp"></div>
         <div class="form-group"><label>Est. Plan</label><select id="pr_estPlan"><option value="">—</option><option>Core ($99)</option><option>Extended ($149)</option><option>Operational ($199)</option><option>Resilience ($249)</option><option>Critical ($299+)</option></select></div>
@@ -2417,7 +2428,7 @@ body.wide-mode .panel{max-width:none;}
     <div class="form-group" style="margin-bottom:14px;">
       <label>New Stage</label>
       <select id="newStageSelect">
-        <option>New Lead</option><option>Contacted</option><option>Demo Scheduled</option><option>Proposal Sent</option><option>Negotiation</option><option>Closed Won</option><option>Closed Lost</option>
+        <option>New Lead</option><option>Contacted</option><option>Demo Scheduled</option><option>Proposal Sent</option><option>Negotiation</option><option>Closed Won</option><option>Closed Lost</option><option>Not Interested</option>
       </select>
     </div>
     <div class="form-group" style="margin-bottom:14px;">
@@ -3224,6 +3235,7 @@ function renderCustomerTable(customers) {
 function getPill(s){ if(!s) return '<span class="pill pill-gray">—</span>'; const l=s.toLowerCase(); if(l.includes('active')) return `<span class="pill pill-green">${s}</span>`; if(l.includes('pending')) return `<span class="pill pill-yellow">${s}</span>`; if(l.includes('suspend')||l.includes('cancel')) return `<span class="pill pill-red">${s}</span>`; return `<span class="pill pill-gray">${s}</span>`; }
 
 function getStagePill(s){ if(!s) return '<span class="pill pill-gray">—</span>'; const l=s.toLowerCase();
+  if(l.includes('not interested')) return `<span class="pill pill-slate">${s}</span>`;
   if(l.includes('new')) return `<span class="pill pill-blue">${s}</span>`;
   if(l.includes('contacted')) return `<span class="pill pill-cyan">${s}</span>`;
   if(l.includes('demo')) return `<span class="pill pill-purple">${s}</span>`;
@@ -3250,7 +3262,7 @@ function renderStageFilters() {
   allProspects.forEach(p => { const s=p['Stage']||'Unknown'; stages[s]=(stages[s]||0)+1; });
   const container = document.getElementById('stageFilters');
   let html = `<button class="stage-pill active" onclick="filterByStage('all',this)">All<span class="count">${allProspects.length}</span></button>`;
-  const order = ['New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won','Closed Lost'];
+  const order = ['New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won','Closed Lost','Not Interested'];
   order.forEach(s => { if(stages[s]) html += `<button class="stage-pill" onclick="filterByStage('${s}',this)">${s}<span class="count">${stages[s]}</span></button>`; });
   container.innerHTML = html;
 }
@@ -3313,9 +3325,10 @@ function renderProspectTable(prospects) {
     else urgencyHtml = '<span class="urgency-label urgency-cold">—</span>';
 
     const saBadge = checkStayAway(p['Customer']) ? '<span class="sa-badge">⛔ FSN</span>' : '';
+    const niBadge = getResurfaceBadge(p);
 
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
-      <td><strong>${p['Customer']||''}</strong>${saBadge}</td>
+      <td><strong>${p['Customer']||''}</strong>${saBadge}${niBadge}</td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
       <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="'+gvCallUrl(phoneDial)+'" target="_blank" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
@@ -3475,7 +3488,21 @@ function selectProspect(idx) {
   lastInteractedProspect = p['Customer'] || '';
   renderProspectTable(getFilteredProspects());
   document.getElementById('prosDetailName').textContent=p['Customer']||'';
-  document.getElementById('prosDetailStage').textContent=p['Stage']||'';
+  const stageEl = document.getElementById('prosDetailStage');
+  stageEl.textContent=p['Stage']||'';
+  // Dynamic stage badge color
+  const sl=(p['Stage']||'').toLowerCase();
+  stageEl.className='pill pill-yellow'; // default
+  if(sl.includes('not interested')) stageEl.className='pill pill-slate';
+  else if(sl.includes('new')) stageEl.className='pill pill-blue';
+  else if(sl.includes('contacted')) stageEl.className='pill pill-cyan';
+  else if(sl.includes('demo')) stageEl.className='pill pill-purple';
+  else if(sl.includes('won')) stageEl.className='pill pill-green';
+  else if(sl.includes('lost')) stageEl.className='pill pill-red';
+  stageEl.style.fontSize='11px';
+  // Hide Not Interested button if already NI, Closed Won, or Closed Lost
+  const niBtn = document.getElementById('niActionBtn');
+  if(niBtn) niBtn.style.display = (p['Stage'] === 'Not Interested' || p['Stage'] === 'Closed Won' || p['Stage'] === 'Closed Lost') ? 'none' : '';
   document.getElementById('prosEditToggle').textContent='✎ Edit'; document.getElementById('prosEditToggle').style.color='var(--accent)';
   document.getElementById('prosSaveBar').classList.remove('visible');
   // Update call link with phone number
@@ -3584,7 +3611,7 @@ function toggleProsEditMode() {
 
 // Dropdown options for specific fields
 const FIELD_DROPDOWNS = {
-  'Stage': ['','New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won','Closed Lost'],
+  'Stage': ['','New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won','Closed Lost','Not Interested'],
   'Source': ['','Cold Email','Cold Call','Walk-In / Drop Off','Partner Referral','Website Inquiry','Outage Trigger','Google Maps','Networking','Other'],
   'Est. Plan': ['','Core ($99)','Extended ($149)','Operational ($199)','Resilience ($249)','Critical ($299+)'],
   'Product': ['','LTE Failover','Custom'],
@@ -3849,6 +3876,121 @@ function deleteActivity(actId) {
   if(selectedProspectIdx >= 0) renderProsActivity(allProspects[selectedProspectIdx]);
   renderProspectTable(getFilteredProspects());
   showToast('Activity marked as deleted','success');
+}
+
+// =======================================================================
+// NOT INTERESTED — Quick-mark with full audit trail + 6-month resurface
+// =======================================================================
+function markNotInterested() {
+  const p = allProspects[selectedProspectIdx];
+  if (!p) return;
+  const name = p['Customer'] || 'Unknown';
+  const oldStage = p['Stage'] || 'Unknown';
+  
+  // Prevent double-marking
+  if (oldStage === 'Not Interested') {
+    showToast('⚠️ ' + name + ' is already marked Not Interested', 'error');
+    return;
+  }
+  
+  // Prompt for reason (required for audit)
+  const reason = prompt('🚫 Mark "' + name + '" as Not Interested?\n\nReason (required for audit trail):');
+  if (reason === null) return; // Cancelled
+  if (!reason.trim()) {
+    showToast('⚠️ Reason is required — every action must be auditable', 'error');
+    return;
+  }
+  
+  const user = sessionStorage.getItem('sp_user') || 'scott';
+  const now = new Date().toISOString();
+  
+  // Calculate 6-month resurface date
+  const resurfaceDate = new Date();
+  resurfaceDate.setMonth(resurfaceDate.getMonth() + 6);
+  const resurfaceDateStr = resurfaceDate.toISOString().split('T')[0];
+  
+  // 1. Log the stage change activity with full audit detail
+  const activity = {
+    id: Date.now(),
+    prospect: name,
+    type: 'Stage Change',
+    text: oldStage + ' → Not Interested — ' + reason.trim() + ' [Resurface: ' + resurfaceDateStr + ']',
+    timestamp: now,
+    user: user,
+    deleted: false
+  };
+  activities.unshift(activity);
+  
+  // 2. Persist activity to Sheets
+  if (CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'addActivity',
+        data: {
+          id: String(activity.id),
+          prospect: activity.prospect,
+          type: activity.type,
+          text: activity.text,
+          followUp: resurfaceDateStr,
+          timestamp: activity.timestamp,
+          user: activity.user,
+          deleted: ''
+        }
+      })
+    }).catch(e => console.log('NI activity save failed:', e));
+  }
+  
+  // 3. Update prospect stage + set follow-up to resurface date
+  const updates = { 'Stage': 'Not Interested', 'Follow-Up': resurfaceDateStr };
+  if (CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'updateProspect',
+        businessName: name,
+        updates: updates
+      })
+    }).then(r => r.json()).then(d => {
+      if (d.success) {
+        renderProspectTable(getFilteredProspects());
+        renderStageFilters();
+        if (currentPipeView === 'kanban') renderKanban();
+      }
+    }).catch(e => console.log('NI stage update failed:', e));
+  }
+  
+  // 4. Update local state immediately
+  allProspects[selectedProspectIdx]['Stage'] = 'Not Interested';
+  allProspects[selectedProspectIdx]['Follow-Up'] = resurfaceDateStr;
+  document.getElementById('prosDetailStage').textContent = 'Not Interested';
+  
+  // 5. Refresh all views
+  renderProsActivity(p);
+  renderGlobalActivity();
+  renderProspectTable(getFilteredProspects());
+  renderStageFilters();
+  if (currentPipeView === 'kanban') renderKanban();
+  
+  showToast('🚫 ' + name + ' marked Not Interested — resurfaces ' + resurfaceDateStr, 'success');
+}
+
+// Check if a Not Interested prospect should resurface (called in renderProspectTable)
+function getResurfaceBadge(p) {
+  if (p['Stage'] !== 'Not Interested') return '';
+  const followUp = p['Follow-Up'];
+  if (!followUp) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fuDate = new Date(followUp); fuDate.setHours(0,0,0,0);
+  const diffDays = Math.floor((fuDate - today) / (1000*60*60*24));
+  if (diffDays <= 0) {
+    return '<span class="ni-resurface-badge">🔔 RESURFACE DUE</span>';
+  } else if (diffDays <= 14) {
+    return '<span class="ni-resurface-badge">⏰ ' + diffDays + 'd to resurface</span>';
+  }
+  return '';
 }
 
 function changeStage() {
@@ -4331,7 +4473,7 @@ function getUrgencyScore(prospect) {
   else if(planVal.includes('199') || planVal.includes('Operational')) score += 4;
 
   // Don't score closed deals
-  if(prospect['Stage'] === 'Closed Won' || prospect['Stage'] === 'Closed Lost') score = 0;
+  if(prospect['Stage'] === 'Closed Won' || prospect['Stage'] === 'Closed Lost' || prospect['Stage'] === 'Not Interested') score = 0;
 
   return Math.round(score);
 }
@@ -4355,7 +4497,7 @@ function renderDashboard() {
   document.getElementById('dashMRRsub').textContent = activeCustomers.length + ' active customer' + (activeCustomers.length!==1?'s':'');
 
   // Pipeline value (weighted by stage)
-  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost');
+  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost' && p['Stage'] !== 'Not Interested');
   let pipelineValue = 0;
   let rawPipelineValue = 0;
   openProspects.forEach(p => {
@@ -4427,6 +4569,41 @@ function renderDashboard() {
   renderStreaks();
   renderWeeklyActivity();
   renderAnalytics();
+
+  // Resurfacing Prospects — Not Interested with follow-up date due
+  const niProspects = allProspects.filter(p => p['Stage'] === 'Not Interested');
+  const resurfaceDue = niProspects.filter(p => {
+    const fu = p['Follow-Up'];
+    if (!fu) return false;
+    const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
+    const diff = Math.floor((fuDate - today) / 86400000);
+    return diff <= 14; // Due within 2 weeks or overdue
+  }).sort((a,b) => new Date(a['Follow-Up']) - new Date(b['Follow-Up']));
+  
+  const resurfaceSection = document.getElementById('dashResurfaceSection');
+  const resurfaceList = document.getElementById('dashResurfaceList');
+  if (resurfaceDue.length > 0) {
+    resurfaceSection.style.display = 'block';
+    resurfaceList.innerHTML = resurfaceDue.slice(0, 5).map(p => {
+      const fu = p['Follow-Up'];
+      const fuDate = new Date(fu); fuDate.setHours(0,0,0,0);
+      const diff = Math.floor((fuDate - today) / 86400000);
+      const label = diff <= 0 ? '<span style="color:#ef4444;font-weight:700;">OVERDUE ' + Math.abs(diff) + 'd</span>' : '<span style="color:#d97706;">' + diff + 'd away</span>';
+      const idx = allProspects.indexOf(p);
+      // Find the original NI reason from activities
+      const niAct = activities.find(a => a.prospect === p['Customer'] && !a.deleted && a.type === 'Stage Change' && a.text && a.text.includes('→ Not Interested'));
+      const reasonSnippet = niAct ? niAct.text.replace(/.*→ Not Interested — /, '').replace(/\[Resurface:.*/, '').trim() : '';
+      return `<div style="padding:8px 10px;border-radius:8px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.15);margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="switchTab('pipeline',document.querySelectorAll('.tab-btn')[2]);setTimeout(()=>{filterByStage('Not Interested',null);selectProspect(${idx})},200);">
+        <div><strong style="font-size:12px;">${p['Customer']||''}</strong>${reasonSnippet ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">'+reasonSnippet+'</div>' : ''}</div>
+        <div style="font-size:11px;font-family:var(--mono);">${label}</div>
+      </div>`;
+    }).join('');
+    if (resurfaceDue.length > 5) {
+      resurfaceList.innerHTML += '<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:4px;">+ ' + (resurfaceDue.length - 5) + ' more</div>';
+    }
+  } else {
+    resurfaceSection.style.display = 'none';
+  }
 }
 
 // =======================================================================
@@ -4570,7 +4747,7 @@ function toggleQuickLog() {
 
 function populateQuickProspectList() {
   const sel = document.getElementById('quickProspect');
-  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost');
+  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost' && p['Stage'] !== 'Not Interested');
   // Sort by urgency
   const scored = openProspects.map(p => ({ p, score: getUrgencyScore(p) }));
   scored.sort((a,b) => b.score - a.score);
@@ -5570,14 +5747,15 @@ function generateWeeklyReport() {
   const weekActs = activities.filter(a => !a.deleted && new Date(a.timestamp) >= weekAgo);
   const activeCustomers = allCustomers.filter(c => (c['Billing Status']||'').toLowerCase().includes('active'));
   const activeMRR = activeCustomers.reduce((sum, c) => sum + parseFloat(c['Monthly MRC ($)'] || 0), 0);
-  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost');
+  const openProspects = allProspects.filter(p => p['Stage'] !== 'Closed Won' && p['Stage'] !== 'Closed Lost' && p['Stage'] !== 'Not Interested');
   const totalPoints = weekActs.reduce((sum, a) => sum + (ACTIVITY_POINTS[a.type] || 1), 0);
 
   // Pipeline movement this week
   const stageChanges = weekActs.filter(a => a.type === 'Stage Change');
   const dealsWon = stageChanges.filter(a => a.text.includes('→ Closed Won'));
   const dealsLost = stageChanges.filter(a => a.text.includes('→ Closed Lost'));
-  const advanced = stageChanges.filter(a => !a.text.includes('Closed'));
+  const markedNI = stageChanges.filter(a => a.text.includes('→ Not Interested'));
+  const advanced = stageChanges.filter(a => !a.text.includes('Closed') && !a.text.includes('Not Interested'));
 
   // Activity breakdown
   const typeCounts = {};
@@ -5619,6 +5797,7 @@ function generateWeeklyReport() {
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <div style="font-size:13px;"><span style="color:var(--success);font-weight:700;">${dealsWon.length}</span> deals won</div>
         <div style="font-size:13px;"><span style="color:var(--danger);font-weight:700;">${dealsLost.length}</span> deals lost</div>
+        <div style="font-size:13px;"><span style="color:#64748b;font-weight:700;">${markedNI.length}</span> marked not interested</div>
         <div style="font-size:13px;"><span style="color:var(--accent);font-weight:700;">${advanced.length}</span> stages advanced</div>
       </div>
       ${stageChanges.length ? '<div style="margin-top:10px;">'+stageChanges.map(a => '<div style="font-size:11px;padding:4px 0;border-bottom:1px solid rgba(18,28,45,0.04);"><strong>'+a.prospect+'</strong> — '+a.text+'</div>').join('')+'</div>' : '<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">No pipeline movement this week</div>'}
