@@ -3739,9 +3739,11 @@ async function stripeCreateCustomer() {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
         action: 'stripeCreateCustomer',
-        customerId: c['Unique Customer ID'],
-        name: c['Customer Name'] || '',
-        email: c['Primary Contact Email'] || ''
+        data: {
+          portalCustomerId: c['Unique Customer ID'],
+          name: c['Customer Name'] || '',
+          email: c['Primary Contact Email'] || ''
+        }
       })
     });
     const data = await resp.json();
@@ -3865,10 +3867,12 @@ async function stripeAddPayment(stripeId) {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
         action: 'stripeCreateCheckout',
-        stripeCustomerId: stripeId,
-        mode: 'setup',
-        successUrl: window.location.href,
-        cancelUrl: window.location.href
+        data: {
+          stripeCustomerId: stripeId,
+          mode: 'setup',
+          successUrl: window.location.href,
+          cancelUrl: window.location.href
+        }
       })
     });
     const data = await resp.json();
@@ -3903,9 +3907,11 @@ async function stripeStartSubscription(stripeId) {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
         action: 'stripeCreateSubscription',
-        stripeCustomerId: stripeId,
-        priceId: STRIPE_CORE_PRICE,
-        startDate: startDate
+        data: {
+          stripeCustomerId: stripeId,
+          priceId: STRIPE_CORE_PRICE,
+          startDate: startDate
+        }
       })
     });
     const data = await resp.json();
