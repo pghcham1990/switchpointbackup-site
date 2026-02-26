@@ -3368,6 +3368,7 @@ function fetchActivities() {
       renderGlobalActivity();
       renderDashboard();
       if(selectedProspectIdx >= 0) renderProsActivity(allProspects[selectedProspectIdx]);
+      if(selectedCustomerIdx >= 0) renderCustActivity(allCustomers[selectedCustomerIdx]);
       if(allProspects.length) renderProspectTable(getFilteredProspects());
     } else {
       console.log('Activities not yet available:', data);
