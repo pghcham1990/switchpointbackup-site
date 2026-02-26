@@ -284,6 +284,27 @@ textarea{resize:vertical;min-height:64px;}
 .cust-activity-col .detail-section:first-child .detail-section-header::after{background:var(--warning);}
 .cust-activity-col .detail-section:last-child .detail-section-header::after{background:var(--text-dim);}
 
+/* APPEND-ONLY NOTES LEDGER */
+.notes-ledger{max-height:300px;overflow-y:auto;padding:8px 0;}
+.notes-ledger:empty::before{content:'No notes yet.';display:block;text-align:center;padding:20px;color:var(--text-dim);font-size:12px;font-style:italic;}
+.note-entry{padding:10px 16px;border-bottom:1px solid rgba(18,28,45,0.04);transition:background 0.15s;}
+.note-entry:last-child{border-bottom:none;}
+.note-entry:hover{background:rgba(46,107,255,0.015);}
+.note-entry:hover .note-void-btn{opacity:0.4;}
+.note-meta{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.note-time{font-size:9px;font-family:var(--mono);color:var(--text-dim);opacity:0.7;}
+.note-author{font-size:8.5px;font-weight:700;color:var(--white);background:linear-gradient(135deg,var(--accent),#5b8def);padding:1px 7px;border-radius:4px;letter-spacing:0.3px;}
+.note-text{font-size:12.5px;line-height:1.55;color:var(--text);font-weight:450;}
+.note-entry.voided .note-text{text-decoration:line-through;opacity:0.4;color:var(--text-dim);}
+.note-entry.voided .note-meta::after{content:'VOIDED';font-size:8px;font-weight:700;color:var(--danger);background:var(--danger-bg);padding:1px 6px;border-radius:3px;letter-spacing:0.5px;}
+.note-void-btn{opacity:0;font-size:9px;color:var(--text-dim);cursor:pointer;padding:2px 8px;border-radius:4px;border:1px solid transparent;background:none;font-family:var(--sans);font-weight:600;transition:all 0.2s;margin-left:auto;flex-shrink:0;}
+.note-void-btn:hover{opacity:1 !important;color:var(--danger);background:var(--danger-bg);border-color:rgba(239,68,68,0.15);}
+.note-entry.voided .note-void-btn{display:none;}
+.notes-add-bar{padding:10px 14px;border-top:1px solid rgba(18,28,45,0.06);display:flex;gap:8px;align-items:flex-end;background:rgba(242,246,255,0.3);}
+.notes-input{flex:1;font-family:var(--sans);font-size:12px;color:var(--text);background:var(--white);border:1px solid rgba(18,28,45,0.08);border-radius:8px;padding:8px 10px;outline:none;resize:vertical;min-height:36px;max-height:120px;transition:border-color 0.2s,box-shadow 0.2s;line-height:1.4;}
+.notes-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,107,255,0.06);}
+.notes-add-btn{font-size:11px;padding:8px 14px;white-space:nowrap;flex-shrink:0;border-radius:8px;}
+
 /* NOTE MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(12,18,32,0.45);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
 .modal-overlay.visible{display:flex;animation:modalFadeIn 0.2s ease-out;}
@@ -1255,11 +1276,15 @@ body.layout-ultra .db-table{table-layout:auto;}
             <div class="activity-log" id="custActivityLog"><div class="activity-empty">No activities logged yet.</div></div>
           </div>
         </div>
-        <!-- NOTES (moved from left sections to right column) -->
+        <!-- NOTES (append-only ledger) -->
         <div class="detail-section" id="custNotesSection">
           <div class="detail-section-header" onclick="toggleSection(this)">📝 Notes</div>
-          <div class="detail-section-body" style="display:block;padding:14px 18px;">
-            <div id="custNotesContent" class="detail-field-value empty">Not set</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div id="custNotesLedger" class="notes-ledger"></div>
+            <div class="notes-add-bar">
+              <textarea id="custNoteInput" class="notes-input" placeholder="Add a note..." rows="2"></textarea>
+              <button class="btn btn-success notes-add-btn" onclick="addCustNote()">+ Add Note</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1365,6 +1390,19 @@ body.layout-ultra .db-table{table-layout:auto;}
           <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
           <div class="detail-section-body" style="display:block;padding:0;">
             <div class="activity-log" id="prosActivityLog"><div class="activity-empty">No activities logged yet. Click "+ Log Activity" to start.</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- NOTES LEDGER -->
+      <div style="margin-top:16px;">
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📝 Notes</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div id="prosNotesLedger" class="notes-ledger"></div>
+            <div class="notes-add-bar">
+              <textarea id="prosNoteInput" class="notes-input" placeholder="Add a note..." rows="2"></textarea>
+              <button class="btn btn-success notes-add-btn" onclick="addProsNote()">+ Add Note</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1684,6 +1722,19 @@ body.layout-ultra .db-table{table-layout:auto;}
           <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
           <div class="detail-section-body" style="display:block;padding:0;">
             <div class="activity-log" id="partnerActivityLog"><div class="activity-empty">No activities logged yet.</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- PARTNER NOTES LEDGER -->
+      <div style="margin-top:16px;">
+        <div class="detail-section">
+          <div class="detail-section-header" onclick="toggleSection(this)">📝 Notes</div>
+          <div class="detail-section-body" style="display:block;padding:0;">
+            <div id="partnerNotesLedger" class="notes-ledger"></div>
+            <div class="notes-add-bar">
+              <textarea id="partnerNoteInput" class="notes-input" placeholder="Add a note..." rows="2"></textarea>
+              <button class="btn btn-success notes-add-btn" onclick="addPartnerNote()">+ Add Note</button>
+            </div>
           </div>
         </div>
       </div>
@@ -3495,24 +3546,7 @@ function selectCustomer(idx) {
   document.getElementById('detailSaveBar').classList.remove('visible');
   renderCustDetailSections(c);
   renderCustActivity(c);
-  // Render notes in right column
-  const notesEl = document.getElementById('custNotesContent');
-  if(notesEl) {
-    const notesVal = c['Notes'] || '';
-    if(notesVal) {
-      notesEl.textContent = notesVal;
-      notesEl.className = 'detail-field-value';
-      notesEl.style.cssText = 'font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--text);';
-    } else {
-      notesEl.textContent = 'No notes yet';
-      notesEl.className = 'detail-field-value empty';
-      notesEl.style.cssText = '';
-    }
-    if(editMode) {
-      notesEl.classList.add('editable');
-      notesEl.onclick = function(){ startCustEdit(this, 'Notes'); };
-    }
-  }
+  renderCustNotesLedger(c);
   const card=document.getElementById('detailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
   // Apply saved section states
   applySectionStates(card);
@@ -3721,6 +3755,123 @@ function renderCustActivity(c) {
 }
 
 // =======================================================================
+// APPEND-ONLY NOTES LEDGER
+// =======================================================================
+// Notes format in Google Sheets cell:
+// [2026-02-25 7:30pm | scott] First note text
+// ---
+// [2026-02-25 8:00pm | scott] Second note
+// ---
+// [VOID][2026-02-25 8:05pm | scott] Mistyped note
+// ---
+// [2026-02-25 8:06pm | scott] Corrected note
+
+function parseNotesLedger(raw) {
+  if(!raw || !raw.trim()) return [];
+  // Split by --- separator (new format) or fall back to treating as single legacy entry
+  const parts = raw.split(/\n---\n/);
+  return parts.map(part => {
+    part = part.trim();
+    if(!part) return null;
+    const voided = part.startsWith('[VOID]');
+    if(voided) part = part.slice(6);
+    // Try to parse structured format: [timestamp | user] text
+    const match = part.match(/^\[([^\]]+)\]\s*([\s\S]*)$/);
+    if(match) {
+      const meta = match[1];
+      const text = match[2].trim();
+      const pipeIdx = meta.indexOf(' | ');
+      let timestamp = meta, author = '';
+      if(pipeIdx > -1) { timestamp = meta.slice(0, pipeIdx); author = meta.slice(pipeIdx + 3); }
+      return { timestamp, author, text, voided };
+    }
+    // Legacy format — unstructured text, no timestamp
+    return { timestamp: '', author: '', text: part, voided, legacy: true };
+  }).filter(Boolean);
+}
+
+function serializeNotesLedger(entries) {
+  return entries.map(e => {
+    const prefix = e.voided ? '[VOID]' : '';
+    if(e.legacy) return prefix + e.text;
+    return prefix + '[' + e.timestamp + (e.author ? ' | ' + e.author : '') + '] ' + e.text;
+  }).join('\n---\n');
+}
+
+function renderCustNotesLedger(c) {
+  const raw = c['Notes'] || '';
+  const entries = parseNotesLedger(raw);
+  const ledger = document.getElementById('custNotesLedger');
+  if(!entries.length) { ledger.innerHTML = ''; return; }
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  ledger.innerHTML = entries.map((e, i) => {
+    const voidClass = e.voided ? ' voided' : '';
+    const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
+    const authorDisplay = e.author ? '<span class="note-author">' + e.author + '</span>' : '';
+    const voidBtn = (!e.voided && isAdmin) ? '<button class="note-void-btn" onclick="voidCustNote(' + i + ')" title="Mark as mistype">✕ void</button>' : '';
+    return '<div class="note-entry' + voidClass + '">' +
+      '<div class="note-meta"><span class="note-time">' + timeDisplay + '</span>' + authorDisplay + voidBtn + '</div>' +
+      '<div class="note-text">' + (e.text || '—') + '</div></div>';
+  }).join('');
+}
+
+function addCustNote() {
+  const input = document.getElementById('custNoteInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const c = allCustomers[selectedCustomerIdx];
+  const user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'scott';
+  const now = new Date();
+  const ts = now.toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'}) + ' ' +
+    now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+  const newEntry = { timestamp: ts, author: user, text: text, voided: false };
+  const existing = parseNotesLedger(c['Notes'] || '');
+  existing.push(newEntry);
+  const serialized = serializeNotesLedger(existing);
+  // Save to sheet
+  const edits = { 'Notes': serialized };
+  c['Notes'] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateCustomer',customerId:c['Unique Customer ID'],updates:edits})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        // Log to activity timeline
+        const activity = { id:Date.now(), prospect:c['Customer Name']||c['Unique Customer ID'], type:'Note', text:'📝 Note added: '+text.slice(0,100)+(text.length>100?'...':''), timestamp:new Date().toISOString(), user:user, deleted:false };
+        activities.unshift(activity);
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(activity.id),prospect:activity.prospect,type:activity.type,text:activity.text,followUp:'',timestamp:activity.timestamp,user:activity.user,deleted:''}})}).catch(()=>{});
+        renderCustActivity(c);
+        showToast('✓ Note saved','success');
+      }
+    }).catch(()=>showToast('Note save failed','error'));
+  }
+  input.value = '';
+  renderCustNotesLedger(c);
+}
+
+function voidCustNote(idx) {
+  const c = allCustomers[selectedCustomerIdx];
+  const entries = parseNotesLedger(c['Notes'] || '');
+  if(!entries[idx] || entries[idx].voided) return;
+  entries[idx].voided = true;
+  const serialized = serializeNotesLedger(entries);
+  c['Notes'] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    const user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'scott';
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateCustomer',customerId:c['Unique Customer ID'],updates:{'Notes':serialized}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        const activity = { id:Date.now(), prospect:c['Customer Name']||c['Unique Customer ID'], type:'Note', text:'🚫 Note voided (mistype): "'+entries[idx].text.slice(0,80)+'"', timestamp:new Date().toISOString(), user:user, deleted:false };
+        activities.unshift(activity);
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(activity.id),prospect:activity.prospect,type:activity.type,text:activity.text,followUp:'',timestamp:activity.timestamp,user:activity.user,deleted:''}})}).catch(()=>{});
+        renderCustActivity(c);
+        showToast('Note voided','success');
+      }
+    }).catch(()=>showToast('Void failed','error'));
+  }
+  renderCustNotesLedger(c);
+}
+
+// =======================================================================
 // PROSPECT DETAIL CARD
 // =======================================================================
 function selectProspect(idx) {
@@ -3755,6 +3906,7 @@ function selectProspect(idx) {
   updateProsNav();
   renderProsDetailSections(p);
   renderProsActivity(p);
+  renderProsNotesLedger(p);
   renderJourneyTimeline(p);
   showProspectMap(p);
   const card=document.getElementById('prospectDetailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
@@ -3778,8 +3930,7 @@ function getFilteredProspects() {
 
 const PROS_DETAIL_FIELDS = [
   { title:'👤 Contact Info', fields:['Customer','Contact','Phone','Email','Address','URL'] },
-  { title:'📊 Pipeline', fields:['Stage','Source','Est. Plan','Date Added','Follow-Up'] },
-  { title:'📝 Notes', fields:['NOTES'] }
+  { title:'📊 Pipeline', fields:['Stage','Source','Est. Plan','Date Added','Follow-Up'] }
 ];
 
 function renderProsDetailSections(p) {
@@ -4371,6 +4522,79 @@ function renderProsActivity(p) {
   const items=activities.filter(a=>a.prospect===p['Customer']);
   if(!items.length){ log.innerHTML='<div class="activity-empty">No activities logged yet. Click "+ Log Activity" to start.</div>'; return; }
   log.innerHTML=items.map(a=>renderActivityItem(a, false)).join('');
+}
+
+// Prospect Notes Ledger (append-only)
+function renderProsNotesLedger(p) {
+  const raw = p['NOTES'] || p['Notes'] || '';
+  const entries = parseNotesLedger(raw);
+  const ledger = document.getElementById('prosNotesLedger');
+  if(!ledger) return;
+  if(!entries.length) { ledger.innerHTML = ''; return; }
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  ledger.innerHTML = entries.map((e, i) => {
+    const voidClass = e.voided ? ' voided' : '';
+    const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
+    const authorDisplay = e.author ? '<span class="note-author">' + e.author + '</span>' : '';
+    const voidBtn = (!e.voided && isAdmin) ? '<button class="note-void-btn" onclick="voidProsNote(' + i + ')" title="Mark as mistype">✕ void</button>' : '';
+    return '<div class="note-entry' + voidClass + '">' +
+      '<div class="note-meta"><span class="note-time">' + timeDisplay + '</span>' + authorDisplay + voidBtn + '</div>' +
+      '<div class="note-text">' + (e.text || '—') + '</div></div>';
+  }).join('');
+}
+
+function addProsNote() {
+  const input = document.getElementById('prosNoteInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const p = allProspects[selectedProspectIdx];
+  const user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'scott';
+  const now = new Date();
+  const ts = now.toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'}) + ' ' +
+    now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+  const noteField = p.hasOwnProperty('NOTES') ? 'NOTES' : 'Notes';
+  const existing = parseNotesLedger(p[noteField] || '');
+  existing.push({ timestamp: ts, author: user, text: text, voided: false });
+  const serialized = serializeNotesLedger(existing);
+  p[noteField] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',prospectName:p['Customer'],updates:{[noteField]:serialized}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        const activity = { id:Date.now(), prospect:p['Customer'], type:'Note', text:'📝 Note added: '+text.slice(0,100)+(text.length>100?'...':''), timestamp:new Date().toISOString(), user:user, deleted:false };
+        activities.unshift(activity);
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(activity.id),prospect:activity.prospect,type:activity.type,text:activity.text,followUp:'',timestamp:activity.timestamp,user:activity.user,deleted:''}})}).catch(()=>{});
+        renderProsActivity(p);
+        showToast('✓ Note saved','success');
+      }
+    }).catch(()=>showToast('Note save failed','error'));
+  }
+  input.value = '';
+  renderProsNotesLedger(p);
+}
+
+function voidProsNote(idx) {
+  const p = allProspects[selectedProspectIdx];
+  const noteField = p.hasOwnProperty('NOTES') ? 'NOTES' : 'Notes';
+  const entries = parseNotesLedger(p[noteField] || '');
+  if(!entries[idx] || entries[idx].voided) return;
+  entries[idx].voided = true;
+  const serialized = serializeNotesLedger(entries);
+  p[noteField] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    const user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'scott';
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',prospectName:p['Customer'],updates:{[noteField]:serialized}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        const activity = { id:Date.now(), prospect:p['Customer'], type:'Note', text:'🚫 Note voided (mistype): "'+entries[idx].text.slice(0,80)+'"', timestamp:new Date().toISOString(), user:user, deleted:false };
+        activities.unshift(activity);
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(activity.id),prospect:activity.prospect,type:activity.type,text:activity.text,followUp:'',timestamp:activity.timestamp,user:activity.user,deleted:''}})}).catch(()=>{});
+        renderProsActivity(p);
+        showToast('Note voided','success');
+      }
+    }).catch(()=>showToast('Void failed','error'));
+  }
+  renderProsNotesLedger(p);
 }
 
 function renderGlobalActivity() {
@@ -6213,7 +6437,7 @@ const PARTNER_DETAIL_FIELDS = [
   { title:'👤 Contact Info', fields:['Name','Company','Phone','Email','LinkedIn','Location'] },
   { title:'🤝 Relationship', fields:['Relationship Type','Specialty','Status','Linked Accounts'] },
   { title:'💰 Deal Tracking', fields:['Deals Closed Together','Total Revenue Shared','Last Payment ($)','Last Payment Date'] },
-  { title:'📝 Notes & Follow-Up', fields:['Notes','Last Contact Date','Next Follow-Up'] }
+  { title:'📅 Follow-Up', fields:['Last Contact Date','Next Follow-Up'] }
 ];
 
 function fetchPartners() {
@@ -6297,6 +6521,7 @@ function selectPartner(idx) {
   document.getElementById('partnerSaveBar').classList.remove('visible');
   renderPartnerDetailSections(p);
   renderPartnerActivity(p);
+  renderPartnerNotesLedger(p);
   const card = document.getElementById('partnerDetailCard');
   card.classList.add('visible');
   card.scrollIntoView({behavior:'smooth',block:'start'});
@@ -6467,6 +6692,64 @@ function renderPartnerActivity(p) {
     const userBadge = a.user ? '<span style="font-size:9px;font-weight:600;color:var(--text-dim);background:var(--surface-2);padding:1px 5px;border-radius:4px;margin-left:6px;">'+a.user+'</span>' : '';
     return `<div class="activity-item"><div class="activity-time">${ts}${userBadge}</div><div class="activity-text">${a.text}</div></div>`;
   }).join('');
+}
+
+// Partner Notes Ledger (append-only)
+function renderPartnerNotesLedger(p) {
+  const raw = p['Notes'] || '';
+  const entries = parseNotesLedger(raw);
+  const ledger = document.getElementById('partnerNotesLedger');
+  if(!ledger) return;
+  if(!entries.length) { ledger.innerHTML = ''; return; }
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  ledger.innerHTML = entries.map((e, i) => {
+    const voidClass = e.voided ? ' voided' : '';
+    const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
+    const authorDisplay = e.author ? '<span class="note-author">' + e.author + '</span>' : '';
+    const voidBtn = (!e.voided && isAdmin) ? '<button class="note-void-btn" onclick="voidPartnerNote(' + i + ')" title="Mark as mistype">✕ void</button>' : '';
+    return '<div class="note-entry' + voidClass + '">' +
+      '<div class="note-meta"><span class="note-time">' + timeDisplay + '</span>' + authorDisplay + voidBtn + '</div>' +
+      '<div class="note-text">' + (e.text || '—') + '</div></div>';
+  }).join('');
+}
+
+function addPartnerNote() {
+  const input = document.getElementById('partnerNoteInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const p = allPartners[selectedPartnerIdx];
+  const user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'scott';
+  const now = new Date();
+  const ts = now.toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'}) + ' ' +
+    now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+  const existing = parseNotesLedger(p['Notes'] || '');
+  existing.push({ timestamp: ts, author: user, text: text, voided: false });
+  const serialized = serializeNotesLedger(existing);
+  p['Notes'] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updatePartner',partnerName:p['Name'],updates:{'Notes':serialized}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) showToast('✓ Note saved','success');
+    }).catch(()=>showToast('Note save failed','error'));
+  }
+  input.value = '';
+  renderPartnerNotesLedger(p);
+}
+
+function voidPartnerNote(idx) {
+  const p = allPartners[selectedPartnerIdx];
+  const entries = parseNotesLedger(p['Notes'] || '');
+  if(!entries[idx] || entries[idx].voided) return;
+  entries[idx].voided = true;
+  const serialized = serializeNotesLedger(entries);
+  p['Notes'] = serialized;
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updatePartner',partnerName:p['Name'],updates:{'Notes':serialized}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) showToast('Note voided','success');
+    }).catch(()=>showToast('Void failed','error'));
+  }
+  renderPartnerNotesLedger(p);
 }
 
 // ADD PARTNER
