@@ -2629,6 +2629,42 @@ body.layout-ultra .db-table{table-layout:auto;}
       <button class="btn btn-secondary" onclick="closeStageModal()">Cancel</button>
       <button class="btn btn-success" onclick="saveStageChange()">Update Stage</button>
     </div>
+</div>
+</div>
+
+<!-- CONVERT TO CUSTOMER MODAL -->
+<div class="modal-overlay" id="convertModal">
+  <div class="modal-box" style="max-width:520px;">
+    <h3>🎉 Convert to Customer</h3>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">This prospect won — create a customer record automatically?</p>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;">
+        <div><span style="color:var(--text-dim);">Customer:</span> <strong id="cvt_name"></strong></div>
+        <div><span style="color:var(--text-dim);">Contact:</span> <span id="cvt_contact"></span></div>
+        <div><span style="color:var(--text-dim);">Email:</span> <span id="cvt_email"></span></div>
+        <div><span style="color:var(--text-dim);">Phone:</span> <span id="cvt_phone"></span></div>
+        <div><span style="color:var(--text-dim);">Address:</span> <span id="cvt_address"></span></div>
+        <div><span style="color:var(--text-dim);">Est. Plan:</span> <span id="cvt_plan"></span></div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Service Plan</label>
+      <select id="cvt_servicePlan">
+        <option value="Core Continuity">Core Continuity — $99/mo</option>
+        <option value="Extended Continuity">Extended Continuity — $149/mo</option>
+        <option value="Operational Continuity">Operational Continuity — $199/mo</option>
+        <option value="Resilience Continuity">Resilience Continuity — $249/mo</option>
+        <option value="Critical Continuity">Critical Continuity — $299/mo</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Service Start Date</label>
+      <input type="date" id="cvt_startDate">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeConvertModal()">Skip</button>
+      <button class="btn btn-success" id="cvt_submitBtn" onclick="executeConversion()">✅ Create Customer Record</button>
+    </div>
   </div>
 </div>
 
@@ -4786,6 +4822,137 @@ function saveStageChange() {
   renderProspectTable(getFilteredProspects());
   renderStageFilters();
   showToast('✓ Stage updated: '+newStage,'success');
+
+  // AUTO-CONVERT: When moved to Closed Won, offer to create customer record
+  if (newStage === 'Closed Won') {
+    setTimeout(() => { offerConvertToCustomer(p); }, 600);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PIPELINE → CUSTOMER CONVERSION (auto on Closed Won)
+   ═══════════════════════════════════════════════════════════════ */
+let convertProspect = null;
+
+function offerConvertToCustomer(p) {
+  convertProspect = p;
+  // Check if customer already exists
+  const existing = allCustomers.find(c => c['Customer Name'] && c['Customer Name'].toLowerCase() === (p['Customer']||'').toLowerCase());
+  if (existing) {
+    showToast('ℹ Customer record already exists for ' + p['Customer'], 'success');
+    return;
+  }
+  // Populate preview
+  document.getElementById('cvt_name').textContent = p['Customer'] || 'N/A';
+  document.getElementById('cvt_contact').textContent = p['Contact'] || 'N/A';
+  document.getElementById('cvt_email').textContent = p['Email'] || 'N/A';
+  document.getElementById('cvt_phone').textContent = p['Phone'] || 'N/A';
+  document.getElementById('cvt_address').textContent = p['Address'] || 'N/A';
+  document.getElementById('cvt_plan').textContent = p['Est. Plan'] || 'Core Continuity';
+  // Pre-select plan
+  const planMap = {'core':'Core Continuity','extended':'Extended Continuity','operational':'Operational Continuity','resilience':'Resilience Continuity','critical':'Critical Continuity'};
+  const estPlan = (p['Est. Plan']||'').toLowerCase();
+  let matchedPlan = 'Core Continuity';
+  Object.keys(planMap).forEach(k => { if(estPlan.includes(k)) matchedPlan = planMap[k]; });
+  document.getElementById('cvt_servicePlan').value = matchedPlan;
+  // Default start date = today
+  document.getElementById('cvt_startDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('convertModal').classList.add('visible');
+}
+
+function closeConvertModal() { document.getElementById('convertModal').classList.remove('visible'); convertProspect = null; }
+
+async function executeConversion() {
+  if (!convertProspect) return;
+  const p = convertProspect;
+  const plan = document.getElementById('cvt_servicePlan').value;
+  const startDate = document.getElementById('cvt_startDate').value;
+  const btn = document.getElementById('cvt_submitBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Creating...';
+
+  const mrcMap = {'Core Continuity':99,'Extended Continuity':149,'Operational Continuity':199,'Resilience Continuity':249,'Critical Continuity':299};
+  const capMap = {'Core Continuity':5,'Extended Continuity':10,'Operational Continuity':20,'Resilience Continuity':50,'Critical Continuity':100};
+  const custId = 'SP-' + String(allCustomers.length + 1).padStart(4, '0');
+
+  const customerData = {
+    'Unique Customer ID': custId,
+    'Customer Name': p['Customer'] || '',
+    'Location ID': '',
+    'Service Address': p['Address'] || '',
+    'Referring Partner ID': '',
+    'Primary Contact Name': p['Contact'] || '',
+    'Primary Contact Email': p['Email'] || '',
+    'Primary Contact Role': '',
+    'Service Start Date': startDate,
+    'Service End Date': '',
+    'Service Plan': plan,
+    'Billing Term': 'Monthly',
+    'Agreement Document ID': '',
+    'Agreement Signed Date': '',
+    'Support Level': 'Standard',
+    'Monthly MRC ($)': '$' + (mrcMap[plan] || 99),
+    'Activation Fee Paid': 'No',
+    'Activation Fee Amount ($)': '$399.99',
+    'Billing Status': 'Pending',
+    'Stripe Customer ID': 'PENDING – Stripe setup',
+    'Last Invoice Date': '',
+    'Next Billing Date': startDate,
+    'Primary ISP': '',
+    'Primary ISP Type': '',
+    'Edge Device Present': 'No',
+    'Edge Device Brand': 'Peplink',
+    'Peplink Device ID': '',
+    'LTE SIM ID': '',
+    'Data Cap (GB)': capMap[plan] || 5,
+    'LTE Cap Enforcement': 'Notify',
+    'Setup Complete': 'No'
+  };
+
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'addCustomer', data: customerData })
+    });
+    const result = await resp.json();
+    if (result.success) {
+      // Add to local array
+      allCustomers.push(customerData);
+      renderCustomerTable(allCustomers);
+      document.getElementById('dbCount').textContent = allCustomers.length;
+
+      // Log activity
+      const activity = {
+        id: Date.now(),
+        prospect: p['Customer'],
+        type: 'Stage Change',
+        text: '🎉 Converted to Customer — ' + custId + ' · ' + plan + ' · $' + (mrcMap[plan]||99) + '/mo',
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(activity);
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+          action:'addActivity',
+          data: { id:String(activity.id), prospect:activity.prospect, type:activity.type, text:activity.text, followUp:'', timestamp:activity.timestamp, user:activity.user, deleted:'' }
+        })}).catch(()=>{});
+      }
+
+      showToast('🎉 Customer record created: ' + custId + ' — ' + plan, 'success');
+      closeConvertModal();
+
+      // Switch to Database tab and select new customer
+      setTimeout(() => {
+        switchTab('database', document.querySelector('[onclick*="database"]'));
+        setTimeout(() => { selectCustomer(allCustomers.length - 1); }, 500);
+      }, 800);
+    } else {
+      throw new Error(result.error || 'Failed to create customer');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '✅ Create Customer Record';
+  }
 }
 
 function renderProsActivity(p) {
