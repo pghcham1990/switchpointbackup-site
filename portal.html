@@ -1262,7 +1262,8 @@ body.layout-ultra .db-table{table-layout:auto;}
   <div class="detail-card" id="detailCard">
     <div class="detail-card-header">
       <h3><span id="detailName"></span><span class="cust-id" id="detailId"></span></h3>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="detail-close" id="stripeBillingBtn" onclick="openStripeBilling()" style="color:var(--success);border-color:rgba(31,191,138,0.3);">💳 Billing</button>
         <button class="detail-close" id="editToggleBtn" onclick="toggleEditMode()" style="color:var(--accent);border-color:rgba(59,130,246,0.3);">✎ Edit</button>
         <button class="detail-close" onclick="closeDetail()">✕ Close</button>
       </div>
@@ -1270,6 +1271,15 @@ body.layout-ultra .db-table{table-layout:auto;}
     <div class="detail-body"><div class="detail-sections" id="detailSections"></div>
       <!-- CUSTOMER ACTIVITY TIMELINE (v11.2) -->
       <div class="cust-activity-col">
+        <!-- STRIPE BILLING PANEL (v8) -->
+        <div class="detail-section" id="stripeBillingPanel" style="display:none;">
+          <div class="detail-section-header" onclick="toggleSection(this)">💳 Stripe Billing</div>
+          <div class="detail-section-body" style="display:block;padding:14px 18px;">
+            <div id="stripeBillingContent">
+              <div class="activity-empty">Loading billing info...</div>
+            </div>
+          </div>
+        </div>
         <div class="detail-section">
           <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
           <div class="detail-section-body" style="display:block;padding:0;">
@@ -3547,6 +3557,9 @@ function selectCustomer(idx) {
   renderCustDetailSections(c);
   renderCustActivity(c);
   renderCustNotesLedger(c);
+  // Reset billing panel
+  document.getElementById('stripeBillingPanel').style.display='none';
+  document.getElementById('stripeBillingContent').innerHTML='<div class="activity-empty">Loading billing info...</div>';
   const card=document.getElementById('detailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
   // Apply saved section states
   applySectionStates(card);
@@ -3645,7 +3658,265 @@ function saveEdits() {
 
 function closeDetail(){ document.getElementById('detailCard').classList.remove('visible'); selectedCustomerIdx=-1; renderCustomerTable(allCustomers); }
 
-// Render activity timeline for a customer
+/* ═══════════════════════════════════════════════════════════════
+   STRIPE BILLING INTEGRATION (v8)
+   ═══════════════════════════════════════════════════════════════ */
+const STRIPE_CORE_PRICE = 'price_1T201XRaJyKmhjrHxpPdJoCF'; // Core Continuity $99/mo
+
+function openStripeBilling() {
+  const panel = document.getElementById('stripeBillingPanel');
+  panel.style.display = 'block';
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const stripeId = c['Stripe Customer ID'] || '';
+  const hasStripe = stripeId && !stripeId.includes('PENDING') && stripeId.startsWith('cus_');
+  if (hasStripe) {
+    loadStripeCustomer(stripeId, c);
+  } else {
+    renderStripeSetup(c);
+  }
+}
+
+function renderStripeSetup(c) {
+  const el = document.getElementById('stripeBillingContent');
+  el.innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:28px;margin-bottom:8px;">💳</div>
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">No Stripe account linked yet</div>
+      <button class="btn btn-primary" onclick="stripeCreateCustomer()" id="stripeCreateBtn" style="font-size:12px;padding:10px 24px;">
+        ⚡ Create Stripe Customer
+      </button>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:10px;">
+        Creates customer in Stripe using:<br>
+        <strong>${c['Customer Name'] || 'N/A'}</strong> · ${c['Primary Contact Email'] || 'No email on file'}
+      </div>
+    </div>`;
+}
+
+async function stripeCreateCustomer() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const btn = document.getElementById('stripeCreateBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Creating...';
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'stripeCreateCustomer',
+        customerId: c['Unique Customer ID'],
+        name: c['Customer Name'] || '',
+        email: c['Primary Contact Email'] || ''
+      })
+    });
+    const data = await resp.json();
+    if (data.success && data.stripeCustomerId) {
+      // Update local data
+      allCustomers[selectedCustomerIdx]['Stripe Customer ID'] = data.stripeCustomerId;
+      renderCustDetailSections(allCustomers[selectedCustomerIdx]);
+      showToast('✅ Stripe customer created: ' + data.stripeCustomerId);
+      loadStripeCustomer(data.stripeCustomerId, allCustomers[selectedCustomerIdx]);
+    } else {
+      throw new Error(data.error || 'Failed to create Stripe customer');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '⚡ Create Stripe Customer';
+  }
+}
+
+async function loadStripeCustomer(stripeId, c) {
+  const el = document.getElementById('stripeBillingContent');
+  el.innerHTML = '<div class="activity-empty"><div class="spinner" style="width:20px;height:20px;"></div><br>Loading Stripe data...</div>';
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'stripeGetCustomer', stripeCustomerId: stripeId })
+    });
+    const data = await resp.json();
+    if (!data.success) throw new Error(data.error || 'Failed to load');
+    renderStripeDashboard(data, c, stripeId);
+  } catch(e) {
+    el.innerHTML = `<div class="activity-empty" style="color:var(--danger);">❌ ${e.message}</div>`;
+  }
+}
+
+function renderStripeDashboard(data, c, stripeId) {
+  const el = document.getElementById('stripeBillingContent');
+  const cust = data.customer || {};
+  const pm = data.paymentMethods || [];
+  const subs = data.subscriptions || [];
+  const hasPM = pm.length > 0;
+  const activeSub = subs.find(s => s.status === 'active' || s.status === 'trialing');
+
+  // Status badge
+  let statusBadge = '';
+  if (activeSub) {
+    const statusColor = activeSub.status === 'active' ? 'var(--success)' : '#f59e0b';
+    const statusLabel = activeSub.status === 'trialing' ? '⏳ Starts ' + new Date(activeSub.trial_end * 1000).toLocaleDateString() : '✅ Active';
+    statusBadge = `<span style="background:${statusColor}22;color:${statusColor};padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">${statusLabel}</span>`;
+  } else {
+    statusBadge = '<span style="background:var(--danger)22;color:var(--danger);padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">⚠ No Subscription</span>';
+  }
+
+  // Payment method display
+  let pmDisplay = '';
+  if (hasPM) {
+    const card = pm[0].card || {};
+    pmDisplay = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
+      <span style="font-size:18px;">${cardBrandIcon(card.brand)}</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;">•••• ${card.last4 || '????'}</div>
+        <div style="font-size:10px;color:var(--text-dim);">Exp ${card.exp_month}/${card.exp_year}</div>
+      </div>
+    </div>`;
+  } else {
+    pmDisplay = `<button class="btn btn-secondary" onclick="stripeAddPayment('${stripeId}')" style="font-size:11px;padding:8px 16px;width:100%;">
+      🔗 Add Payment Method
+    </button>`;
+  }
+
+  // Subscription display
+  let subDisplay = '';
+  if (activeSub) {
+    const planName = activeSub.plan?.nickname || activeSub.plan?.product || 'Core Continuity';
+    const amount = activeSub.plan?.amount ? '$' + (activeSub.plan.amount / 100).toFixed(2) : '$99.00';
+    const interval = activeSub.plan?.interval || 'month';
+    const currentEnd = new Date(activeSub.current_period_end * 1000).toLocaleDateString();
+    subDisplay = `<div style="padding:10px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:600;">${planName}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${amount}/${interval} · Next billing: ${currentEnd}</div>
+    </div>`;
+  } else if (hasPM) {
+    subDisplay = `<div style="display:flex;gap:8px;align-items:end;">
+      <div style="flex:1;">
+        <label style="font-size:10px;color:var(--text-dim);display:block;margin-bottom:4px;">Billing Start Date</label>
+        <input type="date" id="stripeBillingStart" value="2026-03-01" style="width:100%;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">
+      </div>
+      <button class="btn btn-primary" onclick="stripeStartSubscription('${stripeId}')" style="font-size:11px;padding:8px 16px;white-space:nowrap;">
+        🚀 Start Subscription
+      </button>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:10px;color:var(--text-dim);font-family:monospace;">${stripeId}</div>
+      ${statusBadge}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Payment Method</div>
+        ${pmDisplay}
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Subscription</div>
+        ${subDisplay || '<div style="font-size:11px;color:var(--text-dim);padding:8px 0;">Add a payment method first</div>'}
+      </div>
+    </div>`;
+}
+
+function cardBrandIcon(brand) {
+  const icons = { visa:'💙', mastercard:'🔴', amex:'💚', discover:'🟠' };
+  return icons[(brand||'').toLowerCase()] || '💳';
+}
+
+async function stripeAddPayment(stripeId) {
+  const c = allCustomers[selectedCustomerIdx];
+  const btn = event.target;
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></div> Generating link...';
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'stripeCreateCheckout',
+        stripeCustomerId: stripeId,
+        mode: 'setup',
+        successUrl: window.location.href,
+        cancelUrl: window.location.href
+      })
+    });
+    const data = await resp.json();
+    if (data.success && data.checkoutUrl) {
+      window.open(data.checkoutUrl, '_blank');
+      showToast('🔗 Stripe Checkout opened — enter card details there');
+      // After a delay, refresh the billing panel
+      setTimeout(() => { loadStripeCustomer(stripeId, c); }, 5000);
+      // Show a manual refresh button
+      btn.disabled = false;
+      btn.innerHTML = '↻ Refresh After Adding Card';
+      btn.onclick = () => loadStripeCustomer(stripeId, c);
+    } else {
+      throw new Error(data.error || 'Failed to create checkout');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '🔗 Add Payment Method';
+  }
+}
+
+async function stripeStartSubscription(stripeId) {
+  const startDate = document.getElementById('stripeBillingStart')?.value;
+  if (!startDate) { showToast('⚠ Pick a billing start date', true); return; }
+
+  if (!confirm(`Start $99/mo Core Continuity subscription?\n\nFirst charge: ${startDate}\nCustomer: ${allCustomers[selectedCustomerIdx]?.['Customer Name']}\n\nThis will create a live subscription in Stripe.`)) return;
+
+  const btn = event.target;
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></div> Creating...';
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'stripeCreateSubscription',
+        stripeCustomerId: stripeId,
+        priceId: STRIPE_CORE_PRICE,
+        startDate: startDate
+      })
+    });
+    const data = await resp.json();
+    if (data.success && data.subscriptionId) {
+      showToast('🎉 Subscription created! ID: ' + data.subscriptionId);
+      // Update local customer data
+      const c = allCustomers[selectedCustomerIdx];
+      c['Billing Status'] = 'Active';
+      c['Service Start Date'] = startDate;
+      c['Next Billing Date'] = startDate;
+      // Update sheet
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify({
+          action: 'updateCustomer',
+          customerId: c['Unique Customer ID'],
+          updates: { 'Billing Status': 'Active', 'Service Start Date': startDate, 'Next Billing Date': startDate }
+        })
+      }).catch(()=>{});
+      // Log activity
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify({
+          action: 'addActivity',
+          data: {
+            id: String(Date.now()),
+            prospect: c['Customer Name'],
+            type: 'Note',
+            text: '💳 Stripe subscription activated — $99/mo Core Continuity starting ' + startDate + ' (Sub: ' + data.subscriptionId + ')',
+            followUp: '',
+            timestamp: new Date().toISOString(),
+            user: sessionStorage.getItem('sp_user'),
+            deleted: ''
+          }
+        })
+      }).catch(()=>{});
+      // Refresh billing panel
+      renderCustDetailSections(c);
+      loadStripeCustomer(stripeId, c);
+    } else {
+      throw new Error(data.error || 'Failed to create subscription');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '🚀 Start Subscription';
+  }
+}
 function renderCustActivity(c) {
   const name = c['Customer Name'] || '';
   const custActs = activities.filter(a => !a.deleted && a.prospect && a.prospect.toLowerCase() === name.toLowerCase());
