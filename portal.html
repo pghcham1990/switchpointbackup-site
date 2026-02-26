@@ -3752,6 +3752,28 @@ async function stripeCreateCustomer() {
       allCustomers[selectedCustomerIdx]['Stripe Customer ID'] = data.stripeCustomerId;
       renderCustDetailSections(allCustomers[selectedCustomerIdx]);
       showToast('✅ Stripe customer created: ' + data.stripeCustomerId);
+      // Log activity
+      const createActivity = {
+        id: Date.now(),
+        prospect: c['Customer Name'],
+        type: 'Note',
+        text: '💳 Stripe customer created — ' + data.stripeCustomerId,
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(createActivity);
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST', headers: {'Content-Type':'text/plain'},
+          body: JSON.stringify({
+            action: 'addActivity',
+            data: { id: String(createActivity.id), prospect: createActivity.prospect, type: createActivity.type, text: createActivity.text, followUp: '', timestamp: createActivity.timestamp, user: createActivity.user, deleted: '' }
+          })
+        }).catch(()=>{});
+      }
+      renderCustActivity(allCustomers[selectedCustomerIdx]);
+      renderGlobalActivity();
       loadStripeCustomer(data.stripeCustomerId, allCustomers[selectedCustomerIdx]);
     } else {
       throw new Error(data.error || 'Failed to create Stripe customer');
@@ -3790,7 +3812,7 @@ function renderStripeDashboard(data, c, stripeId) {
   let statusBadge = '';
   if (activeSub) {
     const statusColor = activeSub.status === 'active' ? 'var(--success)' : '#f59e0b';
-    const statusLabel = activeSub.status === 'trialing' ? '⏳ Starts ' + new Date(activeSub.trial_end * 1000).toLocaleDateString() : '✅ Active';
+    const statusLabel = activeSub.status === 'trialing' && activeSub.trialEnd ? '⏳ Starts ' + new Date(activeSub.trialEnd * 1000).toLocaleDateString() : activeSub.status === 'trialing' ? '⏳ Scheduled' : '✅ Active';
     statusBadge = `<span style="background:${statusColor}22;color:${statusColor};padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">${statusLabel}</span>`;
   } else {
     statusBadge = '<span style="background:var(--danger)22;color:var(--danger);padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">⚠ No Subscription</span>';
@@ -3828,24 +3850,34 @@ function renderStripeDashboard(data, c, stripeId) {
   // Subscription display
   let subDisplay = '';
   if (activeSub) {
-    const planName = activeSub.plan?.nickname || activeSub.plan?.product || 'Core Continuity';
-    const amount = activeSub.plan?.amount ? '$' + (activeSub.plan.amount / 100).toFixed(2) : '$99.00';
-    const interval = activeSub.plan?.interval || 'month';
-    const currentEnd = new Date(activeSub.current_period_end * 1000).toLocaleDateString();
+    const planName = c['Service Plan'] || 'Core Continuity';
+    const amount = activeSub.amount ? '$' + (activeSub.amount / 100).toFixed(2) : (c['Monthly MRC ($)'] || '$99.00');
+    const interval = activeSub.interval || 'month';
+    const currentEnd = activeSub.currentPeriodEnd ? new Date(activeSub.currentPeriodEnd * 1000).toLocaleDateString() : 'Pending';
     subDisplay = `<div style="padding:10px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
       <div style="font-size:12px;font-weight:600;">${planName}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${amount}/${interval} · Next billing: ${currentEnd}</div>
     </div>`;
   } else if (hasPM) {
-    subDisplay = `<div style="display:flex;gap:8px;align-items:end;">
-      <div style="flex:1;">
-        <label style="font-size:10px;color:var(--text-dim);display:block;margin-bottom:4px;">Billing Start Date</label>
-        <input type="date" id="stripeBillingStart" value="2026-03-01" style="width:100%;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">
+    const activationPaid = c['Activation Fee Paid'] === 'Yes';
+    const activationAmt = c['Activation Fee Amount ($)'] || '$399.99';
+    subDisplay = `<div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:end;">
+        <div style="flex:1;">
+          <label style="font-size:10px;color:var(--text-dim);display:block;margin-bottom:4px;">Billing Start Date</label>
+          <input type="date" id="stripeBillingStart" value="2026-03-01" style="width:100%;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;">
+        </div>
+        <button class="btn btn-primary" onclick="stripeStartSubscription('${stripeId}')" style="font-size:11px;padding:8px 16px;white-space:nowrap;">
+          🚀 Start Subscription
+        </button>
       </div>
-      <button class="btn btn-primary" onclick="stripeStartSubscription('${stripeId}')" style="font-size:11px;padding:8px 16px;white-space:nowrap;">
-        🚀 Start Subscription
-      </button>
+      ${activationPaid ? '' : `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);cursor:pointer;padding:6px 0;">
+        <input type="checkbox" id="stripeIncludeActivation" checked style="accent-color:var(--accent);">
+        Include activation fee on first invoice: 
+        <input type="text" id="stripeActivationAmt" value="${activationAmt.replace('$','')}" style="width:65px;padding:3px 6px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;text-align:right;" onclick="event.stopPropagation()">
+      </label>`}
     </div>`;
+  }
   }
 
   el.innerHTML = `
@@ -3902,22 +3934,27 @@ async function stripeSendPaymentLink(stripeId) {
     if (data.success) {
       showToast('📧 Payment setup email sent to ' + data.sentTo);
       // Log activity
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST', headers: {'Content-Type':'text/plain'},
-        body: JSON.stringify({
-          action: 'addActivity',
-          data: {
-            id: String(Date.now()),
-            prospect: c['Customer Name'],
-            type: 'Email',
-            text: '📧 Payment setup email sent to ' + email + ' (Stripe Checkout link)',
-            followUp: '',
-            timestamp: new Date().toISOString(),
-            user: sessionStorage.getItem('sp_user'),
-            deleted: ''
-          }
-        })
-      }).catch(()=>{});
+      const emailActivity = {
+        id: Date.now(),
+        prospect: c['Customer Name'],
+        type: 'Email',
+        text: '📧 Payment setup email sent to ' + email + ' (Stripe Checkout link)',
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(emailActivity);
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST', headers: {'Content-Type':'text/plain'},
+          body: JSON.stringify({
+            action: 'addActivity',
+            data: { id: String(emailActivity.id), prospect: emailActivity.prospect, type: emailActivity.type, text: emailActivity.text, followUp: '', timestamp: emailActivity.timestamp, user: emailActivity.user, deleted: '' }
+          })
+        }).catch(()=>{});
+      }
+      renderCustActivity(c);
+      renderGlobalActivity();
       // Update button to show sent state + refresh
       btn.disabled = false;
       btn.innerHTML = '✅ Email Sent · <span onclick="loadStripeCustomer(\'' + stripeId + '\', allCustomers[selectedCustomerIdx])" style="text-decoration:underline;cursor:pointer;">↻ Refresh</span>';
@@ -3937,7 +3974,16 @@ async function stripeStartSubscription(stripeId) {
   const startDate = document.getElementById('stripeBillingStart')?.value;
   if (!startDate) { showToast('⚠ Pick a billing start date', true); return; }
 
-  if (!confirm(`Start $99/mo Core Continuity subscription?\n\nFirst charge: ${startDate}\nCustomer: ${allCustomers[selectedCustomerIdx]?.['Customer Name']}\n\nThis will create a live subscription in Stripe.`)) return;
+  const includeActivation = document.getElementById('stripeIncludeActivation')?.checked || false;
+  const activationAmt = includeActivation ? parseFloat(document.getElementById('stripeActivationAmt')?.value || '399.99') : 0;
+  const c = allCustomers[selectedCustomerIdx];
+  const plan = c['Service Plan'] || 'Core Continuity';
+  const mrc = c['Monthly MRC ($)'] || '$99';
+
+  let confirmMsg = `Start ${mrc}/mo ${plan} subscription?\n\nFirst charge: ${startDate}\nCustomer: ${c?.['Customer Name']}`;
+  if (includeActivation) confirmMsg += `\n\nFirst invoice: $${activationAmt.toFixed(2)} activation + ${mrc} monthly`;
+  confirmMsg += '\n\nThis will create a live subscription in Stripe.';
+  if (!confirm(confirmMsg)) return;
 
   const btn = event.target;
   btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></div> Creating...';
@@ -3949,7 +3995,8 @@ async function stripeStartSubscription(stripeId) {
         data: {
           stripeCustomerId: stripeId,
           priceId: STRIPE_CORE_PRICE,
-          startDate: startDate
+          startDate: startDate,
+          activationFee: includeActivation ? activationAmt : 0
         }
       })
     });
@@ -3971,24 +4018,29 @@ async function stripeStartSubscription(stripeId) {
         })
       }).catch(()=>{});
       // Log activity
-      fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST', headers: {'Content-Type':'text/plain'},
-        body: JSON.stringify({
-          action: 'addActivity',
-          data: {
-            id: String(Date.now()),
-            prospect: c['Customer Name'],
-            type: 'Note',
-            text: '💳 Stripe subscription activated — $99/mo Core Continuity starting ' + startDate + ' (Sub: ' + data.subscriptionId + ')',
-            followUp: '',
-            timestamp: new Date().toISOString(),
-            user: sessionStorage.getItem('sp_user'),
-            deleted: ''
-          }
-        })
-      }).catch(()=>{});
-      // Refresh billing panel
+      const subActivity = {
+        id: Date.now(),
+        prospect: c['Customer Name'],
+        type: 'Note',
+        text: '💳 Stripe subscription activated — ' + mrc + '/mo ' + plan + ' starting ' + startDate + (includeActivation ? ' + $' + activationAmt.toFixed(2) + ' activation fee' : '') + ' (Sub: ' + data.subscriptionId + ')',
+        timestamp: new Date().toISOString(),
+        user: sessionStorage.getItem('sp_user') || 'scott',
+        deleted: false
+      };
+      activities.unshift(subActivity);
+      if(CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST', headers: {'Content-Type':'text/plain'},
+          body: JSON.stringify({
+            action: 'addActivity',
+            data: { id: String(subActivity.id), prospect: subActivity.prospect, type: subActivity.type, text: subActivity.text, followUp: '', timestamp: subActivity.timestamp, user: subActivity.user, deleted: '' }
+          })
+        }).catch(()=>{});
+      }
+      // Refresh billing panel and timeline
       renderCustDetailSections(c);
+      renderCustActivity(c);
+      renderGlobalActivity();
       loadStripeCustomer(stripeId, c);
     } else {
       throw new Error(data.error || 'Failed to create subscription');
