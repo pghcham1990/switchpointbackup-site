@@ -53,7 +53,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .dot-live{background:var(--success);box-shadow:0 0 6px var(--success);}
 .dot-offline{background:var(--text-dim);}
 .header-badge{font-family:var(--mono);font-size:10px;color:var(--text-muted);background:rgba(255,255,255,0.88);padding:4px 10px;border-radius:20px;border:1px solid var(--border);display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm);}
-.tab-nav{display:flex;gap:2px;padding:14px 28px 0;flex-wrap:wrap;max-width:1200px;margin:0 auto;}
+.tab-nav{display:flex;gap:2px;padding:10px 28px 8px;flex-wrap:wrap;max-width:1200px;margin:0 auto;position:sticky;top:52px;z-index:99;background:rgba(247,249,252,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .tab-btn{font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 18px;border:1px solid transparent;border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;}
 .tab-btn:hover{color:var(--text);background:rgba(255,255,255,0.6);}
 .tab-btn.active{color:var(--text);background:var(--surface);border-color:var(--border);box-shadow:var(--shadow-sm);}
@@ -403,6 +403,19 @@ body.layout-ultra .panel{max-width:none;}
 body.layout-ultra #tab-dashboard .panel{max-width:1400px;margin:0 auto;}
 body.layout-ultra .dash-grid{grid-template-columns:repeat(4,1fr);}
 body.layout-ultra .analytics-grid{grid-template-columns:1fr 1fr 1fr 1fr;}
+/* Dashboard tile layout for ultrawide — zero scroll */
+body.layout-ultra .dash-tile-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;gap:12px;min-height:0;}
+body.layout-ultra .dash-tile-left{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden;}
+body.layout-ultra .dash-tile-right{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden;}
+body.layout-ultra .dash-tile-left .dash-section,
+body.layout-ultra .dash-tile-right .dash-section{flex:1;min-height:0;overflow-y:auto;}
+body.layout-ultra .dash-row2{display:contents;} /* dissolve dash-row2 into tile grid */
+body.layout-ultra #analyticsSection{grid-column:1 / -1;}
+body.layout-ultra #tab-dashboard .form-header{padding:12px 0 4px;} /* tighter header */
+body.layout-ultra .streak-banner{padding:10px 20px;} /* slimmer streak */
+body.layout-ultra #doorKnockerWidget{margin-bottom:0;}
+body.layout-ultra #doorKnockerWidget .dk-box{padding:12px 20px;} /* slimmer doors */
+body.layout-ultra #shameStreakWidget{margin-bottom:0;padding:6px 16px;}
 /* Activity: cap width so entries don't float in space */
 body.layout-ultra #tab-activity .panel{max-width:1100px;margin:0 auto;}
 /* Customer DB table: let it breathe but not absurdly */
@@ -411,14 +424,19 @@ body.layout-ultra #tab-database .panel{max-width:1500px;margin:0 auto;}
 body.layout-ultra #tab-pipeline .panel{max-width:none;}
 body.layout-ultra .kanban-col{min-width:220px;max-height:calc(100vh - 280px);}
 body.layout-ultra .db-table-wrap{max-height:500px;}
-/* Prospect detail card: cap so fields don't scatter */
-body.layout-ultra .detail-card{max-width:1200px;}
+/* Prospect detail card: side-by-side on ultrawide */
+body.layout-ultra .detail-card{max-width:none;}
 body.layout-ultra .detail-section-body{grid-template-columns:1fr 1fr 1fr;}
+body.layout-ultra .detail-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;padding:16px;}
+body.layout-ultra .detail-right-col{display:flex;flex-direction:column;gap:12px;}
+body.layout-ultra .detail-right-col > div{margin-top:0 !important;}
 /* Onboarding form: slightly wider for 3-col goodness */
 body.layout-ultra #tab-onboard .panel{max-width:1400px;margin:0 auto;}
 body.layout-ultra .form-grid{grid-template-columns:1fr 1fr 1fr;}
 /* Expenses: full width — tables rule here */
 body.layout-ultra #tab-expenses .panel{max-width:none;}
+body.layout-ultra #tab-expenses .expense-form-section{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+body.layout-ultra #tab-expenses .expense-summary-cards{grid-column:1 / -1;}
 /* Partners: moderate width */
 body.layout-ultra #tab-partners .panel{max-width:1400px;margin:0 auto;}
 body.layout-ultra .partner-cards{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
@@ -749,7 +767,7 @@ body.layout-ultra .db-table{table-layout:auto;}
   .quick-log-fab{bottom:20px;left:20px;width:48px;height:48px;font-size:20px;}
   .speed-dial-fab{bottom:78px;left:20px;width:40px;height:40px;font-size:14px;}
   .speed-dial-menu{left:20px;bottom:128px;right:20px;min-width:auto;}
-  .header{padding:10px 14px;}.tab-nav{padding:10px 14px 0;}.main{padding:0 14px 32px;}.panel{padding:16px;}
+  .header{padding:10px 14px;}.tab-nav{padding:8px 14px 6px;}.main{padding:0 14px 32px;}.panel{padding:16px;}
   .form-grid,.form-grid.three-col,.form-grid.four-col{grid-template-columns:1fr;}
   .detail-section-body{grid-template-columns:1fr 1fr;}.db-search-bar{flex-wrap:wrap;}.login-card{margin:20px;padding:32px 24px;}
   .prospect-actions-bar{padding:12px 16px;}
@@ -1094,9 +1112,9 @@ body.layout-ultra .db-table{table-layout:auto;}
     </div>
   </div>
 
-  <!-- ROW 2: HOT PROSPECTS + MILESTONES -->
-  <div class="dash-row2">
-    <div class="dash-section">
+  <!-- ROW 2: HOT PROSPECTS + MILESTONES — tile layout on ultra -->
+  <div class="dash-row2" id="dashRow2">
+    <div class="dash-section dash-tile-hottest">
       <h3>🔥 Hottest Prospects</h3>
       <div style="overflow-x:auto;">
         <table class="dash-mini-table">
@@ -1111,7 +1129,7 @@ body.layout-ultra .db-table{table-layout:auto;}
         <div id="dashResurfaceList"></div>
       </div>
     </div>
-    <div class="dash-section">
+    <div class="dash-section dash-tile-achievements">
       <h3>🏆 Milestones & Achievements</h3>
       <div class="milestone-list" id="dashMilestones">
         <span class="milestone">Loading...</span>
@@ -1260,8 +1278,9 @@ body.layout-ultra .db-table{table-layout:auto;}
     </div>
     <div class="detail-body">
       <div class="detail-sections" id="prosDetailSections"></div>
+      <div class="detail-right-col">
       <!-- MAPS EMBED -->
-      <div id="prosMapContainer" style="margin-top:16px;display:none;">
+      <div id="prosMapContainer" style="display:none;">
         <div class="detail-section">
           <div class="detail-section-header" onclick="toggleSection(this)">📍 Location</div>
           <div class="detail-section-body" style="display:block;padding:0;">
@@ -1287,6 +1306,7 @@ body.layout-ultra .db-table{table-layout:auto;}
           </div>
         </div>
       </div>
+      </div><!-- /detail-right-col -->
     </div>
     <div class="detail-save-bar" id="prosSaveBar">
       <span class="unsaved" id="prosUnsavedCount">0 unsaved changes</span>
