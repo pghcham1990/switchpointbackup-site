@@ -3803,7 +3803,7 @@ function renderCustNotesLedger(c) {
   const entries = parseNotesLedger(raw);
   const ledger = document.getElementById('custNotesLedger');
   if(!entries.length) { ledger.innerHTML = ''; return; }
-  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin').toLowerCase() === 'admin';
   ledger.innerHTML = entries.map((e, i) => {
     const voidClass = e.voided ? ' voided' : '';
     const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
@@ -4531,7 +4531,7 @@ function renderProsNotesLedger(p) {
   const ledger = document.getElementById('prosNotesLedger');
   if(!ledger) return;
   if(!entries.length) { ledger.innerHTML = ''; return; }
-  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin').toLowerCase() === 'admin';
   ledger.innerHTML = entries.map((e, i) => {
     const voidClass = e.voided ? ' voided' : '';
     const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
@@ -6701,7 +6701,7 @@ function renderPartnerNotesLedger(p) {
   const ledger = document.getElementById('partnerNotesLedger');
   if(!ledger) return;
   if(!entries.length) { ledger.innerHTML = ''; return; }
-  const isAdmin = (sessionStorage.getItem('sp_role')||'admin') === 'admin';
+  const isAdmin = (sessionStorage.getItem('sp_role')||'admin').toLowerCase() === 'admin';
   ledger.innerHTML = entries.map((e, i) => {
     const voidClass = e.voided ? ' voided' : '';
     const timeDisplay = e.timestamp || (e.legacy ? '<span style="font-style:italic;opacity:0.5;">legacy entry</span>' : '');
