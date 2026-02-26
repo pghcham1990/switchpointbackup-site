@@ -3698,7 +3698,14 @@ function closeDetail(){ document.getElementById('detailCard').classList.remove('
 /* ═══════════════════════════════════════════════════════════════
    STRIPE BILLING INTEGRATION (v8)
    ═══════════════════════════════════════════════════════════════ */
-const STRIPE_CORE_PRICE = 'price_1T201XRaJyKmhjrHxpPdJoCF'; // Core Continuity $99/mo
+const STRIPE_PRICES = {
+  'Core Continuity': 'price_1T201XRaJyKmhjrHxpPdJoCF',           // $99/mo
+  'Extended Continuity': 'price_1T203MRaJyKmhjrHlsud4DnE',       // $149/mo
+  'Operational Continuity': 'price_1T203hRaJyKmhjrHHTHd0418',    // $199/mo
+  'Resilience Continuity': 'price_1T2045RaJyKmhjrHL4tKkVo1',     // $249/mo
+  'Critical Continuity': 'price_1T204PRaJyKmhjrHTEDeZDND'         // $299/mo
+};
+const STRIPE_CORE_PRICE = STRIPE_PRICES['Core Continuity']; // fallback default
 
 function openStripeBilling() {
   const panel = document.getElementById('stripeBillingPanel');
@@ -3994,7 +4001,7 @@ async function stripeStartSubscription(stripeId) {
         action: 'stripeCreateSubscription',
         data: {
           stripeCustomerId: stripeId,
-          priceId: STRIPE_CORE_PRICE,
+          priceId: STRIPE_PRICES[c['Service Plan']] || STRIPE_CORE_PRICE,
           startDate: startDate,
           activationFee: includeActivation ? activationAmt : 0
         }
