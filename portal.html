@@ -391,28 +391,47 @@ textarea{resize:vertical;min-height:64px;}
 body.wide-mode .tab-nav{max-width:none;}
 body.wide-mode .main{max-width:none;}
 body.wide-mode .panel{max-width:none;}
-/* Ultrawide layout — auto-engaged at 1500px+ viewport */
-body.layout-wide .tab-nav{max-width:1600px;}
-body.layout-wide .main{max-width:1600px;}
-body.layout-wide .panel{max-width:1600px;}
-body.layout-wide .dash-grid{grid-template-columns:repeat(4,1fr);}
-body.layout-wide .dash-row2{grid-template-columns:1fr 1fr;}
-body.layout-wide .analytics-grid{grid-template-columns:1fr 1fr;}
-body.layout-wide .db-table-wrap{max-height:420px;}
-body.layout-wide .kanban-col{min-width:220px;max-height:700px;}
-/* Ultra layout — full bleed */
+/* Ultrawide Hybrid Layout — smart per-section widths */
+body.layout-wide .tab-nav{max-width:1500px;}
+body.layout-wide .main{max-width:1500px;}
+body.layout-wide .panel{max-width:1500px;}
 body.layout-ultra .tab-nav{max-width:none;}
 body.layout-ultra .main{max-width:none;}
+/* HYBRID: panels that benefit from width go full, content panels stay capped */
 body.layout-ultra .panel{max-width:none;}
+/* Dashboard: cap the content panel, let data cards use grid naturally */
+body.layout-ultra #tab-dashboard .panel{max-width:1400px;margin:0 auto;}
 body.layout-ultra .dash-grid{grid-template-columns:repeat(4,1fr);}
-body.layout-ultra .dash-row2{grid-template-columns:1fr 1fr;}
 body.layout-ultra .analytics-grid{grid-template-columns:1fr 1fr 1fr 1fr;}
+/* Activity: cap width so entries don't float in space */
+body.layout-ultra #tab-activity .panel{max-width:1100px;margin:0 auto;}
+/* Customer DB table: let it breathe but not absurdly */
+body.layout-ultra #tab-database .panel{max-width:1500px;margin:0 auto;}
+/* Pipeline: FULL WIDTH — kanban and tables love space */
+body.layout-ultra #tab-pipeline .panel{max-width:none;}
+body.layout-ultra .kanban-col{min-width:220px;max-height:calc(100vh - 280px);}
 body.layout-ultra .db-table-wrap{max-height:500px;}
-body.layout-ultra .kanban-col{min-width:240px;max-height:calc(100vh - 280px);}
-body.layout-ultra .partner-cards{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));}
-body.layout-ultra .detail-section-body{grid-template-columns:1fr 1fr 1fr 1fr;}
-body.layout-ultra .db-table{table-layout:auto;}
+/* Prospect detail card: cap so fields don't scatter */
+body.layout-ultra .detail-card{max-width:1200px;}
+body.layout-ultra .detail-section-body{grid-template-columns:1fr 1fr 1fr;}
+/* Onboarding form: slightly wider for 3-col goodness */
+body.layout-ultra #tab-onboard .panel{max-width:1400px;margin:0 auto;}
 body.layout-ultra .form-grid{grid-template-columns:1fr 1fr 1fr;}
+/* Expenses: full width — tables rule here */
+body.layout-ultra #tab-expenses .panel{max-width:none;}
+/* Partners: moderate width */
+body.layout-ultra #tab-partners .panel{max-width:1400px;margin:0 auto;}
+body.layout-ultra .partner-cards{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
+/* Wall: moderate */
+body.layout-ultra #tab-wall .panel{max-width:1400px;margin:0 auto;}
+/* Battleboard: text content — keep readable */
+body.layout-ultra #tab-battleboard .panel{max-width:1100px;margin:0 auto;}
+/* Demo: presentation — centered and clean */
+body.layout-ultra #tab-demo .panel{max-width:1100px;margin:0 auto;}
+/* Prospect Add: form — moderate */
+body.layout-ultra #tab-prospect .panel{max-width:1200px;margin:0 auto;}
+/* Pipeline table: auto layout on wide screens */
+body.layout-ultra .db-table{table-layout:auto;}
 .kanban-toggle{display:flex;gap:2px;background:var(--surface-3);border-radius:8px;padding:2px;}
 .kanban-toggle-btn{font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--text-dim);transition:all 0.15s;font-family:var(--sans);}
 .kanban-toggle-btn.active{background:var(--white);color:var(--text);box-shadow:var(--shadow-sm);}
