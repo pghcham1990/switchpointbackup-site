@@ -418,8 +418,17 @@ body.layout-ultra #doorKnockerWidget .dk-box{padding:12px 20px;} /* slimmer door
 body.layout-ultra #shameStreakWidget{margin-bottom:0;padding:6px 16px;}
 /* Activity: cap width so entries don't float in space */
 body.layout-ultra #tab-activity .panel{max-width:1100px;margin:0 auto;}
-/* Customer DB table: let it breathe but not absurdly */
-body.layout-ultra #tab-database .panel{max-width:1500px;margin:0 auto;}
+/* Customer DB: FULL WIDTH on ultra — table and detail card love space */
+body.layout-ultra #tab-database .panel{max-width:none;}
+/* Customer detail card: 3-zone layout — sections grid LEFT+CENTER, activity RIGHT */
+body.layout-ultra #tab-database .detail-body{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;padding:16px;}
+body.layout-ultra #tab-database .detail-sections{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+body.layout-ultra #tab-database .detail-sections .detail-section{break-inside:avoid;}
+/* Activity timeline: sticky sidebar on ultra */
+body.layout-ultra #tab-database .detail-body > div:last-child{position:sticky;top:120px;max-height:calc(100vh - 160px);overflow-y:auto;}
+/* Customer table: explicit column widths */
+body.layout-ultra #tab-database .db-table{table-layout:auto;}
+body.layout-ultra #tab-database .db-table-wrap{max-height:none;}
 /* Pipeline: FULL WIDTH — kanban and tables love space */
 body.layout-ultra #tab-pipeline .panel{max-width:none;}
 body.layout-ultra .kanban-col{min-width:220px;max-height:calc(100vh - 280px);}
