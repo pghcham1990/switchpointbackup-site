@@ -262,6 +262,28 @@ textarea{resize:vertical;min-height:64px;}
 .activity-empty{text-align:center;padding:40px 24px;color:var(--text-dim);font-size:13px;background:linear-gradient(135deg,rgba(242,246,255,0.3),rgba(255,255,255,0.5));border-radius:12px;}
 .activity-date-group{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;padding:14px 14px 6px;position:sticky;top:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);z-index:1;border-bottom:none;}
 
+/* Rich activity timeline styles */
+.act-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1;}
+.act-time-inline{font-size:9px;color:var(--text-dim);font-family:var(--mono);opacity:0.7;}
+.act-user-badge{font-size:8.5px;font-weight:700;color:var(--white);background:linear-gradient(135deg,var(--accent),#5b8def);padding:1px 7px;border-radius:4px;letter-spacing:0.3px;text-transform:lowercase;}
+.act-count-badge{font-size:9px;font-weight:700;color:var(--accent);background:rgba(46,107,255,0.08);padding:2px 7px;border-radius:6px;margin-left:4px;letter-spacing:0;}
+/* Customer edit field changes */
+.cust-edit-change{display:block;font-size:12px;line-height:1.5;padding:1px 0;}
+.ce-field{font-weight:600;color:var(--text);font-size:11px;}
+.ce-old{color:var(--danger);text-decoration:line-through;opacity:0.6;font-size:11px;}
+.ce-new{color:var(--success);font-weight:600;font-size:11px;}
+.ce-empty{color:var(--text-dim);font-style:italic;font-size:10px;opacity:0.5;}
+/* Support ticket priority badges */
+.act-priority{font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;}
+.act-priority-Normal{background:var(--accent-glow);color:var(--accent);}
+.act-priority-High{background:var(--warning-bg);color:var(--warning);}
+.act-priority-Urgent,.act-priority-Critical{background:var(--danger-bg);color:var(--danger);}
+.act-priority-Low{background:rgba(100,116,139,0.08);color:var(--text-dim);}
+/* Notes section in right column */
+.cust-activity-col .detail-section + .detail-section{margin-top:12px;}
+.cust-activity-col .detail-section:first-child .detail-section-header::after{background:var(--warning);}
+.cust-activity-col .detail-section:last-child .detail-section-header::after{background:var(--text-dim);}
+
 /* NOTE MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(12,18,32,0.45);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
 .modal-overlay.visible{display:flex;animation:modalFadeIn 0.2s ease-out;}
@@ -1231,6 +1253,13 @@ body.layout-ultra .db-table{table-layout:auto;}
           <div class="detail-section-header" onclick="toggleSection(this)">📋 Activity Timeline</div>
           <div class="detail-section-body" style="display:block;padding:0;">
             <div class="activity-log" id="custActivityLog"><div class="activity-empty">No activities logged yet.</div></div>
+          </div>
+        </div>
+        <!-- NOTES (moved from left sections to right column) -->
+        <div class="detail-section" id="custNotesSection">
+          <div class="detail-section-header" onclick="toggleSection(this)">📝 Notes</div>
+          <div class="detail-section-body" style="display:block;padding:14px 18px;">
+            <div id="custNotesContent" class="detail-field-value empty">Not set</div>
           </div>
         </div>
       </div>
@@ -3453,8 +3482,7 @@ const DETAIL_SECTIONS = [
   { title:'🔔 Alerts & Reporting', fields:['Customer Alert Email(s)','Internal Alert Email(s)','Customer Receives Reports'] },
   { title:'⚙️ Installation & Setup', fields:['Install Date','Installed By','Setup Complete'] },
   { title:'🛡️ Hardware Warranty & Returns', fields:['Hardware Must Be Returned','Hardware Returned','Hardware Warranty Status','Replacement Hardware Issued','Hardware Return Needed'] },
-  { title:'📡 LTE Usage & Operations', fields:['Total LTE Usage (Lifetime)','Current Cycle LTE Usage (GB)','Last Failover Event','LTE Add-On Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Cap Risk Status','Billing Risk Status'] },
-  { title:'📝 Notes', fields:['Notes'] }
+  { title:'📡 LTE Usage & Operations', fields:['Total LTE Usage (Lifetime)','Current Cycle LTE Usage (GB)','Last Failover Event','LTE Add-On Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Cap Risk Status','Billing Risk Status'] }
 ];
 
 function selectCustomer(idx) {
@@ -3467,6 +3495,24 @@ function selectCustomer(idx) {
   document.getElementById('detailSaveBar').classList.remove('visible');
   renderCustDetailSections(c);
   renderCustActivity(c);
+  // Render notes in right column
+  const notesEl = document.getElementById('custNotesContent');
+  if(notesEl) {
+    const notesVal = c['Notes'] || '';
+    if(notesVal) {
+      notesEl.textContent = notesVal;
+      notesEl.className = 'detail-field-value';
+      notesEl.style.cssText = 'font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--text);';
+    } else {
+      notesEl.textContent = 'No notes yet';
+      notesEl.className = 'detail-field-value empty';
+      notesEl.style.cssText = '';
+    }
+    if(editMode) {
+      notesEl.classList.add('editable');
+      notesEl.onclick = function(){ startCustEdit(this, 'Notes'); };
+    }
+  }
   const card=document.getElementById('detailCard'); card.classList.add('visible'); card.scrollIntoView({behavior:'smooth',block:'start'});
   // Apply saved section states
   applySectionStates(card);
@@ -3570,13 +3616,108 @@ function renderCustActivity(c) {
   const name = c['Customer Name'] || '';
   const custActs = activities.filter(a => !a.deleted && a.prospect && a.prospect.toLowerCase() === name.toLowerCase());
   const log = document.getElementById('custActivityLog');
-  if(!custActs.length) { log.innerHTML = '<div class="activity-empty">No activities logged yet. Edits, calls, and notes will appear here.</div>'; return; }
-  log.innerHTML = custActs.slice(0,30).map(a => {
+  if(!custActs.length) {
+    log.innerHTML = '<div class="activity-empty">No activities logged yet.<br><span style="font-size:11px;opacity:0.6;margin-top:4px;display:inline-block;">Edits, support tickets, and notes appear here automatically.</span></div>';
+    return;
+  }
+
+  // Activity type classification
+  const callTypes = ['Call','Follow-Up Call','Voicemail'];
+  const emailTypes = ['Email','Email Received','Text'];
+  const meetTypes = ['Drop-In','In-Person Meeting','Demo'];
+  const virtualTypes = ['Virtual Meeting'];
+  const CAL_CFG = typeof CAL_EVENT_CONFIG !== 'undefined' ? CAL_EVENT_CONFIG : {};
+
+  function classifyAct(a) {
+    const txt = (a.text||'').toLowerCase();
+    const typ = a.type || '';
+    // Support tickets
+    if(txt.includes('support request')) return { icon:'🎫', cls:'act-stage', label:'SUPPORT TICKET' };
+    // Customer edits (field changes)
+    if(txt.includes('customer edit:')) return { icon:'✏️', cls:'act-note', label:'FIELD EDIT' };
+    // Standard types
+    if(callTypes.includes(typ)) return { icon:(CAL_CFG[typ]||{}).emoji||'📞', cls:'act-call', label:typ.toUpperCase() };
+    if(emailTypes.includes(typ)) return { icon:(CAL_CFG[typ]||{}).emoji||'✉️', cls:'act-email', label:typ.toUpperCase() };
+    if(meetTypes.includes(typ)) return { icon:(CAL_CFG[typ]||{}).emoji||'🤝', cls:'act-dropin', label:typ.toUpperCase() };
+    if(virtualTypes.includes(typ)) return { icon:(CAL_CFG[typ]||{}).emoji||'💻', cls:'act-stage', label:typ.toUpperCase() };
+    if(typ==='Proposal Sent') return { icon:'📄', cls:'act-email', label:'PROPOSAL' };
+    if(typ==='Stage Change') return { icon:'📊', cls:'act-stage', label:'STAGE CHANGE' };
+    return { icon:(CAL_CFG[typ]||{}).emoji||'📝', cls:'act-note', label:(typ||'NOTE').toUpperCase() };
+  }
+
+  // Parse "Customer Edit:" text into structured change display
+  function parseEditText(text) {
+    const editPrefix = 'Customer Edit: ';
+    if(!text.startsWith(editPrefix)) return text;
+    const changes = text.slice(editPrefix.length).split(' | ');
+    return changes.map(ch => {
+      const arrow = ch.indexOf(' → ');
+      if(arrow === -1) return '<span class="cust-edit-change">' + ch + '</span>';
+      const fieldAndOld = ch.slice(0, arrow);
+      const newVal = ch.slice(arrow + 3);
+      const colonIdx = fieldAndOld.indexOf(': ');
+      if(colonIdx === -1) return '<span class="cust-edit-change">' + ch + '</span>';
+      const field = fieldAndOld.slice(0, colonIdx);
+      const oldVal = fieldAndOld.slice(colonIdx + 2);
+      const oldDisplay = (!oldVal || oldVal === '(blank)' || oldVal === '(empty)') ? '<span class="ce-empty">empty</span>' : '<span class="ce-old">' + oldVal + '</span>';
+      const newDisplay = '<span class="ce-new">' + newVal + '</span>';
+      return '<div class="cust-edit-change"><span class="ce-field">' + field + '</span> ' + oldDisplay + ' → ' + newDisplay + '</div>';
+    }).join('');
+  }
+
+  // Group by date
+  const now = new Date(); now.setHours(0,0,0,0);
+  const yesterday = new Date(now); yesterday.setDate(yesterday.getDate()-1);
+  let lastDateKey = '';
+
+  const html = custActs.slice(0,50).map(a => {
     const d = new Date(a.timestamp);
-    const ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    const userBadge = a.user ? '<span style="font-size:9px;font-weight:600;color:var(--text-dim);background:var(--surface-2);padding:1px 5px;border-radius:4px;margin-left:6px;">'+a.user+'</span>' : '';
-    return `<div class="activity-item"><div class="activity-time">${ts}${userBadge}</div><div class="activity-text">${a.text}</div></div>`;
+    const dKey = d.toDateString();
+    const dNorm = new Date(d); dNorm.setHours(0,0,0,0);
+    let dateHeader = '';
+    if(dKey !== lastDateKey) {
+      lastDateKey = dKey;
+      let label;
+      if(dNorm.getTime() === now.getTime()) label = 'Today';
+      else if(dNorm.getTime() === yesterday.getTime()) label = 'Yesterday';
+      else label = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      dateHeader = '<div class="activity-date-group">' + label + '</div>';
+    }
+
+    const timeStr = d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase();
+    const info = classifyAct(a);
+    const userBadge = a.user ? '<span class="act-user-badge">' + a.user + '</span>' : '';
+
+    // Smart text rendering
+    let displayText;
+    const txt = a.text || '—';
+    if(txt.startsWith('Customer Edit:')) {
+      displayText = parseEditText(txt);
+    } else if(txt.toLowerCase().includes('support request')) {
+      // Parse support ticket: "Support Request [Priority] Category: Subject — Body"
+      displayText = '<span class="act-text-rich">' + txt.replace(/Support Request \[(\w+)\]/, 'Support Request <span class="act-priority act-priority-$1">$1</span>') + '</span>';
+    } else {
+      displayText = txt;
+    }
+
+    return dateHeader + `<div class="activity-item">
+      <div class="activity-icon ${info.cls}">${info.icon}</div>
+      <div class="activity-body">
+        <div class="act-meta-row">
+          <span class="act-type">${info.label}</span>
+          <span class="act-time-inline">${timeStr}</span>
+          ${userBadge}
+        </div>
+        <div class="act-text">${displayText}</div>
+      </div>
+    </div>`;
   }).join('');
+
+  log.innerHTML = html;
+  // Show count
+  const countEl = log.closest('.detail-section')?.querySelector('.detail-section-header');
+  if(countEl && !countEl.dataset.origText) countEl.dataset.origText = countEl.textContent;
+  if(countEl) countEl.innerHTML = (countEl.dataset.origText || '📋 Activity Timeline') + ' <span class="act-count-badge">' + custActs.length + '</span>';
 }
 
 // =======================================================================
