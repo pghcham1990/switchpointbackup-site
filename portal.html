@@ -3800,16 +3800,28 @@ function renderStripeDashboard(data, c, stripeId) {
   let pmDisplay = '';
   if (hasPM) {
     const card = pm[0].card || {};
-    pmDisplay = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
-      <span style="font-size:18px;">${cardBrandIcon(card.brand)}</span>
-      <div>
-        <div style="font-size:12px;font-weight:600;">•••• ${card.last4 || '????'}</div>
-        <div style="font-size:10px;color:var(--text-dim);">Exp ${card.exp_month}/${card.exp_year}</div>
-      </div>
-    </div>`;
+    const bank = pm[0].us_bank_account || {};
+    if (card.last4) {
+      pmDisplay = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:18px;">${cardBrandIcon(card.brand)}</span>
+        <div>
+          <div style="font-size:12px;font-weight:600;">•••• ${card.last4}</div>
+          <div style="font-size:10px;color:var(--text-dim);">Exp ${card.exp_month}/${card.exp_year}</div>
+        </div>
+      </div>`;
+    } else if (bank.last4) {
+      pmDisplay = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:18px;">🏦</span>
+        <div>
+          <div style="font-size:12px;font-weight:600;">${bank.bank_name || 'Bank'} •••• ${bank.last4}</div>
+          <div style="font-size:10px;color:var(--text-dim);">ACH · ${bank.account_type || 'checking'}</div>
+        </div>
+      </div>`;
+    }
   } else {
-    pmDisplay = `<button class="btn btn-secondary" onclick="stripeAddPayment('${stripeId}')" style="font-size:11px;padding:8px 16px;width:100%;">
-      🔗 Add Payment Method
+    const custEmail = c['Primary Contact Email'] || '';
+    pmDisplay = `<button class="btn btn-secondary" onclick="stripeSendPaymentLink('${stripeId}')" id="pmSendBtn" style="font-size:11px;padding:8px 16px;width:100%;">
+      📧 Send Payment Setup Email${custEmail ? ' → ' + custEmail : ''}
     </button>`;
   }
 
@@ -3858,39 +3870,66 @@ function cardBrandIcon(brand) {
   return icons[(brand||'').toLowerCase()] || '💳';
 }
 
-async function stripeAddPayment(stripeId) {
+async function stripeSendPaymentLink(stripeId) {
   const c = allCustomers[selectedCustomerIdx];
-  const btn = event.target;
-  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></div> Generating link...';
+  const email = c['Primary Contact Email'] || '';
+  if (!email) { showToast('⚠ No email on file — add Primary Contact Email first', true); return; }
+
+  const btn = document.getElementById('pmSendBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></div> Sending email...';
+
+  const plan = c['Service Plan'] || 'Core Continuity';
+  const mrc = c['Monthly MRC ($)'] || '$99';
+
   try {
     const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
-        action: 'stripeCreateCheckout',
+        action: 'stripeSendPaymentEmail',
         data: {
           stripeCustomerId: stripeId,
           mode: 'setup',
-          successUrl: window.location.href,
-          cancelUrl: window.location.href
+          successUrl: 'https://switchpointbackup.com/portal.html?stripe=success',
+          cancelUrl: 'https://switchpointbackup.com/portal.html?stripe=cancel',
+          email: email,
+          customerName: c['Customer Name'] || '',
+          plan: plan,
+          mrc: mrc
         }
       })
     });
     const data = await resp.json();
-    if (data.success && data.checkoutUrl) {
-      window.open(data.checkoutUrl, '_blank');
-      showToast('🔗 Stripe Checkout opened — enter card details there');
-      // After a delay, refresh the billing panel
-      setTimeout(() => { loadStripeCustomer(stripeId, c); }, 5000);
-      // Show a manual refresh button
+    if (data.success) {
+      showToast('📧 Payment setup email sent to ' + data.sentTo);
+      // Log activity
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify({
+          action: 'addActivity',
+          data: {
+            id: String(Date.now()),
+            prospect: c['Customer Name'],
+            type: 'Email',
+            text: '📧 Payment setup email sent to ' + email + ' (Stripe Checkout link)',
+            followUp: '',
+            timestamp: new Date().toISOString(),
+            user: sessionStorage.getItem('sp_user'),
+            deleted: ''
+          }
+        })
+      }).catch(()=>{});
+      // Update button to show sent state + refresh
       btn.disabled = false;
-      btn.innerHTML = '↻ Refresh After Adding Card';
-      btn.onclick = () => loadStripeCustomer(stripeId, c);
+      btn.innerHTML = '✅ Email Sent · <span onclick="loadStripeCustomer(\'' + stripeId + '\', allCustomers[selectedCustomerIdx])" style="text-decoration:underline;cursor:pointer;">↻ Refresh</span>';
+      btn.style.background = 'rgba(31,191,138,0.1)';
+      btn.style.borderColor = 'var(--success)';
+      btn.style.color = 'var(--success)';
     } else {
-      throw new Error(data.error || 'Failed to create checkout');
+      throw new Error(data.error || 'Failed to send email');
     }
   } catch(e) {
     showToast('❌ ' + e.message, true);
-    btn.disabled = false; btn.textContent = '🔗 Add Payment Method';
+    btn.disabled = false; btn.innerHTML = '📧 Send Payment Setup Email → ' + email;
   }
 }
 
