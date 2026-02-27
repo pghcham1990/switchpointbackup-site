@@ -1114,6 +1114,7 @@ body.layout-ultra .db-table{table-layout:auto;}
   <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
   <button class="tab-btn" onclick="switchTab('battleboard',this)">Battleboard<span class="tab-indicator" style="background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);">⚔️</span></button>
   <button class="tab-btn" onclick="switchTab('expenses',this);renderExpenses();">Expenses<span class="tab-indicator" style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">💰</span></button>
+  <button class="tab-btn" onclick="switchTab('routeplanner',this);initRoutePlanner();">Route Planner<span class="tab-indicator" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);">🗺️</span></button>
 </div>
 
 <main class="main">
@@ -1264,6 +1265,9 @@ body.layout-ultra .db-table{table-layout:auto;}
       <h3><span id="detailName"></span><span class="cust-id" id="detailId"></span></h3>
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="detail-close" id="stripeBillingBtn" onclick="openStripeBilling()" style="color:var(--success);border-color:rgba(31,191,138,0.3);">💳 Billing</button>
+        <button class="detail-close" id="dataExtBtn" onclick="openDataExtension()" style="color:#f59e0b;border-color:rgba(245,158,11,0.3);">📡 Data Add-On</button>
+        <button class="detail-close" id="custLoginBtn" onclick="createCustomerLoginFromDetail()" style="color:#8b5cf6;border-color:rgba(139,92,246,0.3);">🔐 Create Login</button>
+        <button class="detail-close" id="resetCycleBtn" onclick="resetBillingCycleFromDetail()" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">🔄 Reset Cycle</button>
         <button class="detail-close" id="editToggleBtn" onclick="toggleEditMode()" style="color:var(--accent);border-color:rgba(59,130,246,0.3);">✎ Edit</button>
         <button class="detail-close" onclick="closeDetail()">✕ Close</button>
       </div>
@@ -2525,6 +2529,51 @@ body.layout-ultra .db-table{table-layout:auto;}
 </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     ROUTE PLANNER TAB (v9)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="tab-routeplanner" class="tab-content">
+<div class="panel">
+  <div class="form-header">
+    <h2>🗺️ Smart Route Planner</h2>
+    <p>Enter a zip code to generate an optimized driving route through nearby prospects, scored by close probability.</p>
+  </div>
+  <div style="display:flex;gap:12px;align-items:end;margin-bottom:24px;flex-wrap:wrap;">
+    <div class="form-group" style="margin:0;flex:0 0 160px;">
+      <label>Starting Zip Code</label>
+      <input type="text" id="routeZip" placeholder="e.g. 15001" maxlength="10" style="font-size:16px;font-weight:700;">
+    </div>
+    <div class="form-group" style="margin:0;flex:0 0 120px;">
+      <label>Radius (miles)</label>
+      <select id="routeRadius">
+        <option value="5">5 miles</option>
+        <option value="10">10 miles</option>
+        <option value="15" selected>15 miles</option>
+        <option value="25">25 miles</option>
+        <option value="40">40 miles</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;flex:0 0 120px;">
+      <label>Max Stops</label>
+      <select id="routeMaxStops">
+        <option value="4">4 stops</option>
+        <option value="6">6 stops</option>
+        <option value="8" selected>8 stops</option>
+        <option value="10">10 stops</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="routeGenBtn" onclick="generateRoute()" style="height:40px;white-space:nowrap;">🗺️ Generate Route</button>
+  </div>
+  <div id="routeResults" style="min-height:200px;">
+    <div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+      <div style="font-size:36px;margin-bottom:12px;">🗺️</div>
+      <p style="font-size:14px;">Enter a zip code and hit Generate to build your optimized sales route.</p>
+      <p style="font-size:12px;color:var(--text-dim);">Prospects are scored by stage, follow-up urgency, municipality status, and proximity.</p>
+    </div>
+  </div>
+</div>
+</div>
+
 </main>
 </div><!-- /adminApp -->
 
@@ -2550,7 +2599,7 @@ body.layout-ultra .db-table{table-layout:auto;}
   <main style="padding:24px;max-width:960px;margin:0 auto;">
     <div style="margin-bottom:24px;">
       <h2 style="font-size:22px;font-weight:700;margin:0;">My SwitchPoint</h2>
-      <p style="color:var(--text-muted);font-size:13px;margin:4px 0 0;">Your service status, billing, and support — all in one place.</p>
+      <p style="color:var(--text-muted);font-size:13px;margin:4px 0 0;">Your service status, billing, data usage, and support — all in one place.</p>
     </div>
     <div id="customerPortalContent">
       <div style="text-align:center;padding:40px;"><div class="spinner"></div><br>Loading...</div>
@@ -2880,7 +2929,7 @@ function logout() {
 function applyRolePermissions() {
   const role = currentUserRole;
   const allTabs = document.querySelectorAll('.tab-btn');
-  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall','battleboard','expenses'];
+  const adminTabs = ['dashboard','database','pipeline','activity','onboard','prospect','partners','demo','wall','battleboard','expenses','routeplanner'];
   const employeeTabs = ['dashboard','pipeline','activity','prospect','demo','wall','battleboard'];
   const partnerTabs = ['partner-home'];
   const customerTabs = ['customer-home'];
@@ -3066,6 +3115,9 @@ function loadCustomerPortalData() {
     const lteUsage = myCust['Current Cycle LTE Usage (GB)']||'0';
     const dataCap = myCust['Data Cap (GB)']||'—';
     const billingStatus = myCust['Billing Status']||'—';
+    const dataExtensions = myCust['Data Extensions This Cycle']||'None';
+    const lifetimeExtensions = myCust['Total Data Extensions (Lifetime)']||'0';
+    const authorizedContacts = myCust['Authorized Contacts']||'';
     const myActs = (acts||[]).map(a=>({
       text: a['Notes']||a['text']||'',
       prospect: a['Prospect']||a['prospect']||'',
@@ -3114,6 +3166,22 @@ function loadCustomerPortalData() {
             <div class="detail-field"><div class="detail-field-label">Primary Contact</div><div class="detail-field-value">${myCust['Primary Contact Name']||'—'}</div></div>
             <div class="detail-field"><div class="detail-field-label">Contact Email</div><div class="detail-field-value">${myCust['Primary Contact Email']||'—'}</div></div>
             <div class="detail-field"><div class="detail-field-label">Support Level</div><div class="detail-field-value">${myCust['Support Level']||'Standard'}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Data Extensions (This Cycle)</div><div class="detail-field-value">${dataExtensions}</div></div>
+            <div class="detail-field"><div class="detail-field-label">Lifetime Data Extensions</div><div class="detail-field-value">${lifetimeExtensions} GB</div></div>
+          </div>
+        </div>
+
+        <div class="detail-section" style="margin-bottom:16px;">
+          <div class="detail-section-header" onclick="toggleSection(this)">👤 Manage Account</div>
+          <div class="detail-section-body" style="display:block;">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Update your contact information or add authorized contacts who can interact with SwitchPoint on your behalf.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="form-group"><label>Contact Name</label><input id="cust_selfName" value="${myCust['Primary Contact Name']||''}"></div>
+              <div class="form-group"><label>Contact Email</label><input id="cust_selfEmail" value="${myCust['Primary Contact Email']||''}"></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Alert Emails (comma-separated)</label><input id="cust_selfAlerts" value="${myCust['Customer Alert Email(s)']||''}" placeholder="email1@example.com, email2@example.com"></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Authorized Contacts (Name — Email — Phone, one per line)</label><textarea id="cust_selfContacts" placeholder="Jane Smith — jane@company.com — 555-1234" style="min-height:60px;">${authorizedContacts}</textarea></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveCustomerSelfUpdate()" style="margin-top:10px;">💾 Save Changes</button>
           </div>
         </div>
 
@@ -3211,6 +3279,41 @@ function submitSupportTicket() {
     // Reload the customer portal to show the new ticket
     setTimeout(()=>loadCustomerPortalData(), 1500);
   }).catch(e=>showToast('Submit failed','error'));
+}
+
+async function saveCustomerSelfUpdate() {
+  const name = document.getElementById('cust_selfName').value.trim();
+  const email = document.getElementById('cust_selfEmail').value.trim();
+  const alerts = document.getElementById('cust_selfAlerts').value.trim();
+  const contacts = document.getElementById('cust_selfContacts').value.trim();
+  
+  if (!name || !email) { showToast('Name and email are required', true); return; }
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'updateCustomerSelf',
+        data: {
+          linkedRecord: currentUserLinkedRecord,
+          updates: {
+            'Primary Contact Name': name,
+            'Primary Contact Email': email,
+            'Customer Alert Email(s)': alerts,
+            'Authorized Contacts': contacts
+          }
+        }
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('✅ Account information updated!');
+    } else {
+      throw new Error(data.error || 'Update failed');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+  }
 }
 
 // =======================================================================
@@ -3580,7 +3683,7 @@ const DETAIL_SECTIONS = [
   { title:'🔔 Alerts & Reporting', fields:['Customer Alert Email(s)','Internal Alert Email(s)','Customer Receives Reports'] },
   { title:'⚙️ Installation & Setup', fields:['Install Date','Installed By','Setup Complete'] },
   { title:'🛡️ Hardware Warranty & Returns', fields:['Hardware Must Be Returned','Hardware Returned','Hardware Warranty Status','Replacement Hardware Issued','Hardware Return Needed'] },
-  { title:'📡 LTE Usage & Operations', fields:['Total LTE Usage (Lifetime)','Current Cycle LTE Usage (GB)','Last Failover Event','LTE Add-On Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Cap Risk Status','Billing Risk Status'] }
+  { title:'📡 LTE Usage & Operations', fields:['Total LTE Usage (Lifetime)','Current Cycle LTE Usage (GB)','Data Extensions This Cycle','Total Data Extensions (Lifetime)','Last Failover Event','LTE Add-On Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Cap Risk Status','Billing Risk Status'] }
 ];
 
 function selectCustomer(idx) {
@@ -5354,7 +5457,7 @@ function collectHardwareRow(){return[v('ob_peplinkDevId')||v('ob_hwId'),v('ob_hw
 function collectSimRow(){return[v('ob_simIdField')||v('ob_simId'),v('ob_simIccid'),v('ob_simCarrier'),v('ob_simPlanType'),v('ob_simCostGb'),v('ob_simBaseCost'),v('ob_simHardCap'),v('ob_simStatus'),v('ob_simHwId')||v('ob_peplinkDevId'),v('ob_simCustId')||v('ob_locId'),v('ob_simActivation'),v('ob_simSuspension'),v('ob_simNotes'),v('ob_simSlot')];}
 
 let storedTSV={cust:'',hw:'',sim:'',pros:''};
-const CUST_H=['Unique Customer ID','Customer Name','Location ID','Service Address','Referring Partner ID','Primary Contact Name','Primary Contact Email','Primary Contact Role','Service Start Date','Service End Date','Service Plan','Billing Term','Agreement Document ID','Agreement Signed Date','Support Level','Monthly MRC ($)','Activation Fee Paid','Activation Fee Amount ($)','Billing Status','Stripe Customer ID','Last Invoice Date','Next Billing Date','Primary ISP','Primary ISP Type','Edge Device Present','Edge Device Brand','Peplink Device ID','LTE SIM ID','Data Cap (GB)','LTE Cap Enforcement','LTE Add-On Notes','Hardware Must Be Returned','Hardware Returned','Hardware Warranty Status','Replacement Hardware Issued','Customer Receives Reports','Customer Alert Email(s)','Internal Alert Email(s)','Install Date','Installed By','Total LTE Usage (Lifetime)','Last Failover Event','Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Setup Complete','Current Cycle LTE Usage (GB)','Cap Risk Status','Billing Risk Status','Hardware Return Needed'];
+const CUST_H=['Unique Customer ID','Customer Name','Location ID','Service Address','Referring Partner ID','Primary Contact Name','Primary Contact Email','Primary Contact Role','Service Start Date','Service End Date','Service Plan','Billing Term','Agreement Document ID','Agreement Signed Date','Support Level','Monthly MRC ($)','Activation Fee Paid','Activation Fee Amount ($)','Billing Status','Stripe Customer ID','Last Invoice Date','Next Billing Date','Primary ISP','Primary ISP Type','Edge Device Present','Edge Device Brand','Peplink Device ID','LTE SIM ID','Data Cap (GB)','LTE Cap Enforcement','LTE Add-On Notes','Hardware Must Be Returned','Hardware Returned','Hardware Warranty Status','Replacement Hardware Issued','Customer Receives Reports','Customer Alert Email(s)','Internal Alert Email(s)','Install Date','Installed By','Total LTE Usage (Lifetime)','Last Failover Event','Notes','Projected LTE Exposure ($)','Gross Margin Before Overhead ($)','Setup Complete','Current Cycle LTE Usage (GB)','Cap Risk Status','Billing Risk Status','Hardware Return Needed','Data Extensions This Cycle','Total Data Extensions (Lifetime)','Authorized Contacts'];
 const HW_H=['Hardware ID','Manufacturer','Model','LAN MAC','AP PASS','IMEI','Serial Number','Purchase Date','Purchase Cost','Vendor','Ownership','Status','Current Customer','Customer Location','Install Date','Expected Return','Notes','HARDWARE User','HARDWARE Pass','DEFAULT ACCESS','SIM ICCID','Carrier','Data Plan / Cap','Billing Status','Config Vers','SSID','SSID PASS','SIM PURCHASE COST'];
 const SIM_H=['SIM ID','ICCID','Carrier / Vendor','Plan Type','Cost per GB','Monthly Base Cost','Hard Cap Enabled','Status','Assigned Hardware ID','Assigned Customer','Activation Date','Suspension Date','Notes','SIM SLOT'];
 
@@ -5372,9 +5475,18 @@ function submitToSheet(){
   .then(r=>r.json()).then(data=>{btn.textContent='🚀 Submit to Google Sheet';btn.disabled=false;if(data.success){showToast('✓ All rows written!','success');
       // Audit — log new customer onboarding
       const custName = document.getElementById('ob_custName').value || 'Unknown';
+      const custEmail = document.getElementById('ob_contactEmail').value || '';
       const auditAct = {id:Date.now(), prospect:custName, type:'Note', text:'🎉 New customer onboarded: '+custName+' | Plan: '+(document.getElementById('ob_plan').value||'—')+' | MRC: $'+(document.getElementById('ob_mrc').value||'0'), timestamp:new Date().toISOString(), user:sessionStorage.getItem('sp_user')||'scott', deleted:false};
       activities.unshift(auditAct);
       if(CONFIG.LIVE_MODE) fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(auditAct.id),prospect:auditAct.prospect,type:auditAct.type,text:auditAct.text,followUp:'',timestamp:auditAct.timestamp,user:auditAct.user,deleted:''}})}).catch(e=>{});
+      // Auto-create customer portal login (v9)
+      if(custEmail && CONFIG.LIVE_MODE) {
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'createCustomerLogin',data:{customerName:custName,email:custEmail,customerId:document.getElementById('ob_custId').value||''}})})
+        .then(r=>r.json()).then(loginData=>{
+          if(loginData.success) showToast('🔐 Customer portal login created & emailed to '+custEmail);
+          else if(loginData.existing) showToast('ℹ️ Portal login already exists for '+custEmail);
+        }).catch(e=>{});
+      }
       fetchLiveData();}else showToast('Error: '+(data.error||'Unknown'),'error');})
   .catch(e=>{btn.textContent='🚀 Submit to Google Sheet';btn.disabled=false;showToast('Submit failed','error');});
 }
@@ -9100,6 +9212,301 @@ showApp = function() {
   setTimeout(checkGatekeeper, 2000);
 };
 
+// =======================================================================
+// v9 FEATURE 1: CREATE CUSTOMER LOGIN FROM DETAIL CARD
+// =======================================================================
+async function createCustomerLoginFromDetail() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const name = c['Customer Name'] || '';
+  const email = c['Primary Contact Email'] || '';
+  
+  if (!email) { showToast('⚠ No email on file — add Primary Contact Email first', true); return; }
+  
+  if (!confirm('Create a customer portal login for:\n\n' + name + '\n' + email + '\n\nThis will email them login credentials.')) return;
+  
+  const btn = document.getElementById('custLoginBtn');
+  btn.disabled = true; btn.textContent = '⏳ Creating...';
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'createCustomerLogin',
+        data: {
+          customerName: name,
+          email: email,
+          customerId: c['Unique Customer ID'] || ''
+        }
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('✅ Login created! Credentials emailed to ' + email);
+      btn.textContent = '✅ Login Created';
+      btn.style.color = 'var(--success)';
+      // Log activity locally
+      const act = { id: Date.now(), prospect: name, type: 'Note', text: '🔐 Customer portal login created — ' + email, timestamp: new Date().toISOString(), user: sessionStorage.getItem('sp_user') || 'scott', deleted: false };
+      activities.unshift(act);
+      renderCustActivity(c);
+      renderGlobalActivity();
+    } else if (data.existing) {
+      showToast('ℹ️ Login already exists for ' + email);
+      btn.textContent = '✅ Login Exists';
+    } else {
+      throw new Error(data.error || 'Failed');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '🔐 Create Login';
+  }
+}
+
+// =======================================================================
+// v9 FEATURE 2: DATA CONTINUITY EXTENSION
+// =======================================================================
+function openDataExtension() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const stripeId = c['Stripe Customer ID'] || '';
+  const email = c['Primary Contact Email'] || '';
+  const name = c['Customer Name'] || '';
+  const currentUsage = c['Current Cycle LTE Usage (GB)'] || '0';
+  const dataCap = c['Data Cap (GB)'] || '1';
+  const plan = c['Service Plan'] || 'Core Continuity';
+  const extensions = c['Data Extensions This Cycle'] || 'None';
+  
+  if (!stripeId || !stripeId.startsWith('cus_')) {
+    showToast('⚠ No Stripe customer — set up billing first', true);
+    return;
+  }
+  if (!email) {
+    showToast('⚠ No email on file', true);
+    return;
+  }
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'dataExtModal';
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:480px;">
+      <h3 style="margin:0 0 16px;">📡 Data Continuity Extension</h3>
+      <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">${name}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+          <div><span style="color:var(--text-dim);">Plan:</span> ${plan}</div>
+          <div><span style="color:var(--text-dim);">Cap:</span> ${dataCap} GB</div>
+          <div><span style="color:var(--text-dim);">Current Usage:</span> ${currentUsage} GB</div>
+          <div><span style="color:var(--text-dim);">Extensions:</span> ${extensions}</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Additional Data (GB)</label>
+        <select id="dataExtGb" onchange="updateDataExtTotal()" style="font-size:15px;font-weight:700;">
+          <option value="1">1 GB — $29</option>
+          <option value="2">2 GB — $58</option>
+          <option value="3">3 GB — $87</option>
+          <option value="4">4 GB — $116</option>
+          <option value="5">5 GB — $145</option>
+        </select>
+      </div>
+      <div style="text-align:center;font-size:24px;font-weight:800;color:var(--accent);margin-bottom:16px;" id="dataExtTotalDisplay">$29.00</div>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">This will create a Stripe invoice and email the customer a payment link. Once paid, you'll be notified to activate the extension in Peplink InControl2.</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" id="dataExtSendBtn" onclick="sendDataExtension()" style="flex:1;">📧 Send Invoice to Customer</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('dataExtModal').remove()">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function updateDataExtTotal() {
+  const gb = parseInt(document.getElementById('dataExtGb').value) || 1;
+  document.getElementById('dataExtTotalDisplay').textContent = '$' + (gb * 29) + '.00';
+}
+
+async function sendDataExtension() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const gb = parseInt(document.getElementById('dataExtGb').value) || 1;
+  const btn = document.getElementById('dataExtSendBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"></div> Sending...';
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'stripeCreateDataExtensionInvoice',
+        data: {
+          stripeCustomerId: c['Stripe Customer ID'],
+          customerName: c['Customer Name'] || '',
+          email: c['Primary Contact Email'] || '',
+          gbAmount: gb,
+          customerId: c['Unique Customer ID'] || ''
+        }
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('✅ Invoice sent to ' + data.sentTo + ' — ' + data.amount + ' for ' + data.gbAmount + 'GB');
+      document.getElementById('dataExtModal').remove();
+      // Refresh activity
+      const act = { id: Date.now(), prospect: c['Customer Name'], type: 'Note', text: '📡 Data extension invoice sent — ' + data.gbAmount + 'GB (' + data.amount + ')', timestamp: new Date().toISOString(), user: sessionStorage.getItem('sp_user') || 'scott', deleted: false };
+      activities.unshift(act);
+      renderCustActivity(c);
+      renderGlobalActivity();
+    } else {
+      throw new Error(data.error || 'Failed');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+    btn.disabled = false; btn.textContent = '📧 Send Invoice to Customer';
+  }
+}
+
+// --- Activate Data Extension (after payment confirmed) ---
+async function activateDataExtFromDetail() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  const gb = prompt('How many GB were paid for? (Enter number, e.g. 1, 2, 3)');
+  if (!gb || isNaN(gb)) return;
+  
+  if (!confirm('Activate ' + gb + 'GB data extension for ' + c['Customer Name'] + '?\n\nThis will update the portal records. Make sure you also update Peplink InControl2.')) return;
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'activateDataExtension',
+        data: {
+          customerId: c['Unique Customer ID'],
+          gbAmount: parseInt(gb),
+          totalDollars: '$' + (parseInt(gb) * 29)
+        }
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('✅ ' + data.gbActivated + 'GB extension activated for ' + data.customerName);
+      fetchLiveData();
+    } else {
+      throw new Error(data.error || 'Failed');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+  }
+}
+
+// --- Reset Billing Cycle ---
+async function resetBillingCycleFromDetail() {
+  const c = allCustomers[selectedCustomerIdx];
+  if (!c) return;
+  
+  if (!confirm('⚠️ RESET BILLING CYCLE for ' + c['Customer Name'] + '?\n\nThis will:\n• Reset current cycle usage to 0 GB\n• Clear all data extensions for this cycle\n• Restore data cap to plan default\n\nMake sure you also reset the data cap in Peplink InControl2.')) return;
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'resetBillingCycle',
+        data: { customerId: c['Unique Customer ID'] }
+      })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('🔄 Billing cycle reset — ' + data.customerName + ' restored to ' + data.restoredCap + 'GB (' + data.plan + ')');
+      fetchLiveData();
+    } else {
+      throw new Error(data.error || 'Failed');
+    }
+  } catch(e) {
+    showToast('❌ ' + e.message, true);
+  }
+}
+
+// =======================================================================
+// v9 FEATURE 3: SMART ROUTE PLANNER
+// =======================================================================
+function initRoutePlanner() {
+  // Just ensure the tab is visible, results area ready
+}
+
+async function generateRoute() {
+  const zip = document.getElementById('routeZip').value.trim();
+  if (!zip) { showToast('Enter a zip code', true); return; }
+  
+  const radius = document.getElementById('routeRadius').value;
+  const maxStops = document.getElementById('routeMaxStops').value;
+  const btn = document.getElementById('routeGenBtn');
+  const results = document.getElementById('routeResults');
+  
+  btn.disabled = true; btn.textContent = '⏳ Generating...';
+  results.innerHTML = '<div style="text-align:center;padding:60px;"><div class="spinner" style="width:28px;height:28px;"></div><br><br><span style="color:var(--text-muted);">Geocoding prospects & optimizing route...</span></div>';
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'generateSmartRoute',
+        data: { zipCode: zip, radiusMiles: parseFloat(radius), maxStops: parseInt(maxStops) }
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    if (!data.stops || data.stops.length === 0) {
+      results.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);"><div style="font-size:36px;margin-bottom:12px;">🤷</div><p>No actionable prospects found within ' + radius + ' miles of ' + zip + '.</p><p style="font-size:12px;">Try a larger radius or add more prospects to the pipeline.</p></div>';
+      btn.disabled = false; btn.textContent = '🗺️ Generate Route';
+      return;
+    }
+    
+    const totalDist = data.stops.totalDistanceMiles || '';
+    const totalTime = data.stops.totalDurationMinutes || '';
+    
+    let html = '<div style="margin-bottom:20px;">';
+    html += '<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">';
+    html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;"><strong>' + data.stops.length + '</strong> stops from <strong>' + data.totalCandidates + '</strong> prospects</div>';
+    if (totalDist) html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;">🚗 <strong>' + totalDist + ' mi</strong> total</div>';
+    if (totalTime) html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;">⏱ <strong>' + totalTime + ' min</strong> driving</div>';
+    html += '<a href="https://www.google.com/maps/dir/' + data.origin.lat + ',' + data.origin.lng + '/' + data.stops.map(s => s.lat + ',' + s.lng).join('/') + '" target="_blank" class="btn btn-primary" style="font-size:12px;padding:8px 16px;">📍 Open in Google Maps</a>';
+    html += '</div>';
+    
+    // Route cards
+    data.stops.forEach((stop, i) => {
+      const isMuni = stop.isMunicipal ? '<span style="display:inline-block;background:rgba(139,92,246,0.1);color:#8b5cf6;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;margin-left:6px;">🏛️ MUNICIPALITY</span>' : '';
+      const stagePill = stop.stage ? '<span style="display:inline-block;background:var(--surface-2);color:var(--text-dim);font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;">' + stop.stage + '</span>' : '';
+      
+      html += '<div style="display:flex;gap:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;' + (stop.isMunicipal ? 'border-left:3px solid #8b5cf6;' : '') + '">';
+      html += '<div style="min-width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#1fbf8a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;">' + (stop.routeOrder || (i+1)) + '</div>';
+      html += '<div style="flex:1;">';
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><strong style="font-size:14px;">' + stop.name + '</strong>' + isMuni + stagePill + '</div>';
+      html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">' + stop.address + '</div>';
+      if (stop.reason) html += '<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">' + stop.reason + '</div>';
+      html += '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">';
+      if (stop.drivingTime) html += '<span>🚗 ' + stop.drivingTime + '</span>';
+      if (stop.drivingDistance) html += '<span>📏 ' + stop.drivingDistance + '</span>';
+      html += '<span>📊 Score: ' + stop.score + '</span>';
+      if (stop.contact) html += '<span>👤 ' + stop.contact + '</span>';
+      if (stop.phone) html += '<span>📞 ' + stop.phone + '</span>';
+      html += '</div>';
+      html += '</div></div>';
+    });
+    
+    html += '</div>';
+    results.innerHTML = html;
+    
+  } catch(e) {
+    results.innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger);">❌ ' + e.message + '</div>';
+  }
+  
+  btn.disabled = false; btn.textContent = '🗺️ Generate Route';
+}
+
+// =======================================================================
+// v9: ENHANCED CUSTOMER PORTAL — Account Management & Data Usage
+// =======================================================================
 </script>
 </body>
 </html>
