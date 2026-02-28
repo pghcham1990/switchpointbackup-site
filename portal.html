@@ -9513,6 +9513,9 @@ async function generateRoute() {
     if (totalTime) html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;">⏱ <strong>' + totalTime + ' min</strong> driving</div>';
     if (data.ungeocodedCount > 0) html += '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:8px 14px;border-radius:var(--radius-lg);font-size:12px;color:#b45309;">⚠️ ' + data.ungeocodedCount + ' prospects skipped (not geocoded). <a href="#" onclick="geocodeBatch();return false;" style="color:var(--accent);font-weight:600;">Geocode them now</a></div>';
     html += '<a href="https://www.google.com/maps/dir/' + data.origin.lat + ',' + data.origin.lng + '/' + data.stops.map(s => s.lat + ',' + s.lng).join('/') + '" target="_blank" class="btn btn-primary" style="font-size:12px;padding:8px 16px;">📍 Open in Google Maps</a>';
+    html += '<button class="btn btn-secondary" onclick="printRouteSheet()" style="font-size:12px;padding:8px 16px;">🖨️ Print Route Sheet</button>';
+    // Store route data globally for printing
+    window._lastRouteData = data;
     html += '</div>';
     
     // Route cards
@@ -9541,7 +9544,7 @@ async function generateRoute() {
       if (stop.drivingDistance) html += '<span>📏 ' + stop.drivingDistance + '</span>';
       html += '<span title="' + (stop.scoreBreakdown ? stop.scoreBreakdown.join('\n') : '') + '" style="cursor:help;text-decoration:underline dotted;">📊 Score: ' + stop.score + '</span>';
       if (stop.contact) html += '<span>👤 ' + stop.contact + '</span>';
-      if (stop.phone) html += '<span>📞 ' + stop.phone + '</span>';
+      if (stop.phone) html += '<span><a href="' + gvCallUrl(stop.phone) + '" target="_blank" style="color:var(--success);text-decoration:none;font-weight:600;font-family:var(--mono);font-size:11px;">📞 ' + stop.phone + '</a></span>';
       html += '</div>';
       html += '</div></div>';
     });
@@ -9554,6 +9557,91 @@ async function generateRoute() {
   }
   
   btn.disabled = false; btn.textContent = '🗺️ Generate Route';
+}
+
+// --- Print Route Sheet (PDF) ---
+async function printRouteSheet() {
+  const data = window._lastRouteData;
+  if (!data || !data.stops || !data.stops.length) { showToast('Generate a route first', true); return; }
+  
+  showToast('⏳ Generating route sheet...');
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'generateRouteSheetHTML', data: {
+        origin: data.origin,
+        stops: data.stops,
+        totalCandidates: data.totalCandidates,
+        date: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      }})
+    });
+    // Actually, let's generate it client-side for speed
+  } catch(e) {}
+  
+  // Generate printable HTML client-side
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  let printHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SwitchPoint Route Sheet - ${today}</title>
+<style>
+  @page { margin: 0.4in 0.5in; size: letter; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, 'Segoe UI', sans-serif; font-size:11px; color:#1a1a2e; line-height:1.4; }
+  .header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #2e6bff; padding-bottom:8px; margin-bottom:12px; }
+  .header h1 { font-size:16px; color:#2e6bff; }
+  .header .date { font-size:11px; color:#666; }
+  .header .origin { font-size:10px; color:#888; }
+  .summary { display:flex; gap:16px; margin-bottom:12px; padding:6px 10px; background:#f0f4ff; border-radius:4px; font-size:10px; }
+  .summary span { font-weight:600; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#2e6bff; color:#fff; padding:5px 6px; text-align:left; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  td { padding:6px 6px; border-bottom:1px solid #e0e0e0; vertical-align:top; font-size:10px; }
+  tr:nth-child(even) { background:#f8f9fc; }
+  .stop-num { background:#2e6bff; color:#fff; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:9px; }
+  .muni { background:#f0e6ff; color:#7c3aed; font-size:8px; font-weight:700; padding:1px 5px; border-radius:3px; }
+  .reason { font-size:9px; color:#666; margin-top:2px; }
+  .score { font-weight:700; color:#2e6bff; }
+  .notes-col { width:22%; }
+  .footer { margin-top:8px; padding-top:6px; border-top:1px solid #ddd; font-size:8px; color:#999; display:flex; justify-content:space-between; }
+  .checklist { width:14px; height:14px; border:1.5px solid #ccc; border-radius:2px; display:inline-block; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>`;
+
+  printHTML += '<div class="header"><div><h1>SP SwitchPoint Route Sheet</h1><div class="origin">Starting from: ' + (data.origin.address || data.origin.zip) + '</div></div><div style="text-align:right;"><div class="date">' + today + '</div><div style="font-size:10px;color:#888;">' + data.stops.length + ' stops from ' + (data.totalCandidates||'') + ' prospects</div></div></div>';
+
+  printHTML += '<table><thead><tr><th style="width:4%;">#</th><th style="width:22%;">Business</th><th style="width:20%;">Address</th><th style="width:13%;">Contact</th><th style="width:11%;">Phone</th><th style="width:6%;">Score</th><th class="notes-col">Reason / Intel</th><th style="width:4%;">✅</th></tr></thead><tbody>';
+
+  data.stops.forEach((stop, i) => {
+    const num = stop.routeOrder || (i + 1);
+    const muniTag = stop.isMunicipal ? ' <span class="muni">🏛 MUNI</span>' : '';
+    let intel = [];
+    if (stop.reason) intel.push(stop.reason);
+    if (stop.hadDropIn) intel.push('🚪 Previously visited');
+    if (stop.hadProposal) intel.push('📄 Proposal sent');
+    if (stop.hadDemo) intel.push('🎯 Demo done');
+    if (stop.activityCount > 0) intel.push(stop.activityCount + ' total touches');
+    if (stop.daysSinceActivity >= 0) intel.push('Last touch: ' + stop.daysSinceActivity + 'd ago');
+    
+    printHTML += '<tr>'
+      + '<td style="text-align:center;"><span class="stop-num">' + num + '</span></td>'
+      + '<td><strong>' + stop.name + '</strong>' + muniTag + '<br><span style="font-size:9px;color:#888;">' + (stop.stage||'') + (stop.drivingTime ? ' · ' + stop.drivingTime + ' drive' : '') + '</span></td>'
+      + '<td>' + (stop.address||'') + '</td>'
+      + '<td>' + (stop.contact||'—') + '</td>'
+      + '<td style="font-family:monospace;font-size:10px;">' + (stop.phone||'—') + '</td>'
+      + '<td class="score">' + stop.score + '</td>'
+      + '<td style="font-size:9px;color:#555;">' + intel.join(' · ') + '</td>'
+      + '<td style="text-align:center;"><span class="checklist"></span></td>'
+      + '</tr>';
+  });
+
+  printHTML += '</tbody></table>';
+  printHTML += '<div class="footer"><span>SwitchPoint Backup LLC · switchpointbackup.com · (724) 541-9810</span><span>Generated by Smart Route Planner</span></div>';
+  printHTML += '</body></html>';
+
+  // Open in new window and trigger print
+  const printWin = window.open('', '_blank');
+  printWin.document.write(printHTML);
+  printWin.document.close();
+  setTimeout(() => printWin.print(), 500);
 }
 
 // --- Batch Geocode from Portal ---
