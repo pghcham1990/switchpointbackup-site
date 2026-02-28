@@ -8527,22 +8527,52 @@ function togglePresenceBar() {
 const IRS_MILEAGE_RATE = 0.70; // 2025 IRS standard mileage rate
 let mileageTimer = null;
 let mileageTripStart = null;
+let activeTripId = null;
 
 function initMileageDate() {
   var d = document.getElementById('mileDate');
   if (d && !d.value) d.value = new Date().toISOString().slice(0,10);
   renderMileageLog();
-  // Restore active trip from sessionStorage
-  var saved = sessionStorage.getItem('sp_active_trip');
-  if (saved) {
-    try {
-      var trip = JSON.parse(saved);
-      mileageTripStart = new Date(trip.startTime);
-      document.getElementById('mileageIdle').style.display = 'none';
-      document.getElementById('mileageActive').style.display = 'block';
-      document.getElementById('mileActiveInfo').textContent = 'Started at ' + trip.startOdo + ' mi · ' + trip.vehicle + ' · ' + trip.date;
-      startMileageElapsed();
-    } catch(e) {}
+  checkActiveTrip();
+}
+
+function checkActiveTrip() {
+  var active = allExpenses.find(function(e) {
+    return (e.Notes || '').includes('[TRIP ACTIVE]') && e.Deleted !== 'true';
+  });
+  
+  if (active) {
+    activeTripId = active.ID || active.id;
+    var notes = active.Notes || '';
+    var odoMatch = notes.match(/ODO START: (\d+)/);
+    var vehicleMatch = notes.match(/Vehicle: ([^|]+)/);
+    var timeMatch = notes.match(/Started: ([^|]+)/);
+    
+    var startOdo = odoMatch ? odoMatch[1] : '?';
+    var vehicle = vehicleMatch ? vehicleMatch[1].trim() : 'Ford C-Max';
+    var startTime = timeMatch ? timeMatch[1].trim() : '';
+    
+    mileageTripStart = startTime ? new Date(startTime) : new Date(active.Date || Date.now());
+    
+    document.getElementById('mileageIdle').style.display = 'none';
+    document.getElementById('mileageActive').style.display = 'block';
+    document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi \u00b7 ' + vehicle + ' \u00b7 ' + (active.Date || '');
+    startMileageElapsed();
+    showToast('Active trip restored \u2014 enter ending odometer when done');
+  } else {
+    // Check localStorage backup
+    var saved = localStorage.getItem('sp_active_trip');
+    if (saved) {
+      try {
+        var trip = JSON.parse(saved);
+        mileageTripStart = new Date(trip.startTime);
+        document.getElementById('mileageIdle').style.display = 'none';
+        document.getElementById('mileageActive').style.display = 'block';
+        document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(trip.startOdo).toLocaleString() + ' mi \u00b7 ' + trip.vehicle + ' \u00b7 ' + trip.date;
+        startMileageElapsed();
+        showToast('Active trip restored from backup');
+      } catch(e) {}
+    }
   }
 }
 
@@ -8555,82 +8585,27 @@ function startMileageTrip() {
   if (!date) { showToast('Enter a date', true); return; }
   if (!startOdo) { showToast('Enter your starting odometer reading', true); return; }
   
+  var btn = document.querySelector('#mileageIdle .btn');
+  btn.disabled = true; btn.textContent = '\u23f3 Saving...';
+  
   mileageTripStart = new Date();
   
-  // Save to sessionStorage so it survives page refresh
-  sessionStorage.setItem('sp_active_trip', JSON.stringify({
+  // Save to localStorage immediately as backup
+  localStorage.setItem('sp_active_trip', JSON.stringify({
     date: date, vehicle: vehicle, startOdo: startOdo, purpose: purpose, startTime: mileageTripStart.toISOString()
   }));
   
-  document.getElementById('mileageIdle').style.display = 'none';
-  document.getElementById('mileageActive').style.display = 'block';
-  document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi · ' + vehicle + ' · ' + date;
-  document.getElementById('mileEnd').value = '';
-  document.getElementById('mileCalcMiles').textContent = '—';
-  document.getElementById('mileCalcDeduction').textContent = '$0.00';
-  
-  startMileageElapsed();
-  showToast('Trip started! Drive safe 🚗');
-}
-
-function startMileageElapsed() {
-  if (mileageTimer) clearInterval(mileageTimer);
-  mileageTimer = setInterval(function() {
-    if (!mileageTripStart) return;
-    var elapsed = Date.now() - mileageTripStart.getTime();
-    var hrs = Math.floor(elapsed / 3600000);
-    var mins = Math.floor((elapsed % 3600000) / 60000);
-    document.getElementById('mileElapsed').textContent = hrs + ':' + String(mins).padStart(2, '0');
-  }, 10000);
-}
-
-// Live calculation as they type ending odometer
-document.addEventListener('input', function(e) {
-  if (e.target && e.target.id === 'mileEnd') {
-    var saved = sessionStorage.getItem('sp_active_trip');
-    if (!saved) return;
-    var trip = JSON.parse(saved);
-    var endOdo = parseFloat(e.target.value) || 0;
-    var startOdo = parseFloat(trip.startOdo) || 0;
-    var miles = endOdo - startOdo;
-    if (miles > 0) {
-      document.getElementById('mileCalcMiles').textContent = miles.toFixed(1);
-      document.getElementById('mileCalcDeduction').textContent = '$' + (miles * IRS_MILEAGE_RATE).toFixed(2);
-    } else {
-      document.getElementById('mileCalcMiles').textContent = '—';
-      document.getElementById('mileCalcDeduction').textContent = '$0.00';
-    }
-  }
-});
-
-function endMileageTrip() {
-  var saved = sessionStorage.getItem('sp_active_trip');
-  if (!saved) { showToast('No active trip', true); return; }
-  var trip = JSON.parse(saved);
-  
-  var endOdo = document.getElementById('mileEnd').value;
-  if (!endOdo) { showToast('Enter your ending odometer reading', true); return; }
-  
-  var startOdo = parseFloat(trip.startOdo);
-  var endOdoNum = parseFloat(endOdo);
-  var miles = endOdoNum - startOdo;
-  
-  if (miles <= 0) { showToast('Ending odometer must be greater than starting', true); return; }
-  if (miles > 1000) { if (!confirm('That\'s ' + miles + ' miles — are you sure?')) return; }
-  
-  var deduction = miles * IRS_MILEAGE_RATE;
-  
-  // Auto-save as expense
+  // Also save to backend as expense with [TRIP ACTIVE] marker
   var expData = {
-    action: editingExpenseId ? 'updateExpense' : 'addExpense',
+    action: 'addExpense',
     data: {
-      date: trip.date,
-      amount: deduction.toFixed(2),
+      date: date,
+      amount: '0.00',
       vendor: 'IRS Mileage Deduction',
       category: 'Vehicle',
       payment: 'N/A (Mileage Deduction)',
       paidTo: '',
-      notes: '🚗 MILEAGE: ' + miles.toFixed(1) + ' mi × $' + IRS_MILEAGE_RATE.toFixed(2) + '/mi = $' + deduction.toFixed(2) + ' | ' + trip.vehicle + ' | ODO: ' + startOdo + ' → ' + endOdoNum + ' | Purpose: ' + trip.purpose,
+      notes: '[TRIP ACTIVE] \ud83d\ude97 MILEAGE: IN PROGRESS | Vehicle: ' + vehicle + ' | ODO START: ' + startOdo + ' | Started: ' + mileageTripStart.toISOString() + ' | Purpose: ' + purpose,
       receipt: 'N/A',
       deductible: '100%',
       reimbursable: 'No'
@@ -8642,58 +8617,215 @@ function endMileageTrip() {
     body: JSON.stringify(expData)
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.success) {
-      showToast('✅ ' + miles.toFixed(1) + ' miles logged — $' + deduction.toFixed(2) + ' deduction saved!');
-      sessionStorage.removeItem('sp_active_trip');
-      if (mileageTimer) clearInterval(mileageTimer);
-      mileageTripStart = null;
-      document.getElementById('mileageIdle').style.display = 'block';
-      document.getElementById('mileageActive').style.display = 'none';
-      document.getElementById('mileStart').value = endOdo; // Next trip starts where this one ended
-      document.getElementById('mileDate').value = new Date().toISOString().slice(0,10);
-      loadExpenses(); // Refresh expense list
-      renderMileageLog();
+      activeTripId = data.id || data.ID || String(Date.now());
+      document.getElementById('mileageIdle').style.display = 'none';
+      document.getElementById('mileageActive').style.display = 'block';
+      document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi \u00b7 ' + vehicle + ' \u00b7 ' + date;
+      document.getElementById('mileEnd').value = '';
+      document.getElementById('mileCalcMiles').textContent = '\u2014';
+      document.getElementById('mileCalcDeduction').textContent = '$0.00';
+      startMileageElapsed();
+      loadExpenses();
+      showToast('\u2705 Trip started & saved to server! Drive safe \ud83d\ude97');
     } else {
-      showToast('Error saving: ' + (data.error || 'Unknown'), true);
+      // Backend failed but localStorage has it
+      document.getElementById('mileageIdle').style.display = 'none';
+      document.getElementById('mileageActive').style.display = 'block';
+      document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi \u00b7 ' + vehicle + ' \u00b7 ' + date;
+      startMileageElapsed();
+      showToast('Trip started (saved locally, backend sync failed)', true);
     }
-  }).catch(function(e) { showToast('Save failed: ' + e.message, true); });
+    btn.disabled = false; btn.textContent = '\ud83d\ude97 Start Trip';
+  }).catch(function(e) { 
+    // Still show active since localStorage has it
+    document.getElementById('mileageIdle').style.display = 'none';
+    document.getElementById('mileageActive').style.display = 'block';
+    document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi \u00b7 ' + vehicle + ' \u00b7 ' + date;
+    startMileageElapsed();
+    showToast('Trip started (offline mode \u2014 will sync when you end)', true);
+    btn.disabled = false; btn.textContent = '\ud83d\ude97 Start Trip';
+  });
+}
+
+function startMileageElapsed() {
+  if (mileageTimer) clearInterval(mileageTimer);
+  var update = function() {
+    if (!mileageTripStart) return;
+    var elapsed = Date.now() - mileageTripStart.getTime();
+    var hrs = Math.floor(elapsed / 3600000);
+    var mins = Math.floor((elapsed % 3600000) / 60000);
+    var el = document.getElementById('mileElapsed');
+    if (el) el.textContent = hrs + ':' + String(mins).padStart(2, '0');
+  };
+  update();
+  mileageTimer = setInterval(update, 10000);
+}
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'mileEnd') {
+    var startOdo = 0;
+    var saved = localStorage.getItem('sp_active_trip');
+    if (saved) {
+      try { startOdo = parseFloat(JSON.parse(saved).startOdo) || 0; } catch(ex) {}
+    }
+    if (!startOdo) {
+      var infoText = (document.getElementById('mileActiveInfo') || {}).textContent || '';
+      var match = infoText.match(/Started at ([\d,]+)/);
+      if (match) startOdo = parseFloat(match[1].replace(/,/g, '')) || 0;
+    }
+    var endOdo = parseFloat(e.target.value) || 0;
+    var miles = endOdo - startOdo;
+    if (miles > 0) {
+      document.getElementById('mileCalcMiles').textContent = miles.toFixed(1);
+      document.getElementById('mileCalcDeduction').textContent = '$' + (miles * IRS_MILEAGE_RATE).toFixed(2);
+    } else {
+      document.getElementById('mileCalcMiles').textContent = '\u2014';
+      document.getElementById('mileCalcDeduction').textContent = '$0.00';
+    }
+  }
+});
+
+function endMileageTrip() {
+  var endOdo = document.getElementById('mileEnd').value;
+  if (!endOdo) { showToast('Enter your ending odometer reading', true); return; }
+  
+  var tripData = null;
+  var saved = localStorage.getItem('sp_active_trip');
+  if (saved) { try { tripData = JSON.parse(saved); } catch(ex) {} }
+  
+  if (!tripData) {
+    var active = allExpenses.find(function(e) {
+      return (e.Notes || '').includes('[TRIP ACTIVE]') && e.Deleted !== 'true';
+    });
+    if (active) {
+      var notes = active.Notes || '';
+      var odoMatch = notes.match(/ODO START: (\d+)/);
+      var vehicleMatch = notes.match(/Vehicle: ([^|]+)/);
+      var timeMatch = notes.match(/Started: ([^|]+)/);
+      var purposeMatch = notes.match(/Purpose: ([^|[\]]+)/);
+      tripData = {
+        date: active.Date, startOdo: odoMatch ? odoMatch[1] : '0',
+        vehicle: vehicleMatch ? vehicleMatch[1].trim() : 'Ford C-Max',
+        startTime: timeMatch ? timeMatch[1].trim() : '',
+        purpose: purposeMatch ? purposeMatch[1].trim() : ''
+      };
+    }
+  }
+  
+  if (!tripData) { showToast('Could not find active trip data', true); return; }
+  
+  var startOdo = parseFloat(tripData.startOdo);
+  var endOdoNum = parseFloat(endOdo);
+  var miles = endOdoNum - startOdo;
+  
+  if (miles <= 0) { showToast('Ending must be greater than starting (' + startOdo + ')', true); return; }
+  if (miles > 1000) { if (!confirm('That is ' + miles + ' miles \u2014 are you sure?')) return; }
+  
+  var deduction = miles * IRS_MILEAGE_RATE;
+  var endTime = new Date();
+  var durationMs = mileageTripStart ? (endTime.getTime() - mileageTripStart.getTime()) : 0;
+  var durationHrs = Math.floor(durationMs / 3600000);
+  var durationMins = Math.floor((durationMs % 3600000) / 60000);
+  var durationStr = durationHrs + 'h ' + durationMins + 'm';
+  
+  var finalNotes = '\ud83d\ude97 MILEAGE: ' + miles.toFixed(1) + ' mi \u00d7 $' + IRS_MILEAGE_RATE.toFixed(2) + '/mi = $' + deduction.toFixed(2) + ' | Vehicle: ' + tripData.vehicle + ' | ODO: ' + startOdo + ' \u2192 ' + endOdoNum + ' | Duration: ' + durationStr + ' | Started: ' + (tripData.startTime || '') + ' | Ended: ' + endTime.toISOString() + ' | Purpose: ' + tripData.purpose;
+  
+  var btn = document.querySelector('#mileageActive .btn-success');
+  btn.disabled = true; btn.textContent = '\u23f3 Saving...';
+  
+  var activeExp = allExpenses.find(function(e) {
+    return (e.Notes || '').includes('[TRIP ACTIVE]') && e.Deleted !== 'true';
+  });
+  
+  if (activeExp) {
+    fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'updateExpense', expenseId: activeExp.ID || activeExp.id, data: { amount: deduction.toFixed(2), notes: finalNotes } })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      completeTripEnd(miles, deduction, durationStr, endOdo, btn);
+    }).catch(function(e) {
+      saveNewMileageExpense(tripData, miles, deduction, durationStr, endOdoNum, endTime, finalNotes, btn);
+    });
+  } else {
+    saveNewMileageExpense(tripData, miles, deduction, durationStr, endOdoNum, endTime, finalNotes, btn);
+  }
+}
+
+function saveNewMileageExpense(tripData, miles, deduction, durationStr, endOdoNum, endTime, finalNotes, btn) {
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST', headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({ action: 'addExpense', data: {
+      date: tripData.date, amount: deduction.toFixed(2), vendor: 'IRS Mileage Deduction',
+      category: 'Vehicle', payment: 'N/A (Mileage Deduction)', paidTo: '',
+      notes: finalNotes, receipt: 'N/A', deductible: '100%', reimbursable: 'No'
+    }})
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) completeTripEnd(miles, deduction, durationStr, document.getElementById('mileEnd').value, btn);
+    else { showToast('Error: ' + (data.error || 'Unknown'), true); btn.disabled = false; btn.textContent = '\u2705 End Trip & Save'; }
+  }).catch(function(e) { showToast('Save failed: ' + e.message, true); btn.disabled = false; btn.textContent = '\u2705 End Trip & Save'; });
+}
+
+function completeTripEnd(miles, deduction, durationStr, endOdo, btn) {
+  showToast('\u2705 ' + miles.toFixed(1) + ' miles logged \u2014 $' + deduction.toFixed(2) + ' deduction \u00b7 ' + durationStr);
+  localStorage.removeItem('sp_active_trip');
+  if (mileageTimer) clearInterval(mileageTimer);
+  mileageTripStart = null; activeTripId = null;
+  document.getElementById('mileageIdle').style.display = 'block';
+  document.getElementById('mileageActive').style.display = 'none';
+  document.getElementById('mileStart').value = endOdo;
+  document.getElementById('mileDate').value = new Date().toISOString().slice(0,10);
+  btn.disabled = false; btn.textContent = '\u2705 End Trip & Save';
+  loadExpenses();
 }
 
 function cancelMileageTrip() {
   if (!confirm('Cancel this trip? No mileage will be logged.')) return;
-  sessionStorage.removeItem('sp_active_trip');
+  var active = allExpenses.find(function(e) { return (e.Notes || '').includes('[TRIP ACTIVE]') && e.Deleted !== 'true'; });
+  if (active) {
+    fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'deleteExpense', expenseId: active.ID || active.id })
+    }).catch(function() {});
+  }
+  localStorage.removeItem('sp_active_trip');
   if (mileageTimer) clearInterval(mileageTimer);
-  mileageTripStart = null;
+  mileageTripStart = null; activeTripId = null;
   document.getElementById('mileageIdle').style.display = 'block';
   document.getElementById('mileageActive').style.display = 'none';
   showToast('Trip cancelled');
+  loadExpenses();
 }
 
 function renderMileageLog() {
   var log = document.getElementById('mileageLog');
   if (!log) return;
-  
-  // Filter expenses for mileage entries
   var mileageEntries = allExpenses.filter(function(e) {
-    return (e.Category === 'Vehicle' || e.Vendor === 'IRS Mileage Deduction') && (e.Notes || '').includes('MILEAGE:');
+    return (e.Category === 'Vehicle' || e.Vendor === 'IRS Mileage Deduction') && (e.Notes || '').includes('MILEAGE:') && !(e.Notes || '').includes('[TRIP ACTIVE]') && e.Deleted !== 'true';
   }).sort(function(a, b) { return (b.Date || '').localeCompare(a.Date || ''); }).slice(0, 10);
   
-  if (mileageEntries.length === 0) {
-    log.innerHTML = '<div style="color:var(--text-dim);padding:8px 0;">No mileage entries yet. Start your first trip above!</div>';
-    return;
-  }
+  if (mileageEntries.length === 0) { log.innerHTML = '<div style="color:var(--text-dim);padding:8px 0;">No mileage entries yet. Start your first trip above!</div>'; return; }
   
   var html = '<table style="width:100%;font-size:11px;border-collapse:collapse;">';
-  html += '<tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px;color:var(--text-dim);">DATE</th><th style="text-align:left;padding:4px;">NOTES</th><th style="text-align:right;padding:4px;">DEDUCTION</th></tr>';
+  html += '<tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px;color:var(--text-dim);">DATE</th><th style="text-align:left;padding:4px;">TRIP</th><th style="text-align:right;padding:4px;">MILES</th><th style="text-align:right;padding:4px;">DEDUCTION</th></tr>';
+  var totalMiles = 0, totalDeduction = 0;
   mileageEntries.forEach(function(e) {
-    // Extract miles from notes
     var milesMatch = (e.Notes || '').match(/(\d+\.?\d*) mi/);
     var miles = milesMatch ? milesMatch[1] : '?';
+    var durationMatch = (e.Notes || '').match(/Duration: ([^|]+)/);
+    var duration = durationMatch ? durationMatch[1].trim() : '';
+    var purposeMatch = (e.Notes || '').match(/Purpose: (.+)$/);
+    var purpose = purposeMatch ? purposeMatch[1].trim() : '';
+    if (milesMatch) totalMiles += parseFloat(milesMatch[1]);
+    totalDeduction += parseFloat(e.Amount || 0);
     html += '<tr style="border-bottom:1px solid var(--border-light);">';
     html += '<td style="padding:4px;font-family:var(--mono);">' + (e.Date || '') + '</td>';
-    html += '<td style="padding:4px;">' + miles + ' mi — ' + ((e.Notes || '').split('Purpose: ')[1] || '').split('|')[0] + '</td>';
+    html += '<td style="padding:4px;">' + purpose + (duration ? ' <span style="color:var(--text-dim);">(' + duration + ')</span>' : '') + '</td>';
+    html += '<td style="padding:4px;text-align:right;font-family:var(--mono);">' + miles + '</td>';
     html += '<td style="padding:4px;text-align:right;font-weight:700;color:var(--success);font-family:var(--mono);">$' + parseFloat(e.Amount || 0).toFixed(2) + '</td>';
     html += '</tr>';
   });
+  html += '<tr style="border-top:2px solid var(--border);font-weight:700;"><td style="padding:4px;" colspan="2">TOTAL</td>';
+  html += '<td style="padding:4px;text-align:right;font-family:var(--mono);">' + totalMiles.toFixed(1) + '</td>';
+  html += '<td style="padding:4px;text-align:right;color:var(--success);font-family:var(--mono);">$' + totalDeduction.toFixed(2) + '</td></tr>';
   html += '</table>';
   log.innerHTML = html;
 }
