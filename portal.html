@@ -2539,6 +2539,47 @@ body.layout-ultra .db-table{table-layout:auto;}
     <h2>🗺️ Smart Route Planner</h2>
     <p>Enter a zip code to generate an optimized driving route through nearby prospects, scored by close probability.</p>
   </div>
+  
+  <!-- ═══ DISCOVER PROSPECTS ═══ -->
+  <div style="background:linear-gradient(135deg,rgba(139,92,246,0.04),rgba(59,130,246,0.04));border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">🔍</div>
+      <div><strong style="font-size:14px;">Discover New Prospects</strong><br><span style="font-size:11px;color:var(--text-muted);">Search Google Places for businesses near a zip code and auto-add them to your pipeline (skips duplicates)</span></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;">
+      <div class="form-group" style="margin:0;flex:0 0 130px;">
+        <label style="font-size:11px;">Zip Code</label>
+        <input type="text" id="discoverZip" placeholder="e.g. 15001" maxlength="10" style="font-size:14px;font-weight:600;">
+      </div>
+      <div class="form-group" style="margin:0;flex:0 0 130px;">
+        <label style="font-size:11px;">Radius (miles)</label>
+        <select id="discoverRadius" style="font-size:13px;">
+          <option value="10">10 miles</option>
+          <option value="25" selected>25 miles</option>
+          <option value="50">50 miles</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;flex:0 0 180px;">
+        <label style="font-size:11px;">Business Type</label>
+        <select id="discoverType" style="font-size:13px;">
+          <option value="library">📚 Libraries</option>
+          <option value="church">⛪ Churches</option>
+          <option value="dentist">🦷 Dental Offices</option>
+          <option value="veterinary_care">🐾 Vet Clinics</option>
+          <option value="pharmacy">💊 Pharmacies</option>
+          <option value="gym">🏋️ Gyms</option>
+          <option value="accounting">📊 Accountants</option>
+          <option value="lawyer">⚖️ Law Offices</option>
+          <option value="real_estate_agency">🏠 Real Estate</option>
+          <option value="insurance_agency">🛡️ Insurance</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="discoverBtn" onclick="discoverProspects()" style="height:38px;white-space:nowrap;background:linear-gradient(135deg,#8b5cf6,#6d28d9);font-size:12px;">🔍 Discover & Add</button>
+    </div>
+    <div id="discoverResults" style="margin-top:10px;font-size:12px;color:var(--text-muted);"></div>
+  </div>
+  
+  <!-- ═══ ROUTE GENERATOR ═══ -->
   <div style="display:flex;gap:12px;align-items:end;margin-bottom:24px;flex-wrap:wrap;">
     <div class="form-group" style="margin:0;flex:0 0 160px;">
       <label>Starting Zip Code</label>
@@ -9562,6 +9603,7 @@ async function generateRoute() {
     });
     
     html += '</div>';
+    
     results.innerHTML = html;
     
   } catch(e) {
@@ -9654,6 +9696,58 @@ async function printRouteSheet() {
   printWin.document.write(printHTML);
   printWin.document.close();
   setTimeout(() => printWin.print(), 500);
+}
+
+// --- Discover Prospects from Google Places ---
+async function discoverProspects() {
+  const zip = document.getElementById('discoverZip').value.trim();
+  const radius = document.getElementById('discoverRadius').value;
+  const type = document.getElementById('discoverType').value;
+  const typeName = document.getElementById('discoverType').selectedOptions[0].textContent;
+  const btn = document.getElementById('discoverBtn');
+  const results = document.getElementById('discoverResults');
+  
+  if (!zip) { showToast('Enter a zip code', true); return; }
+  
+  btn.disabled = true; btn.textContent = '⏳ Searching...';
+  results.innerHTML = '<span style="color:var(--accent);">🔍 Searching Google Places for ' + typeName + ' near ' + zip + '...</span>';
+  
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST', headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'discoverProspects',
+        data: { zipCode: zip, radiusMiles: parseFloat(radius), placeType: type }
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    let html = '<div style="margin-top:8px;">';
+    html += '<strong style="color:var(--success);">✅ Found ' + data.totalFound + ' ' + typeName + '</strong>';
+    html += ' — <span style="color:var(--success);font-weight:600;">' + data.added + ' added to pipeline</span>';
+    if (data.skippedDuplicates > 0) html += ' · <span style="color:var(--warning);">' + data.skippedDuplicates + ' duplicates skipped</span>';
+    if (data.skippedNoAddress > 0) html += ' · <span style="color:var(--text-dim);">' + data.skippedNoAddress + ' had no address</span>';
+    
+    if (data.addedNames && data.addedNames.length > 0) {
+      html += '<div style="margin-top:8px;max-height:150px;overflow-y:auto;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);">';
+      data.addedNames.forEach(n => {
+        html += '<div style="padding:3px 0;font-size:11px;border-bottom:1px solid var(--border-light);">✅ ' + n + '</div>';
+      });
+      html += '</div>';
+    }
+    
+    html += '</div>';
+    results.innerHTML = html;
+    showToast('Added ' + data.added + ' new prospects!');
+    
+  } catch(e) {
+    results.innerHTML = '<span style="color:var(--danger);">❌ ' + e.message + '</span>';
+    showToast(e.message, true);
+  }
+  
+  btn.disabled = false; btn.textContent = '🔍 Discover & Add';
 }
 
 // --- Batch Geocode from Portal ---
