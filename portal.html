@@ -9615,7 +9615,7 @@ async function generateRoute() {
       if (stop.daysSinceActivity >= 30) intelBadges += '<span style="background:rgba(239,68,68,0.1);color:#dc2626;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">❄️ ' + stop.daysSinceActivity + 'd cold</span>';
       else if (stop.daysSinceActivity >= 14) intelBadges += '<span style="background:rgba(245,158,11,0.1);color:#d97706;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">🕐 ' + stop.daysSinceActivity + 'd ago</span>';
       
-      html += '<div style="display:flex;gap:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;' + (stop.isMunicipal ? 'border-left:3px solid #8b5cf6;' : '') + '">';
+      html += '<div onclick="openRouteProspect(\'' + stop.name.replace(/'/g, "\\'") + '\')" style="cursor:pointer;display:flex;gap:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;' + (stop.isMunicipal ? 'border-left:3px solid #8b5cf6;' : '') + '">';
       html += '<div style="min-width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#1fbf8a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;">' + (stop.routeOrder || (i+1)) + '</div>';
       html += '<div style="flex:1;">';
       html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;"><strong style="font-size:14px;">' + stop.name + '</strong>' + isMuni + stagePill + '</div>';
@@ -9869,6 +9869,20 @@ async function printRouteSheet() {
   printWin.document.write(printHTML);
   printWin.document.close();
   setTimeout(() => printWin.print(), 500);
+}
+
+// --- Open Prospect from Route Card ---
+function openRouteProspect(name) {
+  // Find the prospect in allProspects by name
+  var idx = allProspects.findIndex(function(p) {
+    return (p['Customer'] || '').toLowerCase().trim() === name.toLowerCase().trim();
+  });
+  if (idx >= 0) {
+    switchTab('pipeline', document.querySelector('.tab-btn'));
+    setTimeout(function() { selectProspect(idx); }, 300);
+  } else {
+    showToast('Prospect not found in pipeline', true);
+  }
 }
 
 // --- Route Type Filter ---
