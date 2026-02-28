@@ -9516,16 +9516,26 @@ async function generateRoute() {
       const isMuni = stop.isMunicipal ? '<span style="display:inline-block;background:rgba(139,92,246,0.1);color:#8b5cf6;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;margin-left:6px;">🏛️ MUNICIPALITY</span>' : '';
       const stagePill = stop.stage ? '<span style="display:inline-block;background:var(--surface-2);color:var(--text-dim);font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;">' + stop.stage + '</span>' : '';
       
+      // Activity intelligence badges
+      let intelBadges = '';
+      if (stop.hadDropIn) intelBadges += '<span style="background:rgba(249,115,22,0.1);color:#ea580c;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">🚪 Visited</span>';
+      if (stop.hadProposal) intelBadges += '<span style="background:rgba(239,68,68,0.1);color:#dc2626;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">📄 Proposal</span>';
+      if (stop.hadDemo) intelBadges += '<span style="background:rgba(16,185,129,0.1);color:#059669;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">🎯 Demo</span>';
+      if (stop.activityCount > 0) intelBadges += '<span style="background:rgba(46,107,255,0.08);color:var(--accent);font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">' + stop.activityCount + ' touches</span>';
+      if (stop.daysSinceActivity >= 30) intelBadges += '<span style="background:rgba(239,68,68,0.1);color:#dc2626;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">❄️ ' + stop.daysSinceActivity + 'd cold</span>';
+      else if (stop.daysSinceActivity >= 14) intelBadges += '<span style="background:rgba(245,158,11,0.1);color:#d97706;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;">🕐 ' + stop.daysSinceActivity + 'd ago</span>';
+      
       html += '<div style="display:flex;gap:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;' + (stop.isMunicipal ? 'border-left:3px solid #8b5cf6;' : '') + '">';
       html += '<div style="min-width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#1fbf8a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;">' + (stop.routeOrder || (i+1)) + '</div>';
       html += '<div style="flex:1;">';
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><strong style="font-size:14px;">' + stop.name + '</strong>' + isMuni + stagePill + '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;"><strong style="font-size:14px;">' + stop.name + '</strong>' + isMuni + stagePill + '</div>';
       html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">' + stop.address + '</div>';
+      if (intelBadges) html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">' + intelBadges + '</div>';
       if (stop.reason) html += '<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">' + stop.reason + '</div>';
-      html += '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">';
+      html += '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;align-items:center;">';
       if (stop.drivingTime) html += '<span>🚗 ' + stop.drivingTime + '</span>';
       if (stop.drivingDistance) html += '<span>📏 ' + stop.drivingDistance + '</span>';
-      html += '<span>📊 Score: ' + stop.score + '</span>';
+      html += '<span title="' + (stop.scoreBreakdown ? stop.scoreBreakdown.join('\n') : '') + '" style="cursor:help;text-decoration:underline dotted;">📊 Score: ' + stop.score + '</span>';
       if (stop.contact) html += '<span>👤 ' + stop.contact + '</span>';
       if (stop.phone) html += '<span>📞 ' + stop.phone + '</span>';
       html += '</div>';
