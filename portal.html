@@ -1114,7 +1114,7 @@ body.layout-ultra .db-table{table-layout:auto;}
   <button class="tab-btn" onclick="switchTab('demo',this)">Demo<span class="tab-indicator ind-orange">SHOW</span></button>
   <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
   <button class="tab-btn" onclick="switchTab('battleboard',this)">Battleboard<span class="tab-indicator" style="background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);">⚔️</span></button>
-  <button class="tab-btn" onclick="switchTab('expenses',this);renderExpenses();">Expenses<span class="tab-indicator" style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">💰</span></button>
+  <button class="tab-btn" onclick="switchTab('expenses',this);renderExpenses();initMileageDate();">Expenses<span class="tab-indicator" style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">💰</span></button>
   <button class="tab-btn" onclick="switchTab('routeplanner',this);initRoutePlanner();">Route Planner<span class="tab-indicator" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);">🗺️</span></button>
 </div>
 
@@ -2342,6 +2342,76 @@ body.layout-ultra .db-table{table-layout:auto;}
   <div class="form-header">
     <h2>💰 Business Expenses — SwitchPoint Backup LLC</h2>
     <p>Track expenses for Schedule C tax filing. PA single-member LLC (pass-through to 1040).</p>
+  </div>
+
+  <!-- MILEAGE TRACKER -->
+  <div class="exp-form" id="mileageTracker" style="border-left:3px solid #8b5cf6;margin-bottom:16px;">
+    <div class="exp-form-header" onclick="document.getElementById('mileageBody').classList.toggle('collapsed')" style="background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(59,130,246,0.04));">
+      <span>🚗 Mileage Tracker — IRS Standard Rate</span>
+      <span class="bb-chevron" style="font-size:14px;">›</span>
+    </div>
+    <div id="mileageBody">
+      <div id="mileageIdle" style="padding:16px;">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Start tracking when you leave, stop when you're back. Auto-calculates IRS deduction at <strong>$0.70/mile (2025 rate)</strong>.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group" style="margin:0;">
+            <label>Date</label>
+            <input type="date" id="mileDate">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Vehicle</label>
+            <select id="mileVehicle">
+              <option value="Ford C-Max (Personal)">Ford C-Max (Personal)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Starting Odometer</label>
+            <input type="number" id="mileStart" placeholder="e.g. 87432" step="1">
+          </div>
+        </div>
+        <div class="form-group" style="margin:0 0 12px 0;">
+          <label>Trip Purpose</label>
+          <input type="text" id="milePurpose" placeholder="e.g. Saturday library drop-ins, prospect visits, customer install" value="SwitchPoint Backup — prospect visits & drop-ins">
+        </div>
+        <button class="btn btn-primary" onclick="startMileageTrip()" style="font-size:12px;padding:8px 20px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);">🚗 Start Trip</button>
+      </div>
+      
+      <div id="mileageActive" style="padding:16px;display:none;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;animation:pulse 2s infinite;">🚗</div>
+          <div>
+            <strong style="font-size:14px;color:var(--success);">Trip In Progress</strong><br>
+            <span style="font-size:11px;color:var(--text-muted);" id="mileActiveInfo">Started at — mi</span>
+          </div>
+          <div style="margin-left:auto;text-align:right;">
+            <div style="font-size:10px;color:var(--text-dim);">ELAPSED</div>
+            <div style="font-size:16px;font-weight:700;font-family:var(--mono);" id="mileElapsed">0:00</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group" style="margin:0;">
+            <label>Ending Odometer</label>
+            <input type="number" id="mileEnd" placeholder="e.g. 87510" step="1">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Calculated</label>
+            <div style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;">
+              <span id="mileCalcMiles">—</span> miles · <strong id="mileCalcDeduction">$0.00</strong> deduction
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-success" onclick="endMileageTrip()" style="font-size:12px;padding:8px 20px;">✅ End Trip & Save</button>
+          <button class="btn btn-secondary" onclick="cancelMileageTrip()" style="font-size:11px;padding:7px 14px;">Cancel</button>
+        </div>
+      </div>
+      
+      <!-- Mileage Log -->
+      <div style="padding:0 16px 16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin:8px 0 6px;text-transform:uppercase;letter-spacing:0.5px;">Recent Mileage Log</div>
+        <div id="mileageLog" style="font-size:12px;color:var(--text-muted);">Loading...</div>
+      </div>
+    </div>
   </div>
 
   <!-- EXPENSE ENTRY FORM -->
@@ -8452,6 +8522,182 @@ function togglePresenceBar() {
 // Presence is initialized from showApp() after successful auth
 
 // =======================================================================
+// MILEAGE TRACKER — IRS Standard Rate
+// =======================================================================
+const IRS_MILEAGE_RATE = 0.70; // 2025 IRS standard mileage rate
+let mileageTimer = null;
+let mileageTripStart = null;
+
+function initMileageDate() {
+  var d = document.getElementById('mileDate');
+  if (d && !d.value) d.value = new Date().toISOString().slice(0,10);
+  renderMileageLog();
+  // Restore active trip from sessionStorage
+  var saved = sessionStorage.getItem('sp_active_trip');
+  if (saved) {
+    try {
+      var trip = JSON.parse(saved);
+      mileageTripStart = new Date(trip.startTime);
+      document.getElementById('mileageIdle').style.display = 'none';
+      document.getElementById('mileageActive').style.display = 'block';
+      document.getElementById('mileActiveInfo').textContent = 'Started at ' + trip.startOdo + ' mi · ' + trip.vehicle + ' · ' + trip.date;
+      startMileageElapsed();
+    } catch(e) {}
+  }
+}
+
+function startMileageTrip() {
+  var date = document.getElementById('mileDate').value;
+  var vehicle = document.getElementById('mileVehicle').value;
+  var startOdo = document.getElementById('mileStart').value;
+  var purpose = document.getElementById('milePurpose').value.trim();
+  
+  if (!date) { showToast('Enter a date', true); return; }
+  if (!startOdo) { showToast('Enter your starting odometer reading', true); return; }
+  
+  mileageTripStart = new Date();
+  
+  // Save to sessionStorage so it survives page refresh
+  sessionStorage.setItem('sp_active_trip', JSON.stringify({
+    date: date, vehicle: vehicle, startOdo: startOdo, purpose: purpose, startTime: mileageTripStart.toISOString()
+  }));
+  
+  document.getElementById('mileageIdle').style.display = 'none';
+  document.getElementById('mileageActive').style.display = 'block';
+  document.getElementById('mileActiveInfo').textContent = 'Started at ' + Number(startOdo).toLocaleString() + ' mi · ' + vehicle + ' · ' + date;
+  document.getElementById('mileEnd').value = '';
+  document.getElementById('mileCalcMiles').textContent = '—';
+  document.getElementById('mileCalcDeduction').textContent = '$0.00';
+  
+  startMileageElapsed();
+  showToast('Trip started! Drive safe 🚗');
+}
+
+function startMileageElapsed() {
+  if (mileageTimer) clearInterval(mileageTimer);
+  mileageTimer = setInterval(function() {
+    if (!mileageTripStart) return;
+    var elapsed = Date.now() - mileageTripStart.getTime();
+    var hrs = Math.floor(elapsed / 3600000);
+    var mins = Math.floor((elapsed % 3600000) / 60000);
+    document.getElementById('mileElapsed').textContent = hrs + ':' + String(mins).padStart(2, '0');
+  }, 10000);
+}
+
+// Live calculation as they type ending odometer
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'mileEnd') {
+    var saved = sessionStorage.getItem('sp_active_trip');
+    if (!saved) return;
+    var trip = JSON.parse(saved);
+    var endOdo = parseFloat(e.target.value) || 0;
+    var startOdo = parseFloat(trip.startOdo) || 0;
+    var miles = endOdo - startOdo;
+    if (miles > 0) {
+      document.getElementById('mileCalcMiles').textContent = miles.toFixed(1);
+      document.getElementById('mileCalcDeduction').textContent = '$' + (miles * IRS_MILEAGE_RATE).toFixed(2);
+    } else {
+      document.getElementById('mileCalcMiles').textContent = '—';
+      document.getElementById('mileCalcDeduction').textContent = '$0.00';
+    }
+  }
+});
+
+function endMileageTrip() {
+  var saved = sessionStorage.getItem('sp_active_trip');
+  if (!saved) { showToast('No active trip', true); return; }
+  var trip = JSON.parse(saved);
+  
+  var endOdo = document.getElementById('mileEnd').value;
+  if (!endOdo) { showToast('Enter your ending odometer reading', true); return; }
+  
+  var startOdo = parseFloat(trip.startOdo);
+  var endOdoNum = parseFloat(endOdo);
+  var miles = endOdoNum - startOdo;
+  
+  if (miles <= 0) { showToast('Ending odometer must be greater than starting', true); return; }
+  if (miles > 1000) { if (!confirm('That\'s ' + miles + ' miles — are you sure?')) return; }
+  
+  var deduction = miles * IRS_MILEAGE_RATE;
+  
+  // Auto-save as expense
+  var expData = {
+    action: editingExpenseId ? 'updateExpense' : 'addExpense',
+    data: {
+      date: trip.date,
+      amount: deduction.toFixed(2),
+      vendor: 'IRS Mileage Deduction',
+      category: 'Vehicle',
+      payment: 'N/A (Mileage Deduction)',
+      paidTo: '',
+      notes: '🚗 MILEAGE: ' + miles.toFixed(1) + ' mi × $' + IRS_MILEAGE_RATE.toFixed(2) + '/mi = $' + deduction.toFixed(2) + ' | ' + trip.vehicle + ' | ODO: ' + startOdo + ' → ' + endOdoNum + ' | Purpose: ' + trip.purpose,
+      receipt: 'N/A',
+      deductible: '100%',
+      reimbursable: 'No'
+    }
+  };
+  
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST', headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify(expData)
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      showToast('✅ ' + miles.toFixed(1) + ' miles logged — $' + deduction.toFixed(2) + ' deduction saved!');
+      sessionStorage.removeItem('sp_active_trip');
+      if (mileageTimer) clearInterval(mileageTimer);
+      mileageTripStart = null;
+      document.getElementById('mileageIdle').style.display = 'block';
+      document.getElementById('mileageActive').style.display = 'none';
+      document.getElementById('mileStart').value = endOdo; // Next trip starts where this one ended
+      document.getElementById('mileDate').value = new Date().toISOString().slice(0,10);
+      loadExpenses(); // Refresh expense list
+      renderMileageLog();
+    } else {
+      showToast('Error saving: ' + (data.error || 'Unknown'), true);
+    }
+  }).catch(function(e) { showToast('Save failed: ' + e.message, true); });
+}
+
+function cancelMileageTrip() {
+  if (!confirm('Cancel this trip? No mileage will be logged.')) return;
+  sessionStorage.removeItem('sp_active_trip');
+  if (mileageTimer) clearInterval(mileageTimer);
+  mileageTripStart = null;
+  document.getElementById('mileageIdle').style.display = 'block';
+  document.getElementById('mileageActive').style.display = 'none';
+  showToast('Trip cancelled');
+}
+
+function renderMileageLog() {
+  var log = document.getElementById('mileageLog');
+  if (!log) return;
+  
+  // Filter expenses for mileage entries
+  var mileageEntries = allExpenses.filter(function(e) {
+    return (e.Category === 'Vehicle' || e.Vendor === 'IRS Mileage Deduction') && (e.Notes || '').includes('MILEAGE:');
+  }).sort(function(a, b) { return (b.Date || '').localeCompare(a.Date || ''); }).slice(0, 10);
+  
+  if (mileageEntries.length === 0) {
+    log.innerHTML = '<div style="color:var(--text-dim);padding:8px 0;">No mileage entries yet. Start your first trip above!</div>';
+    return;
+  }
+  
+  var html = '<table style="width:100%;font-size:11px;border-collapse:collapse;">';
+  html += '<tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:4px;color:var(--text-dim);">DATE</th><th style="text-align:left;padding:4px;">NOTES</th><th style="text-align:right;padding:4px;">DEDUCTION</th></tr>';
+  mileageEntries.forEach(function(e) {
+    // Extract miles from notes
+    var milesMatch = (e.Notes || '').match(/(\d+\.?\d*) mi/);
+    var miles = milesMatch ? milesMatch[1] : '?';
+    html += '<tr style="border-bottom:1px solid var(--border-light);">';
+    html += '<td style="padding:4px;font-family:var(--mono);">' + (e.Date || '') + '</td>';
+    html += '<td style="padding:4px;">' + miles + ' mi — ' + ((e.Notes || '').split('Purpose: ')[1] || '').split('|')[0] + '</td>';
+    html += '<td style="padding:4px;text-align:right;font-weight:700;color:var(--success);font-family:var(--mono);">$' + parseFloat(e.Amount || 0).toFixed(2) + '</td>';
+    html += '</tr>';
+  });
+  html += '</table>';
+  log.innerHTML = html;
+}
+
 // EXPENSES TRACKER — Tax-ready expense management (v18)
 // =======================================================================
 let allExpenses = [];
