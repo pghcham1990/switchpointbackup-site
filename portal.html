@@ -2563,8 +2563,11 @@ body.layout-ultra .db-table{table-layout:auto;}
       <select id="routeMaxStops">
         <option value="4">4 stops</option>
         <option value="6">6 stops</option>
-        <option value="8" selected>8 stops</option>
-        <option value="10">10 stops</option>
+        <option value="8">8 stops</option>
+        <option value="10" selected>10 stops</option>
+        <option value="15">15 stops</option>
+        <option value="20">20 stops</option>
+        <option value="25">25 stops</option>
       </select>
     </div>
     <button class="btn btn-primary" id="routeGenBtn" onclick="generateRoute()" style="height:40px;white-space:nowrap;">🗺️ Generate Route</button>
@@ -2572,6 +2575,10 @@ body.layout-ultra .db-table{table-layout:auto;}
     <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-left:8px;user-select:none;">
       <input type="checkbox" id="routeSkipMuni" style="width:15px;height:15px;cursor:pointer;">
       Skip municipalities (closed weekends)
+    </label>
+    <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-left:8px;user-select:none;">
+      <input type="checkbox" id="routeNewOnly" style="width:15px;height:15px;cursor:pointer;">
+      Unvisited only (no previous drop-ins)
     </label>
   </div>
   <div id="routeResults" style="min-height:200px;">
@@ -9491,7 +9498,7 @@ async function generateRoute() {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
         action: 'generateSmartRoute',
-        data: { zipCode: zip, radiusMiles: parseFloat(radius), maxStops: parseInt(maxStops), skipMunicipalities: document.getElementById('routeSkipMuni').checked }
+        data: { zipCode: zip, radiusMiles: parseFloat(radius), maxStops: parseInt(maxStops), skipMunicipalities: document.getElementById('routeSkipMuni').checked, unvisitedOnly: document.getElementById('routeNewOnly').checked }
       })
     });
     const data = await resp.json();
