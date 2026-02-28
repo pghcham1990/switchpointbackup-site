@@ -41,6 +41,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+[data-gv-injected], .gv-dialer-icon, img[src*="voice.google.com"], img[src*="googlevoice"], [class*="gv-"], [id*="gv-injected"], a[href*="voice.google.com/calls"] img, span[data-gv-injected] img{display:none !important;width:0 !important;height:0 !important;overflow:hidden !important;}
 body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(ellipse 900px 600px at 8% 15%,rgba(46,107,255,.08),transparent 55%),radial-gradient(ellipse 700px 500px at 92% 8%,rgba(31,191,138,.06),transparent 50%),radial-gradient(ellipse 600px 500px at 50% 60%,rgba(139,92,246,.04),transparent 50%);animation:meshDrift 20s ease-in-out infinite alternate;}
 @keyframes meshDrift{0%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.02)}66%{transform:translate(-20px,15px) scale(0.98)}100%{transform:translate(10px,-10px) scale(1.01)}}
 .app{position:relative;z-index:1;}
@@ -2568,6 +2569,10 @@ body.layout-ultra .db-table{table-layout:auto;}
     </div>
     <button class="btn btn-primary" id="routeGenBtn" onclick="generateRoute()" style="height:40px;white-space:nowrap;">🗺️ Generate Route</button>
     <button class="btn btn-secondary" id="geocodeBtn" onclick="geocodeBatch()" style="height:40px;white-space:nowrap;font-size:12px;">📍 Geocode Prospects</button>
+    <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-left:8px;user-select:none;">
+      <input type="checkbox" id="routeSkipMuni" style="width:15px;height:15px;cursor:pointer;">
+      Skip municipalities (closed weekends)
+    </label>
   </div>
   <div id="routeResults" style="min-height:200px;">
     <div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
@@ -9486,7 +9491,7 @@ async function generateRoute() {
       method: 'POST', headers: {'Content-Type':'text/plain'},
       body: JSON.stringify({
         action: 'generateSmartRoute',
-        data: { zipCode: zip, radiusMiles: parseFloat(radius), maxStops: parseInt(maxStops) }
+        data: { zipCode: zip, radiusMiles: parseFloat(radius), maxStops: parseInt(maxStops), skipMunicipalities: document.getElementById('routeSkipMuni').checked }
       })
     });
     const data = await resp.json();
