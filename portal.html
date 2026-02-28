@@ -2563,6 +2563,7 @@ body.layout-ultra .db-table{table-layout:auto;}
       </select>
     </div>
     <button class="btn btn-primary" id="routeGenBtn" onclick="generateRoute()" style="height:40px;white-space:nowrap;">🗺️ Generate Route</button>
+    <button class="btn btn-secondary" id="geocodeBtn" onclick="geocodeBatch()" style="height:40px;white-space:nowrap;font-size:12px;">📍 Geocode Prospects</button>
   </div>
   <div id="routeResults" style="min-height:200px;">
     <div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
@@ -9489,7 +9490,11 @@ async function generateRoute() {
     if (data.error) throw new Error(data.error);
     
     if (!data.stops || data.stops.length === 0) {
-      results.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);"><div style="font-size:36px;margin-bottom:12px;">🤷</div><p>No actionable prospects found within ' + radius + ' miles of ' + zip + '.</p><p style="font-size:12px;">Try a larger radius or add more prospects to the pipeline.</p></div>';
+      const noMsg = data.message || ('No actionable prospects within ' + radius + ' mi of ' + zip);
+      const ungeo = data.ungeocodedCount || 0;
+      results.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);"><div style="font-size:36px;margin-bottom:12px;">🤷</div><p>' + noMsg + '</p>'
+        + (ungeo > 0 ? '<p style="font-size:13px;color:var(--warning);margin-top:12px;">⚠️ <strong>' + ungeo + ' prospects</strong> need geocoding before they can appear in routes.</p><button class="btn btn-primary" onclick="geocodeBatch()" style="margin-top:8px;">📍 Geocode Now</button>' : '<p style="font-size:12px;">Try a larger radius or add more prospects.</p>')
+        + '</div>';
       btn.disabled = false; btn.textContent = '🗺️ Generate Route';
       return;
     }
@@ -9502,6 +9507,7 @@ async function generateRoute() {
     html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;"><strong>' + data.stops.length + '</strong> stops from <strong>' + data.totalCandidates + '</strong> prospects</div>';
     if (totalDist) html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;">🚗 <strong>' + totalDist + ' mi</strong> total</div>';
     if (totalTime) html += '<div style="background:var(--surface-2);padding:10px 16px;border-radius:var(--radius-lg);font-size:13px;">⏱ <strong>' + totalTime + ' min</strong> driving</div>';
+    if (data.ungeocodedCount > 0) html += '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:8px 14px;border-radius:var(--radius-lg);font-size:12px;color:#b45309;">⚠️ ' + data.ungeocodedCount + ' prospects skipped (not geocoded). <a href="#" onclick="geocodeBatch();return false;" style="color:var(--accent);font-weight:600;">Geocode them now</a></div>';
     html += '<a href="https://www.google.com/maps/dir/' + data.origin.lat + ',' + data.origin.lng + '/' + data.stops.map(s => s.lat + ',' + s.lng).join('/') + '" target="_blank" class="btn btn-primary" style="font-size:12px;padding:8px 16px;">📍 Open in Google Maps</a>';
     html += '</div>';
     
@@ -9534,6 +9540,40 @@ async function generateRoute() {
   }
   
   btn.disabled = false; btn.textContent = '🗺️ Generate Route';
+}
+
+// --- Batch Geocode from Portal ---
+async function geocodeBatch() {
+  const btn = document.getElementById('geocodeBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Geocoding...'; }
+  const results = document.getElementById('routeResults');
+  
+  let totalGeocoded = 0;
+  let remaining = 999;
+  let rounds = 0;
+  
+  while (remaining > 0 && rounds < 10) {
+    rounds++;
+    try {
+      const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain'},
+        body: JSON.stringify({ action: 'batchGeocodeProspects', data: { batchSize: 20 } })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      totalGeocoded += data.geocoded || 0;
+      remaining = data.remaining || 0;
+      if (results) results.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner" style="width:28px;height:28px;"></div><br><br><span style="color:var(--text-muted);">📍 Geocoded ' + totalGeocoded + ' prospects... ' + remaining + ' remaining</span></div>';
+      if (data.geocoded === 0) break; // No more to geocode
+    } catch(e) {
+      showToast('❌ Geocoding error: ' + e.message, true);
+      break;
+    }
+  }
+  
+  if (btn) { btn.disabled = false; btn.textContent = '📍 Geocode Prospects'; }
+  showToast('✅ Geocoded ' + totalGeocoded + ' prospects! ' + (remaining > 0 ? remaining + ' remaining.' : 'All done.'));
+  if (results && remaining === 0) results.innerHTML = '<div style="text-align:center;padding:40px;color:var(--success);"><div style="font-size:36px;margin-bottom:12px;">✅</div><p>All prospects geocoded! Click <strong>Generate Route</strong> to plan your route.</p></div>';
 }
 
 // =======================================================================
