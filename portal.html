@@ -4014,10 +4014,62 @@ function renderStageFilters() {
   const noContactCount = allProspects.filter(p => !p['Contact'] || !p['Contact'].trim()).length;
   if(noEmailCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_email',this)">No Email<span class="count">${noEmailCount}</span></button>`;
   if(noContactCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_contact',this)">No Contact<span class="count">${noContactCount}</span></button>`;
+  if(noEmailCount) html += `<button class="stage-pill" id="enrichEmailsBtn" style="border-color:rgba(31,191,138,0.4);color:rgb(20,140,90);margin-left:8px;" onclick="enrichEmails()">🔍 Enrich Emails</button>`;
   container.innerHTML = html;
 }
 
 let currentStageFilter = 'all';
+async function enrichEmails() {
+  const btn = document.getElementById('enrichEmailsBtn');
+  if (!btn) return;
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Enriching...';
+  btn.style.opacity = '0.6';
+  showToast('Starting email enrichment — scraping prospect websites for emails. This may take a few minutes...', 'info');
+
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'enrichEmails' })
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      showToast('Enrichment error: ' + data.error, 'error');
+    } else {
+      const msg = `✅ Enrichment complete: ${data.enriched} emails found, ${data.failed} no email on site, ${data.noUrl} had no URL to check`;
+      showToast(msg, 'success');
+
+      // Log activity
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'addActivity',
+          data: { id: String(Date.now()), prospect: 'System', type: 'Note', text: '🔍 Email enrichment: ' + data.enriched + ' found, ' + data.failed + ' failed, ' + data.noUrl + ' no URL', followUp: '', timestamp: new Date().toISOString(), user: sessionStorage.getItem('sp_user') || 'scott', deleted: '' }
+        })
+      }).catch(e => {});
+
+      // Refresh prospect data
+      const prosResp = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getProspects');
+      const prosData = await prosResp.json();
+      if (Array.isArray(prosData)) {
+        allProspects = prosData;
+        renderStageFilters();
+        filterProspects();
+      }
+    }
+  } catch (err) {
+    showToast('Enrichment failed: ' + err.toString(), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+    btn.style.opacity = '1';
+  }
+}
+
 function filterByStage(stage, btn) {
   currentStageFilter = stage;
   document.querySelectorAll('.stage-pill').forEach(p=>p.classList.remove('active'));
