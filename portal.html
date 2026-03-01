@@ -4040,8 +4040,10 @@ async function apolloEnrichEmails() {
     if (data.error) {
       showToast('Apollo error: ' + data.error, 'error');
     } else {
-      const msg = `🚀 Apollo complete: ${data.enriched} emails found, ${data.contactsFilled || 0} contacts filled, ${data.failed} no match`;
-      showToast(msg, 'success');
+      let msg = `🚀 Apollo complete: ${data.enriched} emails found, ${data.contactsFilled || 0} contacts filled, ${data.failed} no match`;
+      if (data.rateLimited) msg += ' ⚠️ Rate limited — wait a few min and try again';
+      if (data.errors && data.errors.length) msg += '\nFirst error: ' + data.errors[0];
+      showToast(msg, data.enriched > 0 ? 'success' : 'warning');
 
       // Log activity
       fetch(CONFIG.APPS_SCRIPT_URL, {
