@@ -274,6 +274,35 @@ textarea{resize:vertical;min-height:64px;}
 .ce-old{color:var(--danger);text-decoration:line-through;opacity:0.6;font-size:11px;}
 .ce-new{color:var(--success);font-weight:600;font-size:11px;}
 .ce-empty{color:var(--text-dim);font-style:italic;font-size:10px;opacity:0.5;}
+
+/* TICKET SYSTEM v21 */
+.ticket-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;animation:ticketPulse 2s ease-in-out infinite;}
+.ticket-badge-open{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);}
+.ticket-badge-closed{background:rgba(16,185,129,0.10);color:#10b981;border:1px solid rgba(16,185,129,0.2);animation:none;}
+@keyframes ticketPulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
+.ticket-resolve-btn{font-size:11px;padding:4px 10px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:6px;cursor:pointer;transition:all 0.15s;}
+.ticket-resolve-btn:hover{background:#10b981;color:#fff;}
+.ticket-card{border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:all 0.2s;}
+.ticket-card-open{background:var(--bg);border:1px solid rgba(239,68,68,0.25);border-left:3px solid #ef4444;}
+.ticket-card-closed{background:var(--surface-2);border:1px solid var(--border);opacity:0.65;}
+.ticket-card-open:hover{border-color:rgba(239,68,68,0.4);box-shadow:0 2px 8px rgba(239,68,68,0.08);}
+/* Customer portal v21 visual upgrades */
+.cp-hero{background:linear-gradient(135deg,rgba(46,107,255,0.04),rgba(139,92,246,0.04));border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:24px;}
+.cp-stat-card{background:var(--surface-2);padding:16px;border-radius:12px;text-align:center;border:1px solid var(--border);transition:all 0.2s;}
+.cp-stat-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.cp-stat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.cp-stat-value{font-size:16px;font-weight:700;}
+.cp-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+.cp-section-header{padding:14px 18px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.cp-section-header:hover{background:var(--surface-2);}
+.cp-section-body{padding:16px 18px;}
+.cp-ticket-card{border-radius:10px;padding:16px;margin-bottom:10px;transition:all 0.2s;}
+.cp-ticket-open{background:linear-gradient(135deg,rgba(239,68,68,0.03),rgba(239,68,68,0.06));border:1px solid rgba(239,68,68,0.2);border-left:3px solid #ef4444;}
+.cp-ticket-closed{background:var(--surface-2);border:1px solid var(--border);opacity:0.6;}
+.cp-ticket-open:hover{box-shadow:0 2px 10px rgba(239,68,68,0.08);}
+.cp-status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.cp-status-online{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,0.4);animation:pulse 2s infinite;}
+.cp-status-offline{background:#94a3b8;}
 /* Support ticket priority badges */
 .act-priority{font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;}
 .act-priority-Normal{background:var(--accent-glow);color:var(--accent);}
@@ -1268,6 +1297,7 @@ body.layout-ultra .db-table{table-layout:auto;}
         <button class="detail-close" id="stripeBillingBtn" onclick="openStripeBilling()" style="color:var(--success);border-color:rgba(31,191,138,0.3);">💳 Billing</button>
         <button class="detail-close" id="dataExtBtn" onclick="openDataExtension()" style="color:#f59e0b;border-color:rgba(245,158,11,0.3);">📡 Data Add-On</button>
         <button class="detail-close" id="custLoginBtn" onclick="createCustomerLoginFromDetail()" style="color:#8b5cf6;border-color:rgba(139,92,246,0.3);">🔐 Create Login</button>
+        <button class="detail-close" id="resolveTicketBtn" onclick="openTicketManager()" style="color:#ef4444;border-color:rgba(239,68,68,0.3);display:none;">🎫 Tickets <span id="openTicketCount" style="background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:2px;"></span></button>
         <button class="detail-close" id="resetCycleBtn" onclick="resetBillingCycleFromDetail()" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">🔄 Reset Cycle</button>
         <button class="detail-close" id="editToggleBtn" onclick="toggleEditMode()" style="color:var(--accent);border-color:rgba(59,130,246,0.3);">✎ Edit</button>
         <button class="detail-close" onclick="closeDetail()">✕ Close</button>
@@ -1275,6 +1305,18 @@ body.layout-ultra .db-table{table-layout:auto;}
     </div>
     <div class="detail-body"><div class="detail-sections" id="detailSections"></div>
       <!-- CUSTOMER ACTIVITY TIMELINE (v11.2) -->
+
+          <!-- TICKET MANAGER PANEL (v21) -->
+          <div class="detail-section" id="ticketManagerPanel" style="display:none;">
+            <div class="detail-section-header" onclick="toggleSection(this)" style="position:relative;">
+              🎫 Support Tickets
+              <span id="ticketPanelCount" style="position:absolute;right:40px;background:#ef4444;color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;"></span>
+            </div>
+            <div class="detail-section-body" style="display:block;padding:12px;max-height:400px;overflow-y:auto;" id="ticketManagerContent">
+              Loading tickets...
+            </div>
+          </div>
+
       <div class="cust-activity-col">
         <!-- STRIPE BILLING PANEL (v8) -->
         <div class="detail-section" id="stripeBillingPanel" style="display:none;">
@@ -3284,32 +3326,41 @@ function loadCustomerPortalData() {
     })).filter(a => !a.deleted && a.prospect.toLowerCase() === (myCust['Customer Name']||'').toLowerCase()).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
 
     container.innerHTML = `
-      <div class="panel" style="max-width:900px;margin:0 auto;">
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
-          <div class="logo-mark" style="width:56px;height:56px;font-size:20px;">SP</div>
-          <div>
-            <h2 style="margin:0;font-size:20px;">${myCust['Customer Name']}</h2>
-            <p style="margin:2px 0 0;color:var(--text-muted);font-size:13px;">${myCust['Unique Customer ID']||''} · ${plan} · $${mrc}/mo</p>
+      <div class="panel" style="max-width:960px;margin:0 auto;">
+        <!-- Hero Section -->
+        <div class="cp-hero">
+          <div style="display:flex;align-items:center;gap:18px;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#2e6bff,#8b5cf6);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:800;letter-spacing:-1px;box-shadow:0 4px 12px rgba(46,107,255,0.25);">SP</div>
+            <div style="flex:1;">
+              <h2 style="margin:0;font-size:22px;font-weight:800;">${myCust['Customer Name']}</h2>
+              <p style="margin:4px 0 0;color:var(--text-muted);font-size:13px;">${myCust['Unique Customer ID']||''} · ${plan} · $\${mrc}/mo</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#10b981;background:rgba(16,185,129,0.08);padding:6px 14px;border-radius:20px;border:1px solid rgba(16,185,129,0.2);">
+                <span class="cp-status-dot cp-status-online"></span> Active
+              </span>
+              <span style="font-size:10px;color:var(--text-dim);">Member since \${myCust['Service Start Date']||'—'}</span>
+            </div>
           </div>
-          <div style="margin-left:auto;"><span class="pill" style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 12px;">Active</span></div>
         </div>
 
+        <!-- Status Cards -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
-          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
-            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Service Plan</div>
-            <div style="font-size:15px;font-weight:700;">${plan}</div>
+          <div class="cp-stat-card">
+            <div class="cp-stat-label">Service Plan</div>
+            <div class="cp-stat-value" style="color:var(--accent);">${plan}</div>
           </div>
-          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
-            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Monthly Cost</div>
-            <div style="font-size:15px;font-weight:700;">$${mrc}</div>
+          <div class="cp-stat-card">
+            <div class="cp-stat-label">Monthly Cost</div>
+            <div class="cp-stat-value" style="color:var(--success);">$\${mrc}</div>
           </div>
-          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
-            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">LTE Usage</div>
-            <div style="font-size:15px;font-weight:700;">${lteUsage} / ${dataCap} GB</div>
+          <div class="cp-stat-card">
+            <div class="cp-stat-label">LTE Usage</div>
+            <div class="cp-stat-value">${lteUsage} / ${dataCap} GB</div>
           </div>
-          <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-lg);text-align:center;">
-            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;">Last Failover</div>
-            <div style="font-size:13px;font-weight:600;">${lastFailover}</div>
+          <div class="cp-stat-card">
+            <div class="cp-stat-label">Last Failover</div>
+            <div class="cp-stat-value" style="font-size:13px;">${lastFailover}</div>
           </div>
         </div>
 
@@ -3652,14 +3703,15 @@ function fetchActivities() {
         followUp: a['Follow-Up'] || a['followUp'] || '',
         timestamp: a['Timestamp'] || a['timestamp'] || '',
         user: a['User'] || a['user'] || 'scott',
-        deleted: (a['Deleted'] || a['deleted'] || '') === 'true' || a['Deleted'] === true || a['deleted'] === true
+        deleted: (a['Deleted'] || a['deleted'] || '') === 'true' || a['Deleted'] === true || a['deleted'] === true,
+        ticketStatus: a['Ticket Status'] || a['ticketStatus'] || ''
       }));
       activities.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
       activitiesLoaded = true;
       renderGlobalActivity();
       renderDashboard();
       if(selectedProspectIdx >= 0) renderProsActivity(allProspects[selectedProspectIdx]);
-      if(selectedCustomerIdx >= 0) renderCustActivity(allCustomers[selectedCustomerIdx]);
+      if(selectedCustomerIdx >= 0) { renderCustActivity(allCustomers[selectedCustomerIdx]); checkCustomerTickets(allCustomers[selectedCustomerIdx]); }
       if(allProspects.length) renderProspectTable(getFilteredProspects());
     } else {
       console.log('Activities not yet available:', data);
@@ -3734,19 +3786,49 @@ function renderCustomerTable(customers) {
   const tbody=document.getElementById('dbTableBody');
   document.getElementById('dbCount').textContent=customers.length;
   if(!customers.length){ tbody.innerHTML='<tr><td colspan="8"><div class="no-data"><h3>No customers found</h3></div></td></tr>'; return; }
-  tbody.innerHTML=customers.map((c,i)=>{
-    const bp=getPill(c['Billing Status']);
-    const sv=String(c['Setup Complete']||'').toLowerCase();
-    const sp=(sv==='yes'||sv==='true'||sv==='yes')?'<span class="pill pill-green">Complete</span>':'<span class="pill pill-yellow">Pending</span>';
-    return `<tr onclick="selectCustomer(${i})" class="${i===selectedCustomerIdx?'selected':''}">
-      <td style="font-family:var(--mono);font-size:11px;color:var(--accent);">${c['Unique Customer ID']||''}</td>
-      <td><strong>${c['Customer Name']||''}</strong><br><span style="font-size:11px;color:var(--text-dim);">${c['Primary Contact Name']||''}</span></td>
-      <td>${c['Service Plan']||'—'}</td>
-      <td style="font-family:var(--mono);">${c['Monthly MRC ($)']?'$'+c['Monthly MRC ($)']:'—'}</td>
-      <td>${bp}</td><td>${sp}</td>
-      <td style="font-size:11px;">${c['Primary ISP']||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;">${c['Peplink Device ID']||'—'}</td>
-    </tr>`;
+  
+  // Count open tickets per customer
+  var custTickets = {};
+  (activities||[]).forEach(function(a) {
+    if (a.deleted) return;
+    var txt = (a.text||'').toLowerCase();
+    var status = (a.ticketStatus || a['Ticket Status'] || '').trim().toLowerCase();
+    if ((txt.includes('support request') || txt.includes('🎫') || txt.includes('🚨')) && status !== 'closed') {
+      var cName = (a.prospect || '').toLowerCase();
+      custTickets[cName] = (custTickets[cName] || 0) + 1;
+    }
+  });
+  
+  // Sort: customers with open tickets first
+  var sorted = customers.slice().sort(function(a, b) {
+    var aName = (a['Customer Name']||'').toLowerCase();
+    var bName = (b['Customer Name']||'').toLowerCase();
+    var aTickets = custTickets[aName] || 0;
+    var bTickets = custTickets[bName] || 0;
+    if (aTickets > 0 && bTickets === 0) return -1;
+    if (bTickets > 0 && aTickets === 0) return 1;
+    return 0;
+  });
+  
+  tbody.innerHTML=sorted.map(function(c,i){
+    // Find real index in allCustomers for selection
+    var realIdx = allCustomers.indexOf(c);
+    var bp=getPill(c['Billing Status']);
+    var sv=String(c['Setup Complete']||'').toLowerCase();
+    var sp=(sv==='yes'||sv==='true'||sv==='yes')?'<span class="pill pill-green">Complete</span>':'<span class="pill pill-yellow">Pending</span>';
+    var cName = (c['Customer Name']||'').toLowerCase();
+    var openTix = custTickets[cName] || 0;
+    var tixBadge = openTix > 0 ? '<span class="ticket-badge ticket-badge-open" style="margin-left:6px;">🎫 ' + openTix + ' Open</span>' : '';
+    var rowStyle = openTix > 0 ? 'border-left:3px solid #ef4444;' : '';
+    return '<tr onclick="selectCustomer('+realIdx+')" class="'+(realIdx===selectedCustomerIdx?'selected':'')+'" style="'+rowStyle+'">'
+      +'<td style="font-family:var(--mono);font-size:11px;color:var(--accent);">'+(c['Unique Customer ID']||'')+'</td>'
+      +'<td><strong>'+(c['Customer Name']||'')+'</strong>'+tixBadge+'<br><span style="font-size:11px;color:var(--text-dim);">'+(c['Primary Contact Name']||'')+'</span></td>'
+      +'<td>'+(c['Service Plan']||'—')+'</td>'
+      +'<td style="font-family:var(--mono);">'+(c['Monthly MRC ($)']?'$'+c['Monthly MRC ($)']:'—')+'</td>'
+      +'<td>'+bp+'</td><td>'+sp+'</td>'
+      +'<td style="font-size:11px;">'+(c['Primary ISP']||'—')+'</td>'
+      +'<td style="font-family:var(--mono);font-size:11px;">'+(c['Peplink Device ID']||'—')+'</td>'
+      +'</tr>';
   }).join('');
 }
 
@@ -4368,7 +4450,11 @@ function renderCustActivity(c) {
     const txt = (a.text||'').toLowerCase();
     const typ = a.type || '';
     // Support tickets
-    if(txt.includes('support request')) return { icon:'🎫', cls:'act-stage', label:'SUPPORT TICKET' };
+    if(txt.includes('support request')) {
+      var tktStatus = (a.ticketStatus||a['Ticket Status']||'').trim().toLowerCase();
+      var tktLabel = tktStatus === 'closed' ? 'TICKET ✓' : 'TICKET 🔴';
+      return { icon:'🎫', cls:'act-stage', label:tktLabel };
+    }
     // Customer edits (field changes)
     if(txt.includes('customer edit:')) return { icon:'✏️', cls:'act-note', label:'FIELD EDIT' };
     // Standard types
@@ -8522,6 +8608,185 @@ function togglePresenceBar() {
 // Presence is initialized from showApp() after successful auth
 
 // =======================================================================
+
+// ============================================================================
+// TICKET MANAGER SYSTEM (v21) — Admin resolve/manage support tickets
+// ============================================================================
+function checkCustomerTickets(c) {
+  var cName = (c['Customer Name']||'').toLowerCase();
+  var tickets = (activities||[]).filter(function(a) {
+    if (a.deleted) return false;
+    var txt = (a.text||'').toLowerCase();
+    return a.prospect && a.prospect.toLowerCase() === cName && 
+      (txt.includes('support request') || txt.includes('🎫') || txt.includes('🚨'));
+  });
+  
+  var openCount = tickets.filter(function(t) {
+    var status = (t.ticketStatus || t['Ticket Status'] || '').trim().toLowerCase();
+    return status !== 'closed';
+  }).length;
+  
+  // Show/hide ticket button and count
+  var btn = document.getElementById('resolveTicketBtn');
+  var count = document.getElementById('openTicketCount');
+  if (tickets.length > 0) {
+    btn.style.display = '';
+    count.textContent = openCount > 0 ? openCount : '✓';
+    count.style.background = openCount > 0 ? '#ef4444' : '#10b981';
+    // Auto-open ticket panel if there are open tickets
+    if (openCount > 0) {
+      document.getElementById('ticketManagerPanel').style.display = '';
+      renderTicketManager(c);
+    } else {
+      document.getElementById('ticketManagerPanel').style.display = '';
+      renderTicketManager(c);
+    }
+  } else {
+    btn.style.display = 'none';
+    document.getElementById('ticketManagerPanel').style.display = 'none';
+  }
+}
+
+function openTicketManager() {
+  var panel = document.getElementById('ticketManagerPanel');
+  panel.style.display = panel.style.display === 'none' ? '' : 'none';
+  if (panel.style.display !== 'none' && selectedCustomerIdx >= 0) {
+    renderTicketManager(allCustomers[selectedCustomerIdx]);
+  }
+}
+
+function renderTicketManager(c) {
+  var cName = (c['Customer Name']||'').toLowerCase();
+  var tickets = (activities||[]).filter(function(a) {
+    if (a.deleted) return false;
+    var txt = (a.text||'').toLowerCase();
+    return a.prospect && a.prospect.toLowerCase() === cName && 
+      (txt.includes('support request') || txt.includes('🎫') || txt.includes('🚨'));
+  }).sort(function(a, b) {
+    // Open tickets first, then by date
+    var aStatus = (a.ticketStatus || a['Ticket Status'] || '').trim().toLowerCase();
+    var bStatus = (b.ticketStatus || b['Ticket Status'] || '').trim().toLowerCase();
+    var aOpen = aStatus !== 'closed' ? 0 : 1;
+    var bOpen = bStatus !== 'closed' ? 0 : 1;
+    if (aOpen !== bOpen) return aOpen - bOpen;
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+  
+  var openCount = tickets.filter(function(t) {
+    return (t.ticketStatus || t['Ticket Status'] || '').trim().toLowerCase() !== 'closed';
+  }).length;
+  
+  var panelCount = document.getElementById('ticketPanelCount');
+  panelCount.textContent = openCount > 0 ? openCount + ' open' : 'all resolved';
+  panelCount.style.background = openCount > 0 ? '#ef4444' : '#10b981';
+  
+  var container = document.getElementById('ticketManagerContent');
+  
+  if (!tickets.length) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">No support tickets for this customer.</div>';
+    return;
+  }
+  
+  var html = '';
+  tickets.forEach(function(a) {
+    var d = new Date(a.timestamp);
+    var ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    var status = (a.ticketStatus || a['Ticket Status'] || '').trim().toLowerCase();
+    var isClosed = status === 'closed';
+    
+    // Parse ticket text
+    var raw = a.text || '';
+    var subject = raw, category = '', priority = '', details = '';
+    var m = raw.match(/Support Request\s*\[([^\]]*)\]\s*([^:]*?):\s*(.*)/);
+    if (m) { priority = m[1]; category = m[2].trim(); var rest = m[3]; var dd = rest.split(' — '); subject = dd[0].trim(); details = dd.slice(1).join(' — ').trim(); }
+    
+    var cardClass = isClosed ? 'ticket-card ticket-card-closed' : 'ticket-card ticket-card-open';
+    var badge = isClosed 
+      ? '<span class="ticket-badge ticket-badge-closed">✓ Resolved</span>'
+      : '<span class="ticket-badge ticket-badge-open">● Open</span>';
+    
+    var priorityBadge = '';
+    if (priority) {
+      var pColor = priority === 'Normal' ? 'var(--accent)' : priority.includes('High') ? '#f59e0b' : '#ef4444';
+      priorityBadge = '<span style="font-size:9px;font-weight:700;color:'+pColor+';background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:4px;text-transform:uppercase;">'+priority+'</span>';
+    }
+    
+    html += '<div class="'+cardClass+'">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html += '<div style="display:flex;align-items:center;gap:6px;">'+badge+priorityBadge;
+    if (category) html += '<span style="font-size:9px;color:var(--text-dim);background:var(--surface-2);padding:1px 6px;border-radius:4px;">'+category+'</span>';
+    html += '</div>';
+    html += '<span style="font-size:10px;color:var(--text-dim);">'+ts+'</span>';
+    html += '</div>';
+    html += '<div style="font-size:13px;font-weight:600;margin-bottom:'+(details?'4':'0')+'px;">'+subject+'</div>';
+    if (details) html += '<div style="font-size:11px;color:var(--text-muted);line-height:1.4;">'+details+'</div>';
+    
+    // Resolution controls
+    if (!isClosed) {
+      html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;">';
+      html += '<input type="text" placeholder="Resolution note (optional)" id="resolve_'+a.id+'" style="flex:1;font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);">';
+      html += '<button class="ticket-resolve-btn" onclick="resolveTicket(''+a.id+'', this)">✓ Resolve</button>';
+      html += '</div>';
+    } else {
+      // Show resolution info if available
+      var resNote = '';
+      var resActs = (activities||[]).filter(function(ra) {
+        return !ra.deleted && ra.prospect && ra.prospect.toLowerCase() === cName && 
+          (ra.text||'').includes('Ticket Resolved') && (ra.text||'').includes(subject.substring(0,30));
+      });
+      if (resActs.length) {
+        var ra = resActs[0];
+        var rd = new Date(ra.timestamp);
+        resNote = '<div style="margin-top:6px;font-size:10px;color:var(--success);">✓ Resolved ' + rd.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' by ' + (ra.user||'admin') + '</div>';
+      }
+      html += resNote;
+    }
+    
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function resolveTicket(activityId, btn) {
+  if (!activityId) { showToast('No ticket ID', true); return; }
+  
+  var noteInput = document.getElementById('resolve_' + activityId);
+  var resolutionNote = noteInput ? noteInput.value.trim() : '';
+  
+  btn.disabled = true; btn.textContent = '⏳...';
+  
+  // Call backend to update ticket status
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST', headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({
+      action: 'resolveTicket',
+      activityId: activityId,
+      resolution: resolutionNote,
+      user: sessionStorage.getItem('sp_user') || 'admin'
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      showToast('✅ Ticket resolved!');
+      // Update local data
+      var act = activities.find(function(a) { return a.id === activityId; });
+      if (act) { act.ticketStatus = 'Closed'; act['Ticket Status'] = 'Closed'; }
+      // Re-render
+      if (selectedCustomerIdx >= 0) {
+        checkCustomerTickets(allCustomers[selectedCustomerIdx]);
+        renderCustActivity(allCustomers[selectedCustomerIdx]);
+      }
+      renderCustomerTable(allCustomers);
+    } else {
+      showToast('Error: ' + (data.error || 'Unknown'), true);
+      btn.disabled = false; btn.textContent = '✓ Resolve';
+    }
+  }).catch(function(e) {
+    showToast('Failed: ' + e.message, true);
+    btn.disabled = false; btn.textContent = '✓ Resolve';
+  });
+}
+
 // MILEAGE TRACKER — IRS Standard Rate
 // =======================================================================
 const IRS_MILEAGE_RATE = 0.70; // 2025 IRS standard mileage rate
