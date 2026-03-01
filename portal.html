@@ -3460,7 +3460,7 @@ function loadCustomerPortalData() {
           <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">🎫 My Support Tickets</div>
           <div class="cp-section-body" style="padding:12px 16px;">
             ${(()=>{
-              const tickets = myActs.filter(a=>a.text&&(a.text.includes('Support Request')||a.text.includes('🎫')||a.text.includes('🚨')));
+              const tickets = myActs.filter(a=>a.text&&a.text.includes('Support Request')&&!a.text.includes('Ticket Resolved')&&!a.text.includes('TKT-REPLY-')&&!a.text.includes('TKT-RESOLVE-')&&!a.text.includes('Admin Reply')&&!a.text.includes('Customer Reply'));
               if(!tickets.length) return '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No support tickets yet. Use the form above to submit one.</div>';
               return tickets.slice(0,20).map(a=>{
                 const d=new Date(a.timestamp);
@@ -3936,7 +3936,9 @@ function renderCustomerTable(customers) {
     if (a.deleted) return;
     var txt = (a.text||'').toLowerCase();
     var status = (a.ticketStatus || a['Ticket Status'] || '').trim().toLowerCase();
-    if ((txt.includes('support request') || txt.includes('🎫') || txt.includes('🚨')) && status !== 'closed') {
+    // Only count actual support request tickets, not resolution/reply logs
+    if (txt.includes('ticket resolved') || txt.includes('tkt-reply-') || txt.includes('tkt-resolve-') || txt.includes('admin reply') || txt.includes('customer reply')) return;
+    if (txt.includes('support request') && status !== 'closed') {
       var cName = (a.prospect || '').toLowerCase();
       custTickets[cName] = (custTickets[cName] || 0) + 1;
     }
@@ -8762,7 +8764,13 @@ function getAllTickets() {
   return (activities||[]).filter(function(a) {
     if (a.deleted) return false;
     var txt = (a.text||'').toLowerCase();
-    return txt.includes('support request') || (txt.includes('🎫') && !txt.includes('ticket resolved'));
+    // Exclude resolution logs, reply logs, and non-ticket entries
+    if (txt.includes('ticket resolved')) return false;
+    if (txt.includes('tkt-reply-')) return false;
+    if (txt.includes('tkt-resolve-')) return false;
+    if (txt.includes('admin reply')) return false;
+    if (txt.includes('customer reply')) return false;
+    return txt.includes('support request');
   }).sort(function(a,b) {
     // Open first, then newest
     var aOpen = (a.ticketStatus||'').toLowerCase() !== 'closed' ? 0 : 1;
@@ -9082,11 +9090,6 @@ function closeTicketFromTab(ticketId) {
       // Update local
       ticket.ticketStatus = 'Closed';
       ticket['Ticket Status'] = 'Closed';
-      activities.unshift({
-        id: 'TKT-' + Date.now(), prospect: ticket.prospect || '', type: 'Note',
-        text: '🎫 Ticket Resolved — TKT-RESOLVE-' + ticketId + ' — Resolved via Tickets tab',
-        timestamp: new Date().toISOString(), user: user, deleted: false, ticketStatus: ''
-      });
       showToast('✅ Ticket resolved!');
       selectedTicketId = null;
       document.getElementById('ticketDrawer').style.display = 'none';
@@ -9106,8 +9109,8 @@ function checkCustomerTickets(c) {
   var tickets = (activities||[]).filter(function(a) {
     if (a.deleted) return false;
     var txt = (a.text||'').toLowerCase();
-    return a.prospect && a.prospect.toLowerCase() === cName && 
-      (txt.includes('support request') || txt.includes('🎫') || txt.includes('🚨'));
+    if (txt.includes('ticket resolved') || txt.includes('tkt-reply-') || txt.includes('tkt-resolve-') || txt.includes('admin reply') || txt.includes('customer reply')) return false;
+    return a.prospect && a.prospect.toLowerCase() === cName && txt.includes('support request');
   });
   
   var openCount = tickets.filter(function(t) {
