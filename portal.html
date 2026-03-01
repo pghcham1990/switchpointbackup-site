@@ -1,3 +1,54 @@
+
+SwitchPoint Backup
+/
+1772370148473_image.png
+
+read_me.zip
+zip
+
+id like a few more options for sorting at the top one id like to look at right now to add is No email and No point of contact
+
+that way i can click those and work on adding emails or work on calling or researching the contact for the org can you add those to the top next to Not Interested?
+
+8:04 AM
+Let me look at the uploaded files to understand the current codebase.
+
+
+Ran 5 commands
+Ran 5 commands
+Now I can see the structure. The filter pills are rendered in renderStageFilters(). I need to add "No Email" and "No Contact" filter pills after "Not Interested". Let me look at how the filtering works to understand what fields to check.
+
+
+Check field names for email and contact
+Check field names for email and contact
+Now I have what I need. The fields are 'Email' and 'Contact'. I'll add two new filter pills — "No Email" and "No Contact" — and modify filterProspects() to handle them.
+
+
+Ran a command, edited a file
+Ran a command, edited a file
+Now update filterProspects() to handle the new special filters:
+
+
+Edited a file, ran a command, read a file
+Edited a file, ran a command, read a file
+Done. I added two new filter pills — No Email and No Contact — right after "Not Interested" in the stage filter bar. They're styled with an orange tint so they visually stand apart as "data gap" filters rather than pipeline stages.
+
+Clicking "No Email" shows all prospects missing an email address, and "No Contact" shows those with no point of contact name — so you can quickly work through filling in the gaps. The counts update dynamically just like the stage pills.
+
+Portal
+Code · HTML 
+
+
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Portal · HTML
+Copy
+
+Syntax highlighting has been disabled due to code size.
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4009,6 +4060,11 @@ function renderStageFilters() {
   let html = `<button class="stage-pill active" onclick="filterByStage('all',this)">All<span class="count">${allProspects.length}</span></button>`;
   const order = ['New Lead','Contacted','Demo Scheduled','Proposal Sent','Negotiation','Closed Won','Closed Lost','Not Interested'];
   order.forEach(s => { if(stages[s]) html += `<button class="stage-pill" onclick="filterByStage('${s}',this)">${s}<span class="count">${stages[s]}</span></button>`; });
+  // Data gap filters
+  const noEmailCount = allProspects.filter(p => !p['Email'] || !p['Email'].trim()).length;
+  const noContactCount = allProspects.filter(p => !p['Contact'] || !p['Contact'].trim()).length;
+  if(noEmailCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_email',this)">No Email<span class="count">${noEmailCount}</span></button>`;
+  if(noContactCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_contact',this)">No Contact<span class="count">${noContactCount}</span></button>`;
   container.innerHTML = html;
 }
 
@@ -4023,7 +4079,11 @@ function filterByStage(stage, btn) {
 function filterProspects() {
   const q = document.getElementById('pipeSearch').value.toLowerCase();
   let filtered = allProspects;
-  if(currentStageFilter !== 'all') filtered = filtered.filter(p => p['Stage'] === currentStageFilter);
+  if(currentStageFilter !== 'all') {
+    if(currentStageFilter === '_no_email') filtered = filtered.filter(p => !p['Email'] || !p['Email'].trim());
+    else if(currentStageFilter === '_no_contact') filtered = filtered.filter(p => !p['Contact'] || !p['Contact'].trim());
+    else filtered = filtered.filter(p => p['Stage'] === currentStageFilter);
+  }
   if(q) filtered = filtered.filter(p => Object.values(p).some(v => v && String(v).toLowerCase().includes(q)));
   renderProspectTable(filtered);
 }
@@ -11160,3 +11220,11 @@ async function geocodeBatch() {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+Apollo
+
