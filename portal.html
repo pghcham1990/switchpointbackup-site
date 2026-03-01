@@ -8875,13 +8875,17 @@ function filterTickets(filter, btn) {
 function openTicketDetail(ticketId) {
   selectedTicketId = ticketId;
   var ticket = (activities||[]).find(function(a) { return String(a.id) === String(ticketId); });
-  if (!ticket) { showToast('Ticket not found', true); return; }
+  if (!ticket) { 
+    // Try matching as number
+    ticket = (activities||[]).find(function(a) { return a.id == ticketId; });
+  }
+  if (!ticket) { showToast('Ticket not found (ID: '+ticketId+')', true); return; }
   
   // Re-render list to highlight selection
   filterTickets(currentTicketFilter);
   
   var drawer = document.getElementById('ticketDrawer');
-  drawer.style.display = '';
+  drawer.style.display = 'block';
   
   // Parse ticket
   var raw = ticket.text||'';
@@ -8967,7 +8971,7 @@ function openTicketDetail(ticketId) {
   document.getElementById('ticketDrawerContent').innerHTML = html;
   
   // Scroll drawer into view
-  drawer.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  setTimeout(function() { drawer.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
 }
 
 function sendTicketReply(ticketId) {
