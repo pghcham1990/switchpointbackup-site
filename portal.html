@@ -276,12 +276,28 @@ textarea{resize:vertical;min-height:64px;}
 .ce-empty{color:var(--text-dim);font-style:italic;font-size:10px;opacity:0.5;}
 
 /* TICKET SYSTEM v21 */
-.ticket-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;animation:ticketPulse 2s ease-in-out infinite;}
-.ticket-badge-open{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);}
+.ticket-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;}
+.ticket-badge-open{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);animation:ticketPulse 2s ease-in-out infinite;}
 .ticket-badge-closed{background:rgba(16,185,129,0.10);color:#10b981;border:1px solid rgba(16,185,129,0.2);animation:none;}
 @keyframes ticketPulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
 .ticket-resolve-btn{font-size:11px;padding:4px 10px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);border-radius:6px;cursor:pointer;transition:all 0.15s;}
 .ticket-resolve-btn:hover{background:#10b981;color:#fff;}
+/* Ticket list cards */
+.tkt-row{display:flex;align-items:center;gap:16px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
+.tkt-row:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.tkt-row-open{border-left:3px solid #ef4444;}
+.tkt-row-closed{opacity:0.55;}
+.tkt-row-closed:hover{opacity:0.8;}
+.tkt-row.tkt-selected{border-color:var(--accent);background:var(--accent-glow);box-shadow:0 2px 12px rgba(46,107,255,0.08);}
+/* Ticket detail drawer */
+.tkt-thread{max-height:400px;overflow-y:auto;padding:8px 0;}
+.tkt-msg{padding:12px 16px;border-radius:10px;margin-bottom:8px;max-width:85%;}
+.tkt-msg-customer{background:var(--surface-2);border:1px solid var(--border);margin-right:auto;}
+.tkt-msg-admin{background:rgba(46,107,255,0.06);border:1px solid rgba(46,107,255,0.15);margin-left:auto;}
+.tkt-msg-system{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);margin:0 auto;text-align:center;font-size:11px;max-width:60%;}
+.tkt-reply-box{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border);margin-top:12px;}
+.tkt-reply-box textarea{flex:1;min-height:60px;font-size:12px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);resize:vertical;}
+.tkt-reply-box button{align-self:flex-end;}
 .ticket-card{border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:all 0.2s;}
 .ticket-card-open{background:var(--bg);border:1px solid rgba(239,68,68,0.25);border-left:3px solid #ef4444;}
 .ticket-card-closed{background:var(--surface-2);border:1px solid var(--border);opacity:0.65;}
@@ -1144,6 +1160,7 @@ body.layout-ultra .db-table{table-layout:auto;}
   <button class="tab-btn" onclick="switchTab('wall',this);renderWall();">Wall<span class="tab-indicator" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">📊</span></button>
   <button class="tab-btn" onclick="switchTab('battleboard',this)">Battleboard<span class="tab-indicator" style="background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);">⚔️</span></button>
   <button class="tab-btn" onclick="switchTab('expenses',this);renderExpenses();initMileageDate();">Expenses<span class="tab-indicator" style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.2);">💰</span></button>
+  <button class="tab-btn" id="ticketsTabBtn" onclick="switchTab('tickets',this);renderTicketsTab();">Tickets<span class="tab-indicator" id="ticketsTabBadge" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);">🎫</span></button>
   <button class="tab-btn" onclick="switchTab('routeplanner',this);initRoutePlanner();">Route Planner<span class="tab-indicator" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.2);">🗺️</span></button>
 </div>
 
@@ -2645,6 +2662,38 @@ body.layout-ultra .db-table{table-layout:auto;}
 <!-- ═══════════════════════════════════════════════════════════════
      ROUTE PLANNER TAB (v9)
      ═══════════════════════════════════════════════════════════════ -->
+<!-- ======== TICKETS TAB (v21) ======== -->
+<div id="tab-tickets" class="tab-content">
+<div class="panel">
+  <div class="form-header" style="flex-shrink:0;">
+    <h2>🎫 Support Tickets</h2>
+    <p>Manage all customer support requests. Reply, resolve, and track ticket history.</p>
+  </div>
+
+  <!-- Ticket Stats -->
+  <div id="ticketStats" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px;"></div>
+
+  <!-- Ticket Filters -->
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="stage-pill active" onclick="filterTickets('all',this)">All</button>
+    <button class="stage-pill" onclick="filterTickets('open',this)">🔴 Open</button>
+    <button class="stage-pill" onclick="filterTickets('closed',this)">✅ Resolved</button>
+    <div style="flex:1;"></div>
+    <input type="text" id="ticketSearch" placeholder="Search tickets..." oninput="filterTickets(currentTicketFilter)" style="width:200px;font-size:12px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);">
+  </div>
+
+  <!-- Ticket List -->
+  <div id="ticketList" style="min-height:200px;">
+    <div style="text-align:center;padding:60px;color:var(--text-muted);">Loading tickets...</div>
+  </div>
+</div>
+
+<!-- Ticket Detail Drawer -->
+<div id="ticketDrawer" class="panel" style="display:none;margin-top:16px;">
+  <div id="ticketDrawerContent"></div>
+</div>
+</div>
+
 <div id="tab-routeplanner" class="tab-content">
 <div class="panel">
   <div class="form-header">
@@ -3436,6 +3485,22 @@ function loadCustomerPortalData() {
                   +'</div>'
                   +'<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:'+(details?'4':'0')+'px;">'+subject+'</div>'
                   +(details?'<div style="font-size:12px;color:var(--text-muted);line-height:1.4;">'+details+'</div>':'')
+                  +(()=>{
+                    // Show admin replies under this ticket
+                    const tktId = a.id || a.ID;
+                    const replies = myActs.filter(r=>r.text&&(r.text.includes('TKT-REPLY-'+tktId)||r.text.includes('TKT-RESOLVE-'+tktId)));
+                    if(!replies.length) return '';
+                    return replies.map(r=>{
+                      const rd=new Date(r.timestamp);
+                      const rts=rd.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+rd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+                      const rTxt=(r.text||'');
+                      if(rTxt.includes('TKT-RESOLVE-')){
+                        return '<div style="margin-top:8px;padding:8px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;font-size:11px;color:#10b981;">✓ Resolved by '+(r.user||'Support')+' · '+rts+'</div>';
+                      }
+                      const replyMsg=rTxt.replace(/.*TKT-REPLY-\S+\s*/,'').replace(/^[\s—-]+/,'');
+                      return '<div style="margin-top:8px;padding:8px 12px;background:rgba(46,107,255,0.04);border:1px solid rgba(46,107,255,0.12);border-radius:8px;"><div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:3px;">💬 SwitchPoint Support · '+rts+'</div><div style="font-size:12px;line-height:1.4;">'+replyMsg+'</div></div>';
+                    }).join('');
+                  })()
                   +'</div>';
               }).join('');
             })()}
@@ -8612,6 +8677,325 @@ function togglePresenceBar() {
 // Presence is initialized from showApp() after successful auth
 
 // =======================================================================
+
+// ============================================================================
+// TICKETS TAB (v21) — Full ticket management for admin
+// ============================================================================
+var currentTicketFilter = 'all';
+var selectedTicketId = null;
+
+function getAllTickets() {
+  return (activities||[]).filter(function(a) {
+    if (a.deleted) return false;
+    var txt = (a.text||'').toLowerCase();
+    return txt.includes('support request') || (txt.includes('🎫') && !txt.includes('ticket resolved'));
+  }).sort(function(a,b) {
+    // Open first, then newest
+    var aOpen = (a.ticketStatus||'').toLowerCase() !== 'closed' ? 0 : 1;
+    var bOpen = (b.ticketStatus||'').toLowerCase() !== 'closed' ? 0 : 1;
+    if (aOpen !== bOpen) return aOpen - bOpen;
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
+}
+
+function getTicketReplies(ticket) {
+  // Find all replies to this ticket (matched by ticket ID reference or subject)
+  var tktId = ticket.id;
+  var custName = (ticket.prospect||'').toLowerCase();
+  return (activities||[]).filter(function(a) {
+    if (a.deleted) return false;
+    var txt = (a.text||'');
+    return txt.includes('TKT-REPLY-' + tktId) || txt.includes('TKT-RESOLVE-' + tktId);
+  }).sort(function(a,b) { return new Date(a.timestamp) - new Date(b.timestamp); });
+}
+
+function renderTicketsTab() {
+  var allTix = getAllTickets();
+  var openCount = allTix.filter(function(t) { return (t.ticketStatus||'').toLowerCase() !== 'closed'; }).length;
+  var closedCount = allTix.length - openCount;
+  
+  // Update tab badge
+  var badge = document.getElementById('ticketsTabBadge');
+  if (badge) {
+    badge.textContent = openCount > 0 ? openCount + ' 🎫' : '🎫';
+    badge.style.background = openCount > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)';
+    badge.style.color = openCount > 0 ? '#ef4444' : '#10b981';
+    badge.style.borderColor = openCount > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)';
+  }
+  
+  // Stats
+  var avgResponse = '—';
+  var statsHtml = '<div class="cp-stat-card"><div class="cp-stat-label">Total Tickets</div><div class="cp-stat-value">'+allTix.length+'</div></div>';
+  statsHtml += '<div class="cp-stat-card"><div class="cp-stat-label">Open</div><div class="cp-stat-value" style="color:#ef4444;">'+openCount+'</div></div>';
+  statsHtml += '<div class="cp-stat-card"><div class="cp-stat-label">Resolved</div><div class="cp-stat-value" style="color:#10b981;">'+closedCount+'</div></div>';
+  statsHtml += '<div class="cp-stat-card"><div class="cp-stat-label">Resolution Rate</div><div class="cp-stat-value">'+(allTix.length ? Math.round(closedCount/allTix.length*100) : 0)+'%</div></div>';
+  document.getElementById('ticketStats').innerHTML = statsHtml;
+  
+  filterTickets(currentTicketFilter);
+}
+
+function filterTickets(filter, btn) {
+  if (typeof filter === 'string') currentTicketFilter = filter;
+  if (btn) {
+    document.querySelectorAll('#tab-tickets .stage-pill').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  
+  var allTix = getAllTickets();
+  var search = (document.getElementById('ticketSearch')||{}).value || '';
+  search = search.toLowerCase();
+  
+  var filtered = allTix.filter(function(t) {
+    var status = (t.ticketStatus||'').toLowerCase();
+    var isOpen = status !== 'closed';
+    if (currentTicketFilter === 'open' && !isOpen) return false;
+    if (currentTicketFilter === 'closed' && isOpen) return false;
+    if (search) {
+      var txt = ((t.text||'') + ' ' + (t.prospect||'')).toLowerCase();
+      if (txt.indexOf(search) === -1) return false;
+    }
+    return true;
+  });
+  
+  var container = document.getElementById('ticketList');
+  if (!filtered.length) {
+    container.innerHTML = '<div style="text-align:center;padding:60px;"><div style="font-size:36px;opacity:0.2;margin-bottom:8px;">🎫</div><div style="color:var(--text-muted);">No '+(currentTicketFilter==='all'?'':currentTicketFilter)+' tickets found.</div></div>';
+    return;
+  }
+  
+  var html = '';
+  filtered.forEach(function(t) {
+    var d = new Date(t.timestamp);
+    var ts = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var status = (t.ticketStatus||'').toLowerCase();
+    var isOpen = status !== 'closed';
+    var replies = getTicketReplies(t);
+    
+    // Parse ticket
+    var raw = t.text||'';
+    var subject = raw, category = '', priority = '';
+    var m = raw.match(/Support Request\s*\[([^\]]*)\]\s*([^:]*?):\s*(.*)/);
+    if (m) { priority = m[1]; category = m[2].trim(); subject = m[3].split(' — ')[0].trim(); }
+    
+    var badge = isOpen ? '<span class="ticket-badge ticket-badge-open">● Open</span>' : '<span class="ticket-badge ticket-badge-closed">✓ Resolved</span>';
+    var rowClass = 'tkt-row ' + (isOpen ? 'tkt-row-open' : 'tkt-row-closed') + (selectedTicketId === t.id ? ' tkt-selected' : '');
+    var replyBadge = replies.length ? '<span style="font-size:9px;background:var(--accent-glow);color:var(--accent);padding:1px 6px;border-radius:4px;">'+replies.length+' replies</span>' : '';
+    
+    html += '<div class="'+rowClass+'" onclick="openTicketDetail(\''+t.id+'\')">';
+    html += '<div style="flex:0 0 auto;">'+badge+'</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+subject+'</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">'+(t.prospect||'Unknown Customer')+' · '+ts+' '+replyBadge+'</div>';
+    html += '</div>';
+    if (category) html += '<div style="font-size:9px;color:var(--text-dim);background:var(--surface-2);padding:2px 8px;border-radius:4px;white-space:nowrap;">'+category+'</div>';
+    if (priority) {
+      var pColor = priority === 'Normal' ? 'var(--text-dim)' : priority.includes('High') ? '#f59e0b' : '#ef4444';
+      html += '<div style="font-size:9px;font-weight:700;color:'+pColor+';white-space:nowrap;">'+priority+'</div>';
+    }
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function openTicketDetail(ticketId) {
+  selectedTicketId = ticketId;
+  var ticket = (activities||[]).find(function(a) { return String(a.id) === String(ticketId); });
+  if (!ticket) { showToast('Ticket not found', true); return; }
+  
+  // Re-render list to highlight selection
+  filterTickets(currentTicketFilter);
+  
+  var drawer = document.getElementById('ticketDrawer');
+  drawer.style.display = '';
+  
+  // Parse ticket
+  var raw = ticket.text||'';
+  var subject = raw, category = '', priority = '', details = '';
+  var m = raw.match(/Support Request\s*\[([^\]]*)\]\s*([^:]*?):\s*(.*)/);
+  if (m) { priority = m[1]; category = m[2].trim(); var rest = m[3]; var dd = rest.split(' — '); subject = dd[0].trim(); details = dd.slice(1).join(' — ').trim(); }
+  
+  var status = (ticket.ticketStatus||'').toLowerCase();
+  var isOpen = status !== 'closed';
+  var d = new Date(ticket.timestamp);
+  var ts = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  var badge = isOpen ? '<span class="ticket-badge ticket-badge-open" style="font-size:12px;padding:4px 12px;">● Open</span>' : '<span class="ticket-badge ticket-badge-closed" style="font-size:12px;padding:4px 12px;">✓ Resolved</span>';
+  
+  var replies = getTicketReplies(ticket);
+  
+  var html = '';
+  // Header
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">';
+  html += '<div>';
+  html += '<h3 style="margin:0 0 4px;font-size:18px;">'+subject+'</h3>';
+  html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">';
+  html += badge;
+  html += '<span style="font-size:11px;color:var(--text-muted);">'+(ticket.prospect||'Unknown')+' · '+ts+'</span>';
+  if (category) html += '<span style="font-size:10px;background:var(--surface-2);padding:2px 8px;border-radius:4px;color:var(--text-dim);">'+category+'</span>';
+  if (priority) {
+    var pColor = priority === 'Normal' ? 'var(--text-dim)' : priority.includes('High') ? '#f59e0b' : '#ef4444';
+    html += '<span style="font-size:10px;font-weight:700;color:'+pColor+';">'+priority+'</span>';
+  }
+  html += '</div></div>';
+  html += '<div style="display:flex;gap:8px;">';
+  if (isOpen) {
+    html += '<button class="btn btn-success" style="font-size:11px;padding:6px 14px;" onclick="closeTicketFromTab(\''+ticket.id+'\')">✓ Mark Resolved</button>';
+  }
+  html += '<button class="detail-close" onclick="document.getElementById(\'ticketDrawer\').style.display=\'none\';selectedTicketId=null;filterTickets(currentTicketFilter);" style="font-size:11px;">✕ Close</button>';
+  html += '</div></div>';
+  
+  // Thread
+  html += '<div class="tkt-thread">';
+  // Original message
+  html += '<div class="tkt-msg tkt-msg-customer">';
+  html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--text);">👤 '+(ticket.prospect||'Customer')+'</span><span style="font-size:10px;color:var(--text-dim);">'+ts+'</span></div>';
+  html += '<div style="font-size:13px;line-height:1.5;">'+(details || subject)+'</div>';
+  html += '</div>';
+  
+  // Replies
+  replies.forEach(function(r) {
+    var rd = new Date(r.timestamp);
+    var rts = rd.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + rd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    var rTxt = (r.text||'');
+    
+    if (rTxt.includes('TKT-RESOLVE-')) {
+      // Resolution message
+      var resMsg = rTxt.replace(/.*TKT-RESOLVE-\S+\s*/, '').replace(/^[\s—-]+/, '');
+      html += '<div class="tkt-msg tkt-msg-system">🎫 Ticket resolved by '+(r.user||'admin')+' · '+rts+(resMsg ? '<br>'+resMsg : '')+'</div>';
+    } else {
+      // Admin reply
+      var replyMsg = rTxt.replace(/.*TKT-REPLY-\S+\s*/, '').replace(/^[\s—-]+/, '');
+      html += '<div class="tkt-msg tkt-msg-admin">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">💬 '+(r.user||'Admin')+'</span><span style="font-size:10px;color:var(--text-dim);">'+rts+'</span></div>';
+      html += '<div style="font-size:13px;line-height:1.5;">'+replyMsg+'</div>';
+      html += '</div>';
+    }
+  });
+  html += '</div>';
+  
+  // Reply box (only if open)
+  if (isOpen) {
+    html += '<div class="tkt-reply-box">';
+    html += '<textarea id="ticketReplyText" placeholder="Type your reply to the customer..."></textarea>';
+    html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+    html += '<button class="btn btn-primary" style="font-size:11px;padding:8px 16px;white-space:nowrap;" onclick="sendTicketReply(\''+ticket.id+'\')">💬 Reply</button>';
+    html += '<button class="btn btn-success" style="font-size:11px;padding:8px 16px;white-space:nowrap;" onclick="replyAndResolve(\''+ticket.id+'\')">✓ Reply & Resolve</button>';
+    html += '</div></div>';
+  }
+  
+  document.getElementById('ticketDrawerContent').innerHTML = html;
+  
+  // Scroll drawer into view
+  drawer.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function sendTicketReply(ticketId) {
+  var textarea = document.getElementById('ticketReplyText');
+  var msg = textarea ? textarea.value.trim() : '';
+  if (!msg) { showToast('Type a reply first', true); return; }
+  
+  var ticket = (activities||[]).find(function(a) { return String(a.id) === String(ticketId); });
+  if (!ticket) return;
+  
+  var user = sessionStorage.getItem('sp_user') || 'admin';
+  var actText = '💬 Admin Reply — TKT-REPLY-' + ticketId + ' — ' + msg;
+  
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({
+      action: 'addActivity',
+      data: {
+        id: 'REPLY-' + Date.now(),
+        prospect: ticket.prospect || '',
+        type: 'Note',
+        text: actText,
+        followUp: '',
+        timestamp: new Date().toISOString(),
+        user: user,
+        deleted: ''
+      }
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success || data.status === 'ok') {
+      // Add to local activities
+      activities.unshift({
+        id: 'REPLY-' + Date.now(),
+        prospect: ticket.prospect || '',
+        type: 'Note',
+        text: actText,
+        timestamp: new Date().toISOString(),
+        user: user,
+        deleted: false,
+        ticketStatus: ''
+      });
+      showToast('💬 Reply sent');
+      openTicketDetail(ticketId);
+    } else {
+      showToast('Error: ' + (data.error||'Unknown'), true);
+    }
+  }).catch(function(e) { showToast('Failed: ' + e.message, true); });
+}
+
+function replyAndResolve(ticketId) {
+  var textarea = document.getElementById('ticketReplyText');
+  var msg = textarea ? textarea.value.trim() : '';
+  if (!msg) { showToast('Type a reply before resolving', true); return; }
+  
+  var ticket = (activities||[]).find(function(a) { return String(a.id) === String(ticketId); });
+  if (!ticket) return;
+  
+  var user = sessionStorage.getItem('sp_user') || 'admin';
+  
+  // Send reply first, then resolve
+  var actText = '💬 Admin Reply — TKT-REPLY-' + ticketId + ' — ' + msg;
+  
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({
+      action: 'addActivity',
+      data: { id: 'REPLY-' + Date.now(), prospect: ticket.prospect || '', type: 'Note', text: actText, followUp: '', timestamp: new Date().toISOString(), user: user, deleted: '' }
+    })
+  }).then(function(r) { return r.json(); }).then(function() {
+    activities.unshift({ id: 'REPLY-' + Date.now(), prospect: ticket.prospect || '', type: 'Note', text: actText, timestamp: new Date().toISOString(), user: user, deleted: false, ticketStatus: '' });
+    // Now resolve
+    closeTicketFromTab(ticketId);
+  }).catch(function(e) { showToast('Failed: ' + e.message, true); });
+}
+
+function closeTicketFromTab(ticketId) {
+  var ticket = (activities||[]).find(function(a) { return String(a.id) === String(ticketId); });
+  if (!ticket) return;
+  
+  var user = sessionStorage.getItem('sp_user') || 'admin';
+  
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({
+      action: 'resolveTicket',
+      activityId: ticketId,
+      resolution: 'Resolved via Tickets tab',
+      user: user
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success) {
+      // Update local
+      ticket.ticketStatus = 'Closed';
+      ticket['Ticket Status'] = 'Closed';
+      activities.unshift({
+        id: 'TKT-' + Date.now(), prospect: ticket.prospect || '', type: 'Note',
+        text: '🎫 Ticket Resolved — TKT-RESOLVE-' + ticketId + ' — Resolved via Tickets tab',
+        timestamp: new Date().toISOString(), user: user, deleted: false, ticketStatus: ''
+      });
+      showToast('✅ Ticket resolved!');
+      selectedTicketId = null;
+      document.getElementById('ticketDrawer').style.display = 'none';
+      renderTicketsTab();
+      renderCustomerTable(allCustomers);
+    } else {
+      showToast('Error: ' + (data.error||'Unknown'), true);
+    }
+  }).catch(function(e) { showToast('Failed: ' + e.message, true); });
+}
 
 // ============================================================================
 // TICKET MANAGER SYSTEM (v21) — Admin resolve/manage support tickets
