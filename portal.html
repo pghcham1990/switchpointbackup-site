@@ -3364,23 +3364,23 @@ function loadCustomerPortalData() {
           </div>
         </div>
 
-        <div class="detail-section" style="margin-bottom:16px;">
-          <div class="detail-section-header" onclick="toggleSection(this)">📋 Your Service Details</div>
-          <div class="detail-section-body">
-            <div class="detail-field"><div class="detail-field-label">Primary ISP</div><div class="detail-field-value">${isp}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Billing Status</div><div class="detail-field-value">${billingStatus}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Service Address</div><div class="detail-field-value">${myCust['Service Address']||'On file'}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Primary Contact</div><div class="detail-field-value">${myCust['Primary Contact Name']||'—'}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Contact Email</div><div class="detail-field-value">${myCust['Primary Contact Email']||'—'}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Support Level</div><div class="detail-field-value">${myCust['Support Level']||'Standard'}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Data Extensions (This Cycle)</div><div class="detail-field-value">${dataExtensions}</div></div>
-            <div class="detail-field"><div class="detail-field-label">Lifetime Data Extensions</div><div class="detail-field-value">${lifetimeExtensions} GB</div></div>
+        <div class="cp-section">
+          <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">📋 Your Service Details</div>
+          <div class="cp-section-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Primary ISP</div><div style="font-size:13px;font-weight:600;">${isp}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Billing Status</div><div style="font-size:13px;font-weight:600;">${billingStatus}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);grid-column:1/-1;"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Service Address</div><div style="font-size:13px;font-weight:600;">${myCust['Service Address']||'On file'}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Primary Contact</div><div style="font-size:13px;font-weight:600;">${myCust['Primary Contact Name']||'—'}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Contact Email</div><div style="font-size:13px;font-weight:600;">${myCust['Primary Contact Email']||'—'}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Support Level</div><div style="font-size:13px;font-weight:600;">${myCust['Support Level']||'Standard'}</div></div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Data Extensions</div><div style="font-size:13px;font-weight:600;">${dataExtensions}</div></div>
+            <div style="padding:12px 16px;"><div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Lifetime Extensions</div><div style="font-size:13px;font-weight:600;">${lifetimeExtensions} GB</div></div>
           </div>
         </div>
 
-        <div class="detail-section" style="margin-bottom:16px;">
-          <div class="detail-section-header" onclick="toggleSection(this)">👤 Manage Account</div>
-          <div class="detail-section-body" style="display:block;">
+        <div class="cp-section">
+          <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">👤 Manage Account</div>
+          <div class="cp-section-body" style="display:block;">
             <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Update your contact information or add authorized contacts who can interact with SwitchPoint on your behalf.</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <div class="form-group"><label>Contact Name</label><input id="cust_selfName" value="${myCust['Primary Contact Name']||''}"></div>
@@ -3392,9 +3392,9 @@ function loadCustomerPortalData() {
           </div>
         </div>
 
-        <div class="detail-section" style="margin-bottom:16px;">
-          <div class="detail-section-header" onclick="toggleSection(this)">🎫 Submit a Support Request</div>
-          <div class="detail-section-body" style="display:block;">
+        <div class="cp-section">
+          <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">🎫 Submit a Support Request</div>
+          <div class="cp-section-body" style="display:block;">
             <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Need help? Submit a request and we'll get back to you ASAP.</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <div class="form-group"><label>Priority</label><select id="tkt_priority"><option>Normal</option><option>High — Service Affected</option><option>Critical — Internet Down</option></select></div>
@@ -3406,9 +3406,9 @@ function loadCustomerPortalData() {
           </div>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-header" onclick="toggleSection(this)">🎫 My Support Tickets</div>
-          <div class="detail-section-body" style="display:block;padding:12px;">
+        <div class="cp-section">
+          <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">🎫 My Support Tickets</div>
+          <div class="cp-section-body" style="padding:12px 16px;">
             ${(()=>{
               const tickets = myActs.filter(a=>a.text&&(a.text.includes('Support Request')||a.text.includes('🎫')||a.text.includes('🚨')));
               if(!tickets.length) return '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">No support tickets yet. Use the form above to submit one.</div>';
@@ -3418,8 +3418,8 @@ function loadCustomerPortalData() {
                 const status = (a.ticketStatus||'').trim().toLowerCase();
                 const isClosed = status === 'closed';
                 const badge = isClosed
-                  ? '<span style="display:inline-block;background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Resolved</span>'
-                  : '<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">● Open</span>';
+                  ? '<span class="ticket-badge ticket-badge-closed">✓ Resolved</span>'
+                  : '<span class="ticket-badge ticket-badge-open">● Open</span>';
                 // Parse the ticket text: emoji Support Request [Priority] Category: Subject — Details
                 const raw = a.text||'';
                 let subject = raw, category = '', priority = '', details = '';
@@ -3428,7 +3428,7 @@ function loadCustomerPortalData() {
                 const cardBg = isClosed ? 'var(--surface-2)' : 'var(--bg)';
                 const cardBorder = isClosed ? 'var(--border)' : 'rgba(239,68,68,0.2)';
                 const cardOpacity = isClosed ? '0.7' : '1';
-                return '<div style="background:'+cardBg+';border:1px solid '+cardBorder+';border-radius:10px;padding:14px 16px;margin-bottom:10px;opacity:'+cardOpacity+';">'
+                return '<div class="cp-ticket-card '+(isClosed?'cp-ticket-closed':'cp-ticket-open')+'">'
                   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
                   +'<div style="display:flex;align-items:center;gap:8px;">'+badge
                   +'<span style="font-size:11px;color:var(--text-muted);">'+ts+'</span></div>'
@@ -3442,9 +3442,9 @@ function loadCustomerPortalData() {
           </div>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-header" onclick="toggleSection(this)">📋 Recent Activity</div>
-          <div class="detail-section-body" style="display:block;padding:16px 16px 8px;">
+        <div class="cp-section">
+          <div class="cp-section-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">📋 Recent Activity</div>
+          <div class="cp-section-body" style="padding:16px 16px 8px;">
             ${(()=>{
               const custActs = myActs.filter(a=>a.text&&!a.text.includes('Support Request')&&!a.text.includes('🎫')&&!a.text.includes('🚨')&&!a.text.includes('Customer Edit:')&&!a.text.includes('Quick Link:')&&!a.text.includes('Logout:')&&!a.text.includes('Login:'));
               if(!custActs.length) return '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;"><div style="font-size:28px;margin-bottom:8px;opacity:0.4;">📋</div>No recent activity on your account.</div>';
@@ -3493,6 +3493,10 @@ function loadCustomerPortalData() {
               }).join('');
             })()}
           </div>
+        </div>
+        <div style="text-align:center;padding:24px 0 8px;margin-top:16px;border-top:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text-dim);">SwitchPoint Backup LLC &middot; <a href="mailto:support@switchpointbackup.com" style="color:var(--accent);text-decoration:none;">support@switchpointbackup.com</a> &middot; (412) 329-8790</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;opacity:0.5;">Keeping your business online when it matters most.</div>
         </div>
       </div>`;
   }).catch(err => {
