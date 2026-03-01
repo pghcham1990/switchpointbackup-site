@@ -1436,7 +1436,6 @@ body.layout-ultra .db-table{table-layout:auto;}
       <button class="action-btn" onclick="changeStage()">⟳ Change Stage</button>
       <button class="action-btn not-interested-btn" id="niActionBtn" onclick="markNotInterested()">🚫 Not Interested</button>
       <button class="action-btn sequence" onclick="addToSequence()">⚡ Sequence</button>
-      <button class="action-btn" id="prosResearchBtn" onclick="researchProspect()" style="border-color:rgba(107,70,193,0.3);color:rgb(107,70,193);">🔎 Research</button>
     </div>
     <div class="detail-body">
       <div class="detail-sections" id="prosDetailSections"></div>
@@ -4165,7 +4164,13 @@ function renderProspectTable(prospects) {
       if (diffDays === 0) {
         followUpHtml = `<span class="followup-due-today">${followUp}<span class="followup-due-today-label"> TODAY</span></span>`;
       } else if (diffDays < 0) {
-        followUpHtml = `<span class="followup-overdue">${followUp}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`;
+        followUpHtml = `<span class="followup-overdue">${followUp}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`
+          + `<span class="fu-quick-actions" onclick="event.stopPropagation()">`
+          + `<button title="Snooze 1 day" onclick="event.stopPropagation();quickSnoozeFollowUp(${allProspects.indexOf(p)},1)" style="font-size:9px;padding:1px 4px;margin-left:4px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+1d</button>`
+          + `<button title="Snooze 3 days" onclick="event.stopPropagation();quickSnoozeFollowUp(${allProspects.indexOf(p)},3)" style="font-size:9px;padding:1px 4px;margin-left:2px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+3d</button>`
+          + `<button title="Snooze 7 days" onclick="event.stopPropagation();quickSnoozeFollowUp(${allProspects.indexOf(p)},7)" style="font-size:9px;padding:1px 4px;margin-left:2px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+7d</button>`
+          + `<button title="Clear follow-up" onclick="event.stopPropagation();clearFollowUp(${allProspects.indexOf(p)})" style="font-size:9px;padding:1px 4px;margin-left:2px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#ef4444;border-radius:4px;cursor:pointer;">✕</button>`
+          + `</span>`;
       }
     }
     const phone = p['Phone'] || '';
@@ -4188,10 +4193,8 @@ function renderProspectTable(prospects) {
     const saBadge = checkStayAway(p['Customer']) ? '<span class="sa-badge">⛔ FSN</span>' : '';
     const niBadge = getResurfaceBadge(p);
 
-    const noEmailIcon = (!p['Email'] || !p['Email'].trim()) ? `<span onclick="quickResearch(${realIdx},event)" title="Google search for email" style="cursor:pointer;margin-left:4px;font-size:10px;opacity:0.5;">🔎</span>` : '';
-
     return `<tr onclick="selectProspect(${realIdx})" class="${realIdx===selectedProspectIdx?'selected':''}">
-      <td><strong>${p['Customer']||''}</strong>${saBadge}${niBadge}${noEmailIcon}</td>
+      <td><strong>${p['Customer']||''}</strong>${saBadge}${niBadge}</td>
       <td style="font-size:11px;">${p['Contact']||'—'}</td>
       <td style="font-family:var(--mono);font-size:11px;">${phone ? '<a href="'+gvCallUrl(phoneDial)+'" target="_blank" style="color:var(--success);text-decoration:none;" onclick="event.stopPropagation();">'+phone+'</a>' : '—'}</td>
       <td>${getStagePill(p['Stage'])}</td>
@@ -4973,7 +4976,11 @@ function selectProspect(idx) {
 
 function getFilteredProspects() {
   let f=allProspects;
-  if(currentStageFilter!=='all') f=f.filter(p=>p['Stage']===currentStageFilter);
+  if(currentStageFilter!=='all') {
+    if(currentStageFilter === '_no_email') f=f.filter(p => !p['Email'] || !p['Email'].trim());
+    else if(currentStageFilter === '_no_contact') f=f.filter(p => !p['Contact'] || !p['Contact'].trim());
+    else f=f.filter(p=>p['Stage']===currentStageFilter);
+  }
   const q=document.getElementById('pipeSearch').value.toLowerCase();
   if(q) f=f.filter(p=>Object.values(p).some(v=>v&&String(v).toLowerCase().includes(q)));
   return f;
@@ -5002,7 +5009,13 @@ function renderProsDetailSections(p) {
         const fuDate=new Date(val); fuDate.setHours(0,0,0,0);
         const diffDays=Math.floor((fuDate-today)/(1000*60*60*24));
         if(diffDays===0) display=`<span class="followup-due-today">${val}<span class="followup-due-today-label"> TODAY</span></span>`;
-        else if(diffDays<0) display=`<span class="followup-overdue">${val}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`;
+        else if(diffDays<0) display=`<span class="followup-overdue">${val}<span class="followup-overdue-label"> ${Math.abs(diffDays)}d LATE</span></span>`
+          + `<span style="display:inline-flex;margin-left:6px;">`
+          + `<button title="Snooze 1 day" onclick="event.stopPropagation();quickSnoozeFollowUp(selectedProspectIdx,1)" style="font-size:9px;padding:1px 5px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+1d</button>`
+          + `<button title="Snooze 3 days" onclick="event.stopPropagation();quickSnoozeFollowUp(selectedProspectIdx,3)" style="font-size:9px;padding:1px 5px;margin-left:3px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+3d</button>`
+          + `<button title="Snooze 7 days" onclick="event.stopPropagation();quickSnoozeFollowUp(selectedProspectIdx,7)" style="font-size:9px;padding:1px 5px;margin-left:3px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:#d97706;border-radius:4px;cursor:pointer;">+7d</button>`
+          + `<button title="Clear follow-up" onclick="event.stopPropagation();clearFollowUp(selectedProspectIdx)" style="font-size:9px;padding:1px 5px;margin-left:3px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#ef4444;border-radius:4px;cursor:pointer;">✕</button>`
+          + `</span>`;
       }
       const oc=prosEditMode?` onclick="startProsEdit(this,'${f.replace(/'/g,"\\'")}')"` :'';
       return `<div class="detail-field${wide?' wide':''}"><div class="detail-field-label">${f}</div><div class="detail-field-value${empty?' empty':''}${ec}" data-field="${f}"${oc}>${empty?(prosEditMode?'Click to edit':'Not set'):display}</div></div>`;
@@ -5145,6 +5158,48 @@ function saveProsEdits() {
 
 function closeProsDetail(){ document.getElementById('prospectDetailCard').classList.remove('visible'); selectedProspectIdx=-1; }
 
+function quickSnoozeFollowUp(idx, days) {
+  if(idx < 0 || idx >= allProspects.length) return;
+  const p = allProspects[idx];
+  const newDate = new Date();
+  newDate.setDate(newDate.getDate() + days);
+  const newDateStr = newDate.toISOString().split('T')[0];
+  const oldDate = p['Follow-Up'] || '(none)';
+  p['Follow-Up'] = newDateStr;
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',businessName:p['Customer'],updates:{'Follow-Up':newDateStr}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        // Log snooze as activity
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(Date.now()),prospect:p['Customer'],type:'Note',text:'⏰ Follow-up snoozed '+days+'d: '+oldDate+' → '+newDateStr,followUp:'',timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:''}})}).catch(e=>{});
+        showToast('✓ Follow-up snoozed to '+newDateStr,'success');
+      } else showToast('Error saving snooze','error');
+    }).catch(e=>showToast('Snooze save failed','error'));
+  }
+  renderStageFilters();
+  renderProspectTable(getFilteredProspects());
+  if(selectedProspectIdx >= 0) renderProsDetailSections(allProspects[selectedProspectIdx]);
+}
+
+function clearFollowUp(idx) {
+  if(idx < 0 || idx >= allProspects.length) return;
+  const p = allProspects[idx];
+  const oldDate = p['Follow-Up'] || '(none)';
+  p['Follow-Up'] = '';
+  if(CONFIG.LIVE_MODE) {
+    fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'updateProspect',businessName:p['Customer'],updates:{'Follow-Up':''}})})
+    .then(r=>r.json()).then(data=>{
+      if(data.success) {
+        fetch(CONFIG.APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'addActivity',data:{id:String(Date.now()),prospect:p['Customer'],type:'Note',text:'✕ Follow-up cleared (was '+oldDate+')',followUp:'',timestamp:new Date().toISOString(),user:sessionStorage.getItem('sp_user')||'scott',deleted:''}})}).catch(e=>{});
+        showToast('✓ Follow-up cleared','success');
+      } else showToast('Error clearing follow-up','error');
+    }).catch(e=>showToast('Clear failed','error'));
+  }
+  renderStageFilters();
+  renderProspectTable(getFilteredProspects());
+  if(selectedProspectIdx >= 0) renderProsDetailSections(allProspects[selectedProspectIdx]);
+}
+
 // =======================================================================
 // PROSPECT ACTIONS
 // =======================================================================
@@ -5187,29 +5242,6 @@ function openMaps() {
     renderProsActivity(p); renderProspectTable(getFilteredProspects());
   }
   else showToast('No address on file','error');
-}
-
-function researchProspect() {
-  const p = allProspects[selectedProspectIdx];
-  if (!p) return;
-  const name = p['Customer'] || '';
-  const addr = p['Address'] || '';
-  // Build a smart search query
-  const city = addr.split(',').slice(-2, -1)[0] || '';
-  const query = name + (city ? ' ' + city.trim() : '') + ' email contact';
-  window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
-  showToast('Opened Google search for ' + name, 'info');
-}
-
-function quickResearch(idx, event) {
-  event.stopPropagation();
-  const p = allProspects[idx];
-  if (!p) return;
-  const name = p['Customer'] || '';
-  const addr = p['Address'] || '';
-  const city = addr.split(',').slice(-2, -1)[0] || '';
-  const query = name + (city ? ' ' + city.trim() : '') + ' email contact';
-  window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
 }
 
 // =======================================================================
