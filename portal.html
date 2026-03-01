@@ -3366,6 +3366,7 @@ function loadCustomerPortalData() {
     const lifetimeExtensions = myCust['Total Data Extensions (Lifetime)']||'0';
     const authorizedContacts = myCust['Authorized Contacts']||'';
     const myActs = (acts||[]).map(a=>({
+      id: a['ID']||a['id']||'',
       text: a['Notes']||a['text']||'',
       prospect: a['Prospect']||a['prospect']||'',
       timestamp: a['Timestamp']||a['timestamp']||'',
