@@ -3500,7 +3500,7 @@ function loadCustomerPortalData() {
                       }
                       const replyMsg=rTxt.replace(/.*TKT-REPLY-\S+\s*/,'').replace(/^[\s—-]+/,'');
                       if(rTxt.includes('Customer Reply')){
-                        return '<div style="margin-top:8px;padding:8px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;"><div style="font-size:10px;font-weight:600;color:var(--text-dim);margin-bottom:3px;">👤 You · '+rts+'</div><div style="font-size:12px;line-height:1.4;">'+replyMsg+'</div></div>';
+                        return '<div style="margin-top:8px;padding:8px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;position:relative;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><span style="font-size:10px;font-weight:600;color:var(--text-dim);">👤 You · '+rts+'</span><button onclick="deleteTicketReply(\''+r.id+'\')" style="font-size:9px;color:var(--text-dim);background:none;border:none;cursor:pointer;opacity:0.5;padding:2px 4px;" title="Delete">✕</button></div><div style="font-size:12px;line-height:1.4;">'+replyMsg+'</div></div>';
                       }
                       return '<div style="margin-top:8px;padding:8px 12px;background:rgba(46,107,255,0.04);border:1px solid rgba(46,107,255,0.12);border-radius:8px;"><div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:3px;">💬 SwitchPoint Support · '+rts+'</div><div style="font-size:12px;line-height:1.4;">'+replyMsg+'</div></div>';
                     }).join('');
@@ -3584,16 +3584,33 @@ function loadCustomerPortalData() {
   });
 }
 
+function deleteTicketReply(replyId) {
+  if (!confirm('Delete this reply?')) return;
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST', headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({ action: 'deleteActivity', id: replyId })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success || data.status === 'ok') {
+      showToast('Reply deleted');
+      setTimeout(function() { loadCustomerPortalData(); }, 500);
+    } else { showToast('Error deleting', true); }
+  }).catch(function(e) { showToast('Failed', true); });
+}
+
 function sendCustomerReply(ticketId) {
   var textarea = document.getElementById('custReply_' + ticketId);
   var msg = textarea ? textarea.value.trim() : '';
   if (!msg) { showToast('Type a reply first', true); return; }
   
+  // Prevent double submit
+  var btn = textarea ? textarea.parentElement.querySelector('button') : null;
+  if (btn && btn.disabled) return;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+  textarea.disabled = true;
+  
   var user = sessionStorage.getItem('sp_user') || currentUserDisplayName || 'customer';
   var custName = currentUserLinkedRecord || currentUserDisplayName || 'Customer';
   var actText = '👤 Customer Reply — TKT-REPLY-' + ticketId + ' — ' + msg;
-  
-  textarea.disabled = true;
   
   fetch(CONFIG.APPS_SCRIPT_URL, {
     method: 'POST', headers: {'Content-Type':'text/plain'},
@@ -3613,15 +3630,16 @@ function sendCustomerReply(ticketId) {
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.success || data.status === 'ok') {
       showToast('💬 Reply sent!');
-      // Reload the customer portal to show the new reply
       setTimeout(function() { loadCustomerPortalData(); }, 800);
     } else {
       showToast('Error: ' + (data.error || 'Unknown'), true);
       textarea.disabled = false;
+      if (btn) { btn.disabled = false; btn.textContent = '💬 Reply'; }
     }
   }).catch(function(e) {
     showToast('Failed: ' + e.message, true);
     textarea.disabled = false;
+    if (btn) { btn.disabled = false; btn.textContent = '💬 Reply'; }
   });
 }
 
@@ -8924,11 +8942,11 @@ function openTicketDetail(ticketId) {
       if (isCustomerReply) {
         // Customer reply - left aligned
         html += '<div class="tkt-msg tkt-msg-customer">';
-        html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--text);">👤 '+(r.user||'Customer')+'</span><span style="font-size:10px;color:var(--text-dim);">'+rts+'</span></div>';
+        html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--text);">👤 '+(r.user||'Customer')+'</span><span style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-dim);">'+rts+'</span><button onclick="deleteTicketMsg(\''+r.id+'\',\''+ticket.id+'\')" style="font-size:9px;color:var(--text-dim);background:none;border:none;cursor:pointer;opacity:0.4;" title="Delete">✕</button></span></div>';
       } else {
         // Admin reply - right aligned
         html += '<div class="tkt-msg tkt-msg-admin">';
-        html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">💬 '+(r.user||'Admin')+'</span><span style="font-size:10px;color:var(--text-dim);">'+rts+'</span></div>';
+        html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">💬 '+(r.user||'Admin')+'</span><span style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--text-dim);">'+rts+'</span><button onclick="deleteTicketMsg(\''+r.id+'\',\''+ticket.id+'\')" style="font-size:9px;color:var(--text-dim);background:none;border:none;cursor:pointer;opacity:0.4;" title="Delete">✕</button></span></div>';
       }
       html += '<div style="font-size:13px;line-height:1.5;">'+replyMsg+'</div>';
       html += '</div>';
@@ -9023,6 +9041,22 @@ function replyAndResolve(ticketId) {
     // Now resolve
     closeTicketFromTab(ticketId);
   }).catch(function(e) { showToast('Failed: ' + e.message, true); });
+}
+
+function deleteTicketMsg(replyId, ticketId) {
+  if (!confirm('Delete this message?')) return;
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST', headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({ action: 'deleteActivity', id: replyId })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.success || data.status === 'ok') {
+      // Remove from local activities
+      var idx = activities.findIndex(function(a) { return String(a.id) === String(replyId); });
+      if (idx !== -1) activities[idx].deleted = true;
+      showToast('Message deleted');
+      openTicketDetail(ticketId);
+    } else { showToast('Error deleting', true); }
+  }).catch(function(e) { showToast('Failed', true); });
 }
 
 function closeTicketFromTab(ticketId) {
