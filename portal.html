@@ -4015,10 +4015,62 @@ function renderStageFilters() {
   if(noEmailCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_email',this)">No Email<span class="count">${noEmailCount}</span></button>`;
   if(noContactCount) html += `<button class="stage-pill" style="border-color:rgba(255,149,0,0.3);color:rgb(180,100,0);" onclick="filterByStage('_no_contact',this)">No Contact<span class="count">${noContactCount}</span></button>`;
   if(noEmailCount) html += `<button class="stage-pill" id="enrichEmailsBtn" style="border-color:rgba(31,191,138,0.4);color:rgb(20,140,90);margin-left:8px;" onclick="enrichEmails()">🔍 Enrich Emails</button>`;
+  if(noEmailCount) html += `<button class="stage-pill" id="apolloEnrichBtn" style="border-color:rgba(107,70,193,0.4);color:rgb(107,70,193);margin-left:4px;" onclick="apolloEnrichEmails()">🚀 Apollo Enrich</button>`;
   container.innerHTML = html;
 }
 
 let currentStageFilter = 'all';
+async function apolloEnrichEmails() {
+  const btn = document.getElementById('apolloEnrichBtn');
+  if (!btn) return;
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Apollo running...';
+  btn.style.opacity = '0.6';
+  showToast('Starting Apollo enrichment — searching for contacts and emails via Apollo.io. This will take a few minutes...', 'info');
+
+  try {
+    const resp = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'apolloEnrichEmails' })
+    });
+    const data = await resp.json();
+
+    if (data.error) {
+      showToast('Apollo error: ' + data.error, 'error');
+    } else {
+      const msg = `🚀 Apollo complete: ${data.enriched} emails found, ${data.contactsFilled || 0} contacts filled, ${data.failed} no match`;
+      showToast(msg, 'success');
+
+      // Log activity
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'addActivity',
+          data: { id: String(Date.now()), prospect: 'System', type: 'Note', text: '🚀 Apollo enrichment: ' + data.enriched + ' emails, ' + (data.contactsFilled||0) + ' contacts filled, ' + data.failed + ' no match', followUp: '', timestamp: new Date().toISOString(), user: sessionStorage.getItem('sp_user') || 'scott', deleted: '' }
+        })
+      }).catch(e => {});
+
+      // Refresh prospect data
+      const prosResp = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getProspects');
+      const prosData = await prosResp.json();
+      if (Array.isArray(prosData)) {
+        allProspects = prosData;
+        renderStageFilters();
+        filterProspects();
+      }
+    }
+  } catch (err) {
+    showToast('Apollo enrichment failed: ' + err.toString(), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+    btn.style.opacity = '1';
+  }
+}
+
 async function enrichEmails() {
   const btn = document.getElementById('enrichEmailsBtn');
   if (!btn) return;
