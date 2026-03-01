@@ -3333,13 +3333,13 @@ function loadCustomerPortalData() {
             <div style="width:64px;height:64px;background:linear-gradient(135deg,#2e6bff,#8b5cf6);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:800;letter-spacing:-1px;box-shadow:0 4px 12px rgba(46,107,255,0.25);">SP</div>
             <div style="flex:1;">
               <h2 style="margin:0;font-size:22px;font-weight:800;">${myCust['Customer Name']}</h2>
-              <p style="margin:4px 0 0;color:var(--text-muted);font-size:13px;">${myCust['Unique Customer ID']||''} · ${plan} · $\${mrc}/mo</p>
+              <p style="margin:4px 0 0;color:var(--text-muted);font-size:13px;">${myCust['Unique Customer ID']||''} · ${plan} · $${mrc}/mo</p>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
               <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#10b981;background:rgba(16,185,129,0.08);padding:6px 14px;border-radius:20px;border:1px solid rgba(16,185,129,0.2);">
                 <span class="cp-status-dot cp-status-online"></span> Active
               </span>
-              <span style="font-size:10px;color:var(--text-dim);">Member since \${myCust['Service Start Date']||'—'}</span>
+              <span style="font-size:10px;color:var(--text-dim);">Member since ${myCust['Service Start Date']||'—'}</span>
             </div>
           </div>
         </div>
@@ -3352,7 +3352,7 @@ function loadCustomerPortalData() {
           </div>
           <div class="cp-stat-card">
             <div class="cp-stat-label">Monthly Cost</div>
-            <div class="cp-stat-value" style="color:var(--success);">$\${mrc}</div>
+            <div class="cp-stat-value" style="color:var(--success);">$${mrc}</div>
           </div>
           <div class="cp-stat-card">
             <div class="cp-stat-label">LTE Usage</div>
@@ -8725,7 +8725,7 @@ function renderTicketManager(c) {
     if (!isClosed) {
       html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;">';
       html += '<input type="text" placeholder="Resolution note (optional)" id="resolve_'+a.id+'" style="flex:1;font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);">';
-      html += '<button class="ticket-resolve-btn" onclick="resolveTicket(''+a.id+'', this)">✓ Resolve</button>';
+      html += '<button class="ticket-resolve-btn" onclick="resolveTicket(\x27'+a.id+'\x27, this)">\u2713 Resolve</button>';
       html += '</div>';
     } else {
       // Show resolution info if available
